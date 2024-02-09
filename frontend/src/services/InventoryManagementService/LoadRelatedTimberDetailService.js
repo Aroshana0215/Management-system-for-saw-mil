@@ -1,0 +1,80 @@
+import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, query, where } from "firebase/firestore";
+
+
+
+const db = getFirestore();
+
+// Insert new Load Related Timber Details
+export const NewLdRelatedTimber = async(timberData) => {
+    try {
+        const docRef = await addDoc(collection(db, "relatedTimberDetails"), timberData);
+        console.log("New Load Related Timber Details entered into the system with ID: ", docRef.id);
+        return docRef.id;
+    } catch (error) {
+        console.error("Error Entering New Load Related Timber: ", error.message);
+        throw error;
+    }
+};
+
+export const getAllLdRelatedTimber = async () => {
+    try {
+        const querySnapshot = await getDocs(collection(db, "relatedTimberDetails"));
+        const TimberlList = [];
+        querySnapshot.forEach((doc) => {
+            TimberlList.push({ id: doc.id, ...doc.data() });
+        });
+        return TimberlList;
+    } catch (error) {
+        console.error("Error fetching Load Related Timber List: ", error.message);
+        throw error;
+    }
+};
+
+// Update Load Related Timber Details
+export const updateLdRelatedTimber = async (timberId, timberData ) => {
+    try {
+        const TimberDetailsRef = doc(db, "relatedTimberDetails", timberId);
+        await updateDoc(TimberDetailsRef, timberData);
+        console.log("Load Related Timber Details updated successfully");
+    } catch (error) {
+        console.error("Error updating Load Related Timber Details: ", error.message);
+        throw error;
+    }
+};
+
+// Get One Load Details ID
+export const getLdRelatedTimberById =  async (timberId) => {
+    try {
+        const TimberDetailsRef = doc(db, "relatedTimberDetails", timberId);
+        const TimberDetailsSnapshot = await getDoc(TimberDetailsRef);
+
+        if (TimberDetailsSnapshot.exists()) {
+            const timberDetails = { id: TimberDetailsSnapshot.id, ...TimberDetailsSnapshot.data() };
+            return timberDetails;
+        } else {
+            console.log("Load Related Timber Details Details not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting Load Related Timber Details: ", error.message);
+        throw error;
+    }
+};
+
+// Get One Load Details By permitid_fk
+export const getLdRelatedTimberByLoadId = async (LoadId) => {
+    try {
+        const q = query(collection(db, "relatedTimberDetails"), where("permitid_fk", "==", LoadId));
+        const querySnapshot = await getDocs(q);
+
+        const timberDetailsList = [];
+        querySnapshot.forEach((doc) => {
+            timberDetailsList.push({ id: doc.id, ...doc.data() });
+        });
+
+        return timberDetailsList;
+    } catch (error) {
+        console.error("Error getting Load Related Timber Details: ", error.message);
+        throw error;
+    }
+};

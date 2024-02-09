@@ -1,5 +1,6 @@
 import { Container, Grid, Typography } from "@mui/material";
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Landing = () => {
   return (
@@ -16,6 +17,32 @@ const Landing = () => {
           <Typography variant="h4" color={"primary"}>
             Welcome
           </Typography>
+          <Typography
+              component={Link}
+              to={"/price"}
+              variant="body2"
+              sx={{ textAlign: "center", textDecoration: "none" }}
+            >
+              Price card
+            </Typography>
+            <br/>
+            <Typography
+              component={Link}
+              to={"/load"}
+              variant="body2"
+              sx={{ textAlign: "center", textDecoration: "none" }}
+            >
+              Load Management
+            </Typography>
+            <br/>
+            <Typography
+              component={Link}
+              to={"/stock"}
+              variant="body2"
+              sx={{ textAlign: "center", textDecoration: "none" }}
+            >
+              Stock Management
+            </Typography>
         </Grid>
       </Grid>
     </Container>
