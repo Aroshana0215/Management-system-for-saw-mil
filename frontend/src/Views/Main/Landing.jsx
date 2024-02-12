@@ -43,6 +43,15 @@ const Landing = () => {
             >
               Stock Management
             </Typography>
+            <br/>
+            <Typography
+              component={Link}
+              to={"/bill"}
+              variant="body2"
+              sx={{ textAlign: "center", textDecoration: "none" }}
+            >
+              bill and order Management
+            </Typography>
         </Grid>
       </Grid>
     </Container>

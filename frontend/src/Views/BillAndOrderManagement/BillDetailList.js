@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getAllInventoryDetails } from '../../../services/InventoryManagementService/StockManagementService'; // Import the API function
+import { getAllbillDetails } from '../../services/BillAndOrderService/BilllManagemntService'; // Import the API function
 import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 
-const StockList = () => {
+const BillDetailList = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -11,7 +11,7 @@ const StockList = () => {
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const data = await getAllInventoryDetails();
+          const data = await getAllbillDetails();
           console.log('Fetched data:', data); // Log fetched data to inspect its format
           if (Array.isArray(data)) {
             setCategories(data);
@@ -41,11 +41,18 @@ const StockList = () => {
         <table>
           <thead>
             <tr>
-              <th>categoryId_fk</th>
-              <th>Section Number</th>
-              <th>TimberId_fk</th>
-              <th>Amount Of Pieces</th>
-              <th>MachineNo</th>
+              <th>ID</th>
+              <th>Customer Name</th>
+              <th>Customer Address</th>
+              <th>Customer NIC</th>
+              <th>Phone No</th>
+              <th>Total amount</th>
+              <th>Advance</th>
+              <th>Remainning Amount</th>
+              {/* <th>Promized Date</th> */}
+              <th>description</th>
+              <th>BillStatus</th>
+ 
               <th>status</th>
               <th>Created By</th>
               {/* <th>Created Date</th> */}
@@ -56,18 +63,24 @@ const StockList = () => {
           <tbody>
             {categories.map((category, index) => (
               <tr key={index}>
-                <td>{category.categoryId_fk}</td>
-                <td>{category.sectionNumber}</td>
-                <td>{category.timberId_fk}</td>
-                <td>{category.amountOfPieces}</td>
-                <td>{category.MachineNo}</td>
+                <td>{category.id}</td>
+                <td>{category.cusName}</td>
+                <td>{category.cusAddress}</td>
+                <td>{category.cusNIC}</td>
+                <td>{category.cusPhoneNumber}</td>
+                <td>{category.totalAmount}</td>
+                <td>{category.advance}</td>
+                <td>{category.remainningAmount}</td>
+                {/* <td>{category.PromizeDate}</td> */}
+                <td>{category.description}</td>
+                <td>{category.billStatus }</td>
                 <td>{category.status}</td>
                 <td>{category.createdBy}</td>
                 {/* <td>{category.createdDate}</td> */}
                 <td>{category.modifiedBy}</td>
                 {/* <td>{category.modifiedDate}</td> */}
                 <td>
-                  <Link to={`/stock/view/${category.id}`}>
+                  <Link to={`/load/timber/view/${category.id}`}>
                     <button>View</button>
                   </Link>
                 </td>
@@ -77,24 +90,14 @@ const StockList = () => {
         </table>
         <Typography
           component={Link}
-          to={"/stock/add"}
+          to={"/bill/wants/wood"}
           variant="body2"
           sx={{ textAlign: "center", textDecoration: "none" }}
         >
-          New Load
-        </Typography>
-        <br/>
-        <br/>
-        <Typography
-          component={Link}
-          to={"/stockSummary"}
-          variant="body2"
-          sx={{ textAlign: "center", textDecoration: "none" }}
-        >
-          Stock Summary
+          New Bill
         </Typography>
       </div>
     );
   };
 
-export default StockList;
+export default BillDetailList;

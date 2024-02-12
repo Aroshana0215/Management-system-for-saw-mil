@@ -46,7 +46,7 @@ const ViewStockDetail = () => {
         <Grid item xs={12}>
           {/* Category Data Fields */}
           <Typography variant="h6" color="primary">
-            Category Data Fields
+            stock Data Fields
           </Typography>
           <Typography>
             Section Number: {categoryData.sectionNumber}
@@ -60,7 +60,7 @@ const ViewStockDetail = () => {
 
           {/* C Data Fields */}
           <Typography variant="h6" color="primary">
-            C Data Fields
+            Category Data Fields
           </Typography>
           <Typography>
             Timber Type: {cData.timberType}

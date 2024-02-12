@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getAllInventoryDetails } from '../../../services/InventoryManagementService/StockManagementService'; // Import the API function
+import { getAllSummaryDetails } from '../../../services/InventoryManagementService/StockSummaryManagementService'; // Import the API function
 import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 
-const StockList = () => {
+const StockSummaryList = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -11,7 +11,7 @@ const StockList = () => {
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const data = await getAllInventoryDetails();
+          const data = await getAllSummaryDetails();
           console.log('Fetched data:', data); // Log fetched data to inspect its format
           if (Array.isArray(data)) {
             setCategories(data);
@@ -41,12 +41,13 @@ const StockList = () => {
         <table>
           <thead>
             <tr>
-              <th>categoryId_fk</th>
-              <th>Section Number</th>
-              <th>TimberId_fk</th>
-              <th>Amount Of Pieces</th>
-              <th>MachineNo</th>
+              <th>Total Pieces</th>
+              <th>Changed Amount</th>
+              <th>Previous Amount</th>
               <th>status</th>
+              <th>billId_fk</th>
+              <th>stk_id_fk</th>
+              <th>categoryId_fk</th>
               <th>Created By</th>
               {/* <th>Created Date</th> */}
               <th>Modified by</th>
@@ -56,45 +57,23 @@ const StockList = () => {
           <tbody>
             {categories.map((category, index) => (
               <tr key={index}>
-                <td>{category.categoryId_fk}</td>
-                <td>{category.sectionNumber}</td>
-                <td>{category.timberId_fk}</td>
-                <td>{category.amountOfPieces}</td>
-                <td>{category.MachineNo}</td>
+                <td>{category.totalPieces}</td>
+                <td>{category.changedAmount}</td>
+                <td>{category.previousAmount}</td>
                 <td>{category.status}</td>
+                <td>{category.billId_fk}</td>
+                <td>{category.stk_id_fk}</td>
+                <td>{category.categoryId_fk}</td>
                 <td>{category.createdBy}</td>
                 {/* <td>{category.createdDate}</td> */}
                 <td>{category.modifiedBy}</td>
                 {/* <td>{category.modifiedDate}</td> */}
-                <td>
-                  <Link to={`/stock/view/${category.id}`}>
-                    <button>View</button>
-                  </Link>
-                </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <Typography
-          component={Link}
-          to={"/stock/add"}
-          variant="body2"
-          sx={{ textAlign: "center", textDecoration: "none" }}
-        >
-          New Load
-        </Typography>
-        <br/>
-        <br/>
-        <Typography
-          component={Link}
-          to={"/stockSummary"}
-          variant="body2"
-          sx={{ textAlign: "center", textDecoration: "none" }}
-        >
-          Stock Summary
-        </Typography>
       </div>
     );
   };
 
-export default StockList;
+export default StockSummaryList;

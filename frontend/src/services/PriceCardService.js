@@ -75,19 +75,31 @@ export const deleteCategory = createAsyncThunk("category/delete", async (categor
 
 
 // Get CategoryId By timberType and area Parameters
-export const getCategoryIdBytimberType = async (timberType , areaLength , areaWidth) => {
+export const getCategoryIdBytimberType = async (timberType, areaLength, areaWidth , thickness) => {
     try {
-        const q = query(collection(db, "priceCard"), where("timberType", "==", timberType, "and",  "areaLength", "==", areaLength, "areaWidth", "==", areaWidth));
+        const q = query(
+            collection(db, "priceCard"),
+            where("timberType", "==", timberType),
+            where("areaLength", "==", areaLength),
+            where("areaWidth", "==", areaWidth),
+            where("thickness", "==", thickness),
+        );
+
         const querySnapshot = await getDocs(q);
 
-        const priceCardList = [];
-        querySnapshot.forEach((doc) => {
-            priceCardList.push({ id: doc.id, ...doc.data() });
-        });
-
-        return priceCardList;
+        if (!querySnapshot.empty) {
+            // If query returns a result, get the first document
+            const docSnapshot = querySnapshot.docs[0];
+            const stockSummaryDetails = { id: docSnapshot.id, ...docSnapshot.data() };
+            return stockSummaryDetails;
+        } else {
+            console.log("No stockSummaryDetails found for timberType:", timberType);
+            console.log("No stockSummaryDetails found for timberType:", areaLength);
+            console.log("No stockSummaryDetails found for timberType:", areaWidth);
+            return null;
+        }
     } catch (error) {
-        console.error("Error getting Load Related Timber Details: ", error.message);
+        console.error("Error getting stockSummaryDetails: ", error.message);
         throw error;
     }
 };

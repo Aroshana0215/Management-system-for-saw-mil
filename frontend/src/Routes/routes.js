@@ -22,6 +22,14 @@ import ViewLoadAndRelatedTimber from "../Views/InventoryManagement/LoadManagemen
 import StockList from "../Views/InventoryManagement/StockManagement/StockList";
 import CreateNewStock from "../Views/InventoryManagement/StockManagement/CreateStock";
 import ViewStockDetail from "../Views/InventoryManagement/StockManagement/ViewStockDetail";
+import BillDetailList from "../Views/BillAndOrderManagement/BillDetailList";
+import StockSummaryList from "../Views/InventoryManagement/StockManagement/StockSummaryList";
+import GetWantsWood from "../Views/BillAndOrderManagement/GetWantsWoodAmount";
+import ShowRemainWood from "../Views/BillAndOrderManagement/ShowRemainWood";
+import CreateNewBill from "../Views/BillAndOrderManagement/CreateNewBill";
+import ViewBillDetails from "../Views/BillAndOrderManagement/ViewBillDetails";
+
+
 
 
 const privateRouter = createBrowserRouter([
@@ -72,6 +80,30 @@ const privateRouter = createBrowserRouter([
       {
         path: "/stock/view/:stockId",
         element: <ViewStockDetail />,
+      },
+      {
+        path: "/bill",
+        element: <BillDetailList />,
+      },
+      {
+        path: "/stockSummary",
+        element: <StockSummaryList />,
+      },
+      {
+        path: "/bill/wants/wood",
+        element: <GetWantsWood />,
+      },
+      {
+        path: "/bill/process/wood/:woodData",
+        element: <ShowRemainWood />,
+      },
+      {
+        path: "/bill/add/:orderData",
+        element: <CreateNewBill />,
+      },
+      {
+        path: "/bill/view/:billId",
+        element: <ViewBillDetails />,
       },
       {
         path: "*",

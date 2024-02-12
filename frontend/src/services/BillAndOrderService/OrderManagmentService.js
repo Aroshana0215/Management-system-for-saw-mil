@@ -63,9 +63,9 @@ export const getorderById =  async (orderId) => {
 
 
 // Get orderId By timberType and area Parameters
-export const getorderIdBytimberType = async (timberType , areaLength , areaWidth) => {
+export const getorderIdByBillId = async (billId) => {
     try {
-        const q = query(collection(db, "billDetails"), where("timberType", "==", timberType, "and",  "areaLength", "==", areaLength, "areaWidth", "==", areaWidth));
+        const q = query(collection(db, "orderDetails"), where("bill_id_fk", "==", billId));
         const querySnapshot = await getDocs(q);
 
         const billDetailsList = [];

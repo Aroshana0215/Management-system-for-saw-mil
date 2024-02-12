@@ -4,7 +4,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 const db = getFirestore();
 
 // Insert new billDetails for price Card List
-export const createbillDetails = async(billDetailsData) => {
+export const newBill = async(billDetailsData) => {
     try {
         const docRef = await addDoc(collection(db, "billDetails"), billDetailsData);
         console.log("New billDetails entered into the system with ID: ", docRef.id);
@@ -60,20 +60,4 @@ export const getbillDetailsById =  async (billDetailsId) => {
     }
 };
 
-// Get billDetailsId By timberType and area Parameters
-export const getbillDetailsIdBytimberType = async (timberType , areaLength , areaWidth) => {
-    try {
-        const q = query(collection(db, "billDetails"), where("timberType", "==", timberType, "and",  "areaLength", "==", areaLength, "areaWidth", "==", areaWidth));
-        const querySnapshot = await getDocs(q);
 
-        const billDetailsList = [];
-        querySnapshot.forEach((doc) => {
-            billDetailsList.push({ id: doc.id, ...doc.data() });
-        });
-
-        return billDetailsList;
-    } catch (error) {
-        console.error("Error getting Load Related Timber Details: ", error.message);
-        throw error;
-    }
-};

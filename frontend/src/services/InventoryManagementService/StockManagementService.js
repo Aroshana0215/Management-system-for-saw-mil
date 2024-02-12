@@ -7,10 +7,17 @@ const db = getFirestore();
 export const NewInventory = async(InventoryData) => {
     try {
         const docRef = await addDoc(collection(db, "Inventory"), InventoryData);
-        console.log("New Inventory Details entered into the system with ID: ", docRef.id);
-        return docRef.id;
+        const InventoryDetailsSnapshot = await getDoc(docRef);
+
+        if (InventoryDetailsSnapshot.exists()) {
+            const newInventory = { id: InventoryDetailsSnapshot.id, ...InventoryDetailsSnapshot.data() };
+            return newInventory;
+        } else {
+            console.log("load Details not found");
+            return null;
+        }
     } catch (error) {
-        console.error("Error Entering New Inventory Details: ", error.message);
+        console.error("Error getting load Details: ", error.message);
         throw error;
     }
 };

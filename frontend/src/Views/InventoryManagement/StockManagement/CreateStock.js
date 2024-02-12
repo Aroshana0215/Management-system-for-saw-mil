@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Container, Grid, Typography, TextField, Button } from "@mui/material";
 import { Link } from "react-router-dom";
-import { NewInventory } from "../../../services/InventoryManagementService/StockManagementService"; // Import the createCategory function
+import { NewInventory } from "../../../services/InventoryManagementService/StockManagementService"; 
+import { createStockSummary, getActiveStockSummaryDetails, updateStockSummaryDetails } from "../../../services/InventoryManagementService/StockSummaryManagementService"; 
 
 const CreateNewStock = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ const CreateNewStock = () => {
     modifiedDate: "",
   });
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
@@ -29,9 +31,67 @@ const CreateNewStock = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const loadId = await NewInventory(formData);
-      console.log("New category ID:", loadId);
-      // Redirect to "/price" after successful submission
+      const stockData = await NewInventory(formData);
+
+    
+
+      if (stockData != null){
+        
+       const resultData  = await getActiveStockSummaryDetails(stockData.categoryId_fk);
+        if(resultData == null){
+          console.log("in");
+          const stockSumData = {
+            totalPieces: stockData.amountOfPieces,
+            changedAmount: stockData.amountOfPieces,
+            previousAmount: "0",
+            categoryId_fk: stockData.categoryId_fk,
+            stk_id_fk: stockData.timberId_fk,
+            status: "A",
+            billId_fk:"",
+            createdBy:"",
+            createdDate:"",
+            modifiedBy:"",
+            modifiedDate:"",
+          };
+          const stockSummarykData = await createStockSummary(stockSumData);
+        }else{
+          const stockUpdateData = {
+            totalPieces: resultData.totalPieces,
+            changedAmount: resultData.changedAmount,
+            previousAmount: resultData.previousAmount,
+            categoryId_fk: resultData.categoryId_fk,
+            stk_id_fk: resultData.stk_id_fk,
+            status: "D",
+            billId_fk:"",
+            createdBy:"",
+            createdDate:"",
+            modifiedBy:"",
+            modifiedDate:"",
+          };
+          console.log("in:",resultData.id);
+          console.log("in:",resultData.stockUpdateData);
+          const updatedkData = await updateStockSummaryDetails(resultData.id, stockUpdateData);
+
+          const stockSumData = {
+            totalPieces: Number(resultData.totalPieces) + Number(stockData.amountOfPieces),
+            changedAmount: stockData.amountOfPieces,
+            previousAmount: resultData.totalPieces,
+            categoryId_fk: resultData.categoryId_fk,
+            stk_id_fk:  resultData.stk_id_fk,
+            status: "A",
+            billId_fk:"",
+            createdBy:"",
+            createdDate:"",
+            modifiedBy:"",
+            modifiedDate:"",
+          };
+          const newstockSummaryData = await createStockSummary(stockSumData);
+          
+        }
+
+
+      }
+
       window.location.href = "/stock";
     } catch (error) {
       console.error("Error creating category:", error.message);
