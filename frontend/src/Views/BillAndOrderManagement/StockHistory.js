@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getAllbillDetails } from '../../services/BillAndOrderService/BilllManagemntService'; // Import the API function
+import { getAllSummaryDetails } from '../../services/InventoryManagementService/StockSummaryManagementService'; // Import the API function
 import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 
-const BillDetailList = () => {
+const StockHistory = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -11,7 +11,7 @@ const BillDetailList = () => {
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const data = await getAllbillDetails();
+          const data = await getAllSummaryDetails();
           console.log('Fetched data:', data); // Log fetched data to inspect its format
           if (Array.isArray(data)) {
             setCategories(data);
@@ -41,14 +41,12 @@ const BillDetailList = () => {
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Customer Name</th>
-              <th>Customer Address</th>
-              <th>Customer NIC</th>
-              <th>Phone No</th>
-              <th>Total amount</th>
-              <th>Advance</th>
-              <th>Remainning Amount</th>
+              <th>Total Pieces</th>
+              <th>Changed Amount</th>
+              <th>Previous Amount</th>
+              <th>bill Id</th>
+              <th>stock Id</th>
+              <th>category</th>
               {/* <th>Promized Date</th> */}
               <th>description</th>
               <th>BillStatus</th>
@@ -63,14 +61,12 @@ const BillDetailList = () => {
           <tbody>
             {categories.map((category, index) => (
               <tr key={index}>
-                <td>{category.id}</td>
-                <td>{category.cusName}</td>
-                <td>{category.cusAddress}</td>
-                <td>{category.cusNIC}</td>
-                <td>{category.cusPhoneNumber}</td>
-                <td>{category.totalAmount}</td>
-                <td>{category.advance}</td>
-                <td>{category.remainningAmount}</td>
+                <td>{category.totalPieces}</td>
+                <td>{category.changedAmount}</td>
+                <td>{category.previousAmount}</td>
+                <td>{category.billId_fk}</td>
+                <td>{category.stk_id_fk}</td>
+                <td>{category.categoryId_fk}</td>
                 {/* <td>{category.PromizeDate}</td> */}
                 <td>{category.description}</td>
                 <td>{category.billStatus }</td>
@@ -80,9 +76,6 @@ const BillDetailList = () => {
                 <td>{category.modifiedBy}</td>
                 {/* <td>{category.modifiedDate}</td> */}
                 <td>
-                  <Link to={`/load/timber/view/${category.id}`}>
-                    <button>View</button>
-                  </Link>
                 </td>
               </tr>
             ))}
@@ -96,16 +89,8 @@ const BillDetailList = () => {
         >
           New Bill
         </Typography>
-        <Typography
-          component={Link}
-          to={"/stock/history"}
-          variant="body2"
-          sx={{ textAlign: "center", textDecoration: "none" }}
-        >
-          Bill History
-        </Typography>
       </div>
     );
   };
 
-export default BillDetailList;
+export default StockHistory;

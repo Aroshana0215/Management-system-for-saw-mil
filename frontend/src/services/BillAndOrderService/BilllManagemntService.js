@@ -24,7 +24,7 @@ export const getAllbillDetails = async () => {
         });
         return billDetailsList;
     } catch (error) {
-        console.error("Error fetching price Card List: ", error.message);
+        console.error("Error fetching  billDetails List: ", error.message);
         throw error;
     }
 };

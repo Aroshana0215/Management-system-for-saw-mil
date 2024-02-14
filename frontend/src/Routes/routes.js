@@ -28,6 +28,7 @@ import GetWantsWood from "../Views/BillAndOrderManagement/GetWantsWoodAmount";
 import ShowRemainWood from "../Views/BillAndOrderManagement/ShowRemainWood";
 import CreateNewBill from "../Views/BillAndOrderManagement/CreateNewBill";
 import ViewBillDetails from "../Views/BillAndOrderManagement/ViewBillDetails";
+import StockHistory from "../Views/BillAndOrderManagement/StockHistory";
 
 
 
@@ -104,6 +105,10 @@ const privateRouter = createBrowserRouter([
       {
         path: "/bill/view/:billId",
         element: <ViewBillDetails />,
+      },
+      {
+        path: "/stock/history",
+        element: <StockHistory />,
       },
       {
         path: "*",
