@@ -1,18 +1,17 @@
 import React, { useState } from "react";
-import { Container, Grid, Typography, TextField, Button } from "@mui/material";
+import { Grid, Typography, TextField, Button, Box } from "@mui/material";
 import { Link } from "react-router-dom";
 import { NewLoad } from "../../../services/InventoryManagementService/LoadDetailsService"; // Import the createCategory function
 
 const CreateNewLoadRec = () => {
   const [formData, setFormData] = useState({
-
-    sellerName : "",
-    permitNumber : "",
-    region : "",
-    lorryNumber : "",
-    driver : "",
-    otherDetails : "",
-    isLoadCompleted : false,
+    sellerName: "",
+    permitNumber: "",
+    region: "",
+    lorryNumber: "",
+    driver: "",
+    otherDetails: "",
+    isLoadCompleted: false,
     totalLoadPrice: "",
     afterCuttingPrice: "",
     totalIncome: "",
@@ -47,14 +46,13 @@ const CreateNewLoadRec = () => {
   };
 
   return (
-    <Container>
+    <>
       <Grid
         container
         direction="row"
         justifyContent="center"
         alignItems="stretch"
         spacing={2}
-        p={2}
       >
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
@@ -62,12 +60,15 @@ const CreateNewLoadRec = () => {
           </Typography>
         </Grid>
         <Grid item xs={12}>
-          <form onSubmit={handleSubmit}>
+          <Box component={"form"} onSubmit={handleSubmit}>
             {Object.entries(formData).map(([key, value]) => (
               <TextField
                 key={key}
                 fullWidth
-                label={key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                label={
+                  key.charAt(0).toUpperCase() +
+                  key.slice(1).replace(/([A-Z])/g, " $1")
+                }
                 variant="outlined"
                 name={key}
                 value={value}
@@ -83,7 +84,7 @@ const CreateNewLoadRec = () => {
             >
               Create Load
             </Button>
-          </form>
+          </Box>
         </Grid>
         <Grid item xs={12}>
           <Typography
@@ -96,7 +97,7 @@ const CreateNewLoadRec = () => {
           </Typography>
         </Grid>
       </Grid>
-    </Container>
+    </>
   );
 };
 
