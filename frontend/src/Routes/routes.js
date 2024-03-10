@@ -29,8 +29,13 @@ import ShowRemainWood from "../Views/BillAndOrderManagement/ShowRemainWood";
 import CreateNewBill from "../Views/BillAndOrderManagement/CreateNewBill";
 import ViewBillDetails from "../Views/BillAndOrderManagement/ViewBillDetails";
 import StockHistory from "../Views/BillAndOrderManagement/StockHistory";
-
-
+import EmployeeList from "../Views/EmployeeManagement/EmployeeDetailsManagment/EmployeeList";
+import EPaymentList from "../Views/EmployeeManagement/EmployeeDetailsManagment/EmployeePaymentList";
+import CreateEmployee from "../Views/EmployeeManagement/EmployeeDetailsManagment/CreateEmployee";
+import DailyDetailList from "../Views/EmployeeManagement/EmployeeDailyRecordsManagment/DailyDetailList";
+import CreateDailyDetails from "../Views/EmployeeManagement/EmployeeDailyRecordsManagment/CreateDailyDetails";
+import EmpDependatnt from "../Views/EmployeeManagement/EmployeeDetailsManagment/CreateEmpDependants";
+import CreatePayment from "../Views/EmployeeManagement/EmployeeDetailsManagment/CreatePayment";
 
 
 const privateRouter = createBrowserRouter([
@@ -109,6 +114,34 @@ const privateRouter = createBrowserRouter([
       {
         path: "/stock/history",
         element: <StockHistory />,
+      },
+      {
+        path: "/employee",
+        element: <EmployeeList />,
+      },
+      {
+        path: "/employee/payment/:eid",
+        element: <EPaymentList />,
+      },
+      {
+        path: "/employee/add",
+        element: <CreateEmployee />,
+      },
+      {
+        path: "/employee/daily",
+        element: <DailyDetailList />,
+      },
+      {
+        path: "/employee/daily/add",
+        element: <CreateDailyDetails />,
+      },
+      {
+        path: "/employee/dependatnt/:eid",
+        element: <EmpDependatnt />,
+      },
+      {
+        path: "/employee/payment/add/:eid",
+        element: <CreatePayment />,
       },
       {
         path: "*",
