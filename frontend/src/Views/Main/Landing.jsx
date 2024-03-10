@@ -52,6 +52,24 @@ const Landing = () => {
             >
               bill and order Management
             </Typography>
+            <br/>
+            <Typography
+              component={Link}
+              to={"/employee"}
+              variant="body2"
+              sx={{ textAlign: "center", textDecoration: "none" }}
+            >
+              Employee Management
+            </Typography>
+            <br/>
+            <Typography
+              component={Link}
+              to={"/employee/daily"}
+              variant="body2"
+              sx={{ textAlign: "center", textDecoration: "none" }}
+            >
+              Employee Daily Records
+            </Typography>
         </Grid>
       </Grid>
     </Container>
