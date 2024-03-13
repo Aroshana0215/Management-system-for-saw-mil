@@ -27,6 +27,7 @@ export default function MainSideBar() {
     return location.pathname.includes(path);
   };
   const primaryColor = Theme.palette.primary.main;
+  const mainBgS1 = Theme.palette.primary.mainBgS1;
   const secondaryColor = "text.secondary";
   const [openInventory, setOpenInventory] = React.useState(true);
 
@@ -47,7 +48,9 @@ export default function MainSideBar() {
       <List dense>
         <ListItem
           sx={{
-            borderLeft: isSelected("/price") && ` solid 2px ${primaryColor}`,
+            borderLeft: isSelected("/price")
+              ? ` solid 2px ${primaryColor}`
+              : ` solid 2px ${mainBgS1}`,
           }}
         >
           <ListItemButton component={Link} to={"/price"}>
@@ -70,7 +73,9 @@ export default function MainSideBar() {
         </ListItem>
         <ListItem
           sx={{
-            borderLeft: isSelected("/bill") && ` solid 2px ${primaryColor}`,
+            borderLeft: isSelected("/bill")
+              ? ` solid 2px ${primaryColor}`
+              : ` solid 2px ${mainBgS1}`,
           }}
         >
           <ListItemButton component={Link} to={"/bill"}>
@@ -93,7 +98,9 @@ export default function MainSideBar() {
         </ListItem>
         <ListItem
           sx={{
-            borderLeft: isSelected("/employee") && ` solid 2px ${primaryColor}`,
+            borderLeft: isSelected("/employee")
+              ? ` solid 2px ${primaryColor}`
+              : ` solid 2px ${mainBgS1}`,
           }}
         >
           <ListItemButton>
@@ -116,8 +123,9 @@ export default function MainSideBar() {
         </ListItem>
         <ListItem
           sx={{
-            borderLeft:
-              isSelected("/Inventory") && ` solid 2px ${primaryColor}`,
+            borderLeft: isSelected("/Inventory")
+              ? ` solid 2px ${primaryColor}`
+              : ` solid 2px ${mainBgS1}`,
           }}
         >
           <ListItemButton onClick={handleClick}>
@@ -187,7 +195,9 @@ export default function MainSideBar() {
         </Collapse>
         <ListItem
           sx={{
-            borderLeft: isSelected("/Machine") && ` solid 2px ${primaryColor}`,
+            borderLeft: isSelected("/Machine")
+              ? ` solid 2px ${primaryColor}`
+              : ` solid 2px ${mainBgS1}`,
           }}
         >
           <ListItemButton>
@@ -210,7 +220,9 @@ export default function MainSideBar() {
         </ListItem>
         <ListItem
           sx={{
-            borderLeft: isSelected("/Account") && ` solid 2px ${primaryColor}`,
+            borderLeft: isSelected("/Account")
+              ? ` solid 2px ${primaryColor}`
+              : ` solid 2px ${mainBgS1}`,
           }}
         >
           <ListItemButton>
@@ -233,7 +245,9 @@ export default function MainSideBar() {
         </ListItem>
         <ListItem
           sx={{
-            borderLeft: isSelected("/User") && ` solid 2px ${primaryColor}`,
+            borderLeft: isSelected("/User")
+              ? ` solid 2px ${primaryColor}`
+              : ` solid 2px ${mainBgS1}`,
           }}
         >
           <ListItemButton>
@@ -256,7 +270,9 @@ export default function MainSideBar() {
         </ListItem>
         <ListItem
           sx={{
-            borderLeft: isSelected("/Report") && ` solid 2px ${primaryColor}`,
+            borderLeft: isSelected("/Report")
+              ? ` solid 2px ${primaryColor}`
+              : ` solid 2px ${mainBgS1}`,
           }}
         >
           <ListItemButton>
