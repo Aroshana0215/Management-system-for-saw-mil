@@ -103,7 +103,7 @@ export default function MainSideBar() {
               : ` solid 2px ${mainBgS1}`,
           }}
         >
-          <ListItemButton>
+          <ListItemButton component={Link} to={"/employee"}>
             <ListItemIcon
               sx={{
                 color: isSelected("/employee") ? primaryColor : secondaryColor,
