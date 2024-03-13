@@ -15,6 +15,8 @@ export const createCategory = async(categoryData) => {
     }
 };
 
+
+
 export const getAllCategories = async () => {
     try {
         const querySnapshot = await getDocs(collection(db, "priceCard"));

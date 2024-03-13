@@ -5,10 +5,15 @@ import { newBill, getbillDetailsById } from "../../services/BillAndOrderService/
 import { useParams } from "react-router-dom";
 import { createStockSummary, getActiveStockSummaryDetails, updateStockSummaryDetails } from "../../services/InventoryManagementService/StockSummaryManagementService"; 
 import {createOrder } from "../../services/BillAndOrderService/OrderManagmentService";
+import {newIncome } from "../../services/AccountManagementService/IncomeManagmentService";
+import {newAccountSummary, updateAccountSummary , getActiveAccountSummaryDetails } from "../../services/AccountManagementService/AccountSummaryManagmentService";
+import { current } from "@reduxjs/toolkit";
 
 const CreateNewBill = () => {
   const { orderData } = useParams();
   const decodedwoodData = JSON.parse(decodeURIComponent(orderData));
+  const currentDate = new Date();
+  const currentDateTime = currentDate.toISOString();
 
 
   const [formData, setFormData] = useState({
@@ -100,6 +105,51 @@ const CreateNewBill = () => {
     
       const orderId = await createOrder(saveOrderData)
     }
+
+    const saveIncomeData = {
+      date: currentDateTime , 
+      type:  "Bill",
+      des: "Nothing",
+      amount : formData.totalAmount,
+      BilId : billId || "",
+      status: "A",
+      createdBy:"",
+      createdDate:"",
+      modifiedBy:"",
+      modifiedDate:"",
+    };
+  
+    const incomeId = await newIncome(saveIncomeData)
+
+        if (incomeId != null){   
+          const data = await getActiveAccountSummaryDetails();
+          
+          console.log("data.totalAmount:", data.totalAmount);
+
+          if(data != null){
+            const accountSummaryData = {
+              status: "D",
+            };
+
+            const updatedAccountSummary = await updateAccountSummary(data.id, accountSummaryData)
+
+          const newAccountSummaryData = {
+            totalAmount: Number(data.totalAmount) + Number(formData.totalAmount),
+            changedAmount: formData.totalAmount,
+            previousAmount: data.totalAmount,
+            expId_fk:"",
+            incId_fk: incomeId,
+            status: "A",
+            createdBy:"",
+            createdDate:"",
+            modifiedBy:"",
+            modifiedDate:"",
+          };
+
+          const AccountSummaryId = await newAccountSummary(newAccountSummaryData)
+      }
+          
+        }
 
     }
 
