@@ -1,7 +1,5 @@
 import React from "react";
-import { Box, Stack, AppBar, Toolbar, Typography, Button } from "@mui/material";
-import { Link } from "react-router-dom";
-import sawMillLogo from "../../assets/images/sawMillLogo.png";
+import { Stack, AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { logout } from "../../Redux/features/auth/authSlice";
 
@@ -13,12 +11,12 @@ export default function HeaderMain() {
   };
   return (
     <>
-      <AppBar position="sticky" color="inherit" sx={{ boxShadow: 1 }}>
+      <AppBar
+        position="sticky"
+        color="inherit"
+        sx={{ boxShadow: 0, borderTopLeftRadius: 20 }}
+      >
         <Toolbar>
-          <Box component={Link} to={"/"} paddingX={2}>
-            <img alt="Logo" src={sawMillLogo} width={60} />
-          </Box>
-
           <Stack
             spacing={3}
             direction={"row"}
