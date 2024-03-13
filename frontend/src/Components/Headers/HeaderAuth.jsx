@@ -6,7 +6,11 @@ import sawMillLogo from "../../assets/images/sawMillLogo.png";
 export default function HeaderAuth() {
   return (
     <>
-      <AppBar position="sticky" color="inherit" sx={{ boxShadow: 1 }}>
+      <AppBar
+        position="sticky"
+        color="inherit"
+        sx={{ boxShadow: 0, borderTopLeftRadius: 20 }}
+      >
         <Toolbar>
           <Box component={Link} to={"/"} paddingX={2}>
             <img alt="Logo" src={sawMillLogo} width={60} />

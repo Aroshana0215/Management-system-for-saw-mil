@@ -4,6 +4,7 @@ const Theme = createTheme({
   breakpoints: {
     values: {
       xs: 0,
+      xsm: 300,
       sm: 600,
       md: 900,
       lg: 1200,
@@ -13,13 +14,33 @@ const Theme = createTheme({
   palette: {
     primary: {
       main: "#6C4A3F",
+      mainBgS1: "#f0ebe8",
     },
   },
   typography: {
-    fontFamily: "Poppins",
+    fontFamily: "Jost",
+    button: {
+      textTransform: "none",
+    },
   },
   shape: {
     borderRadius: 8,
+  },
+  components: {
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          "&:hover": {
+            backgroundColor: "transparent",
+          },
+        },
+      },
+    },
   },
 });
 
