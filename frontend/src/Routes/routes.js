@@ -36,7 +36,10 @@ import DailyDetailList from "../Views/EmployeeManagement/EmployeeDailyRecordsMan
 import CreateDailyDetails from "../Views/EmployeeManagement/EmployeeDailyRecordsManagment/CreateDailyDetails";
 import EmpDependatnt from "../Views/EmployeeManagement/EmployeeDetailsManagment/CreateEmpDependants";
 import CreatePayment from "../Views/EmployeeManagement/EmployeeDetailsManagment/CreatePayment";
-
+import IncomeList from "../Views/AccountManagement/IncomeManagement/IncomeList";
+import AddIncome from "../Views/AccountManagement/IncomeManagement/AddIncome";
+import ExpList from "../Views/AccountManagement/ExpenseManagemnt/ExpList";
+import AddExp from "../Views/AccountManagement/ExpenseManagemnt/AddExp";
 
 const privateRouter = createBrowserRouter([
   {
@@ -142,6 +145,22 @@ const privateRouter = createBrowserRouter([
       {
         path: "/employee/payment/add/:eid",
         element: <CreatePayment />,
+      },
+      {
+        path: "/income/add",
+        element: <AddIncome />,
+      },
+      {
+        path: "/income",
+        element: <IncomeList />,
+      },
+      {
+        path: "/exp",
+        element: <ExpList />,
+      },
+      {
+        path: "/exp/add",
+        element: <AddExp />,
       },
       {
         path: "*",

@@ -70,6 +70,24 @@ const Landing = () => {
             >
               Employee Daily Records
             </Typography>
+            <br/>
+            <Typography
+              component={Link}
+              to={"/income"}
+              variant="body2"
+              sx={{ textAlign: "center", textDecoration: "none" }}
+            >
+              Income Management
+            </Typography>
+            <br/>
+            <Typography
+              component={Link}
+              to={"/exp"}
+              variant="body2"
+              sx={{ textAlign: "center", textDecoration: "none" }}
+            >
+              Expenses Management
+            </Typography>
         </Grid>
       </Grid>
     </Container>
