@@ -30,9 +30,13 @@ export default function MainSideBar() {
   const mainBgS1 = Theme.palette.primary.mainBgS1;
   const secondaryColor = "text.secondary";
   const [openInventory, setOpenInventory] = React.useState(true);
+  const [openFinace, setOpenFinace] = React.useState(true);
 
-  const handleClick = () => {
+  const handleInventoryClick = () => {
     setOpenInventory(!openInventory);
+  };
+  const handleFinaceClick = () => {
+    setOpenFinace(!openFinace);
   };
   return (
     <Box
@@ -128,7 +132,7 @@ export default function MainSideBar() {
               : ` solid 2px ${mainBgS1}`,
           }}
         >
-          <ListItemButton onClick={handleClick}>
+          <ListItemButton onClick={handleInventoryClick}>
             <ListItemIcon
               sx={{
                 color: isSelected("/Inventory") ? primaryColor : secondaryColor,
@@ -220,54 +224,76 @@ export default function MainSideBar() {
         </ListItem>
         <ListItem
           sx={{
-            borderLeft: isSelected("/Account")
+            borderLeft: isSelected("/Inventory")
               ? ` solid 2px ${primaryColor}`
               : ` solid 2px ${mainBgS1}`,
           }}
         >
-          <ListItemButton>
+          <ListItemButton onClick={handleFinaceClick}>
             <ListItemIcon
               sx={{
-                color: isSelected("/Account") ? primaryColor : secondaryColor,
+                color: isSelected("/Inventory") ? primaryColor : secondaryColor,
               }}
             >
-              <AccountBalanceOutlinedIcon />
+              <AccountBalanceOutlinedIcon/>
             </ListItemIcon>
             <ListItemText
               sx={{ marginLeft: "-18px" }}
               primaryTypographyProps={{
-                fontWeight: isSelected("/Account") ? "bold" : "normal",
-                color: isSelected("/Account") ? primaryColor : secondaryColor,
+                fontWeight:
+                  isSelected("/income") || isSelected("/exp")
+                    ? "bold"
+                    : "normal",
+                color:
+                  isSelected("/income") || isSelected("/exp")
+                    ? primaryColor
+                    : secondaryColor,
               }}
               primary="Finance management"
             />
+            {openFinace ? (
+              <ExpandLess
+                sx={{
+                  color:
+                    isSelected("/income") || isSelected("/exp")
+                      ? primaryColor
+                      : secondaryColor,
+                }}
+              />
+            ) : (
+              <ExpandMore
+                sx={{
+                  color:
+                    isSelected("/income") || isSelected("/exp")
+                      ? primaryColor
+                      : secondaryColor,
+                }}
+              />
+            )}
           </ListItemButton>
         </ListItem>
-        <ListItem
-          sx={{
-            borderLeft: isSelected("/User")
-              ? ` solid 2px ${primaryColor}`
-              : ` solid 2px ${mainBgS1}`,
-          }}
-        >
-          <ListItemButton>
-            <ListItemIcon
-              sx={{
-                color: isSelected("/User") ? primaryColor : secondaryColor,
-              }}
-            >
-              <ManageAccountsOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText
-              sx={{ marginLeft: "-18px" }}
-              primaryTypographyProps={{
-                fontWeight: isSelected("/User") ? "bold" : "normal",
-                color: isSelected("/User") ? primaryColor : secondaryColor,
-              }}
-              primary="User management"
-            />
-          </ListItemButton>
-        </ListItem>
+        <Collapse in={openFinace} timeout="auto" unmountOnExit>
+          <List dense disablePadding>
+            <ListItemButton sx={{ pl: 3 }} component={Link} to={"/income"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Income"
+                primaryTypographyProps={{
+                  color: isSelected("/income") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton sx={{ pl: 3 }} component={Link} to={"/exp"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Expenses"
+                primaryTypographyProps={{
+                  color: isSelected("/exp") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+          </List>
+        </Collapse>
         <ListItem
           sx={{
             borderLeft: isSelected("/Report")
