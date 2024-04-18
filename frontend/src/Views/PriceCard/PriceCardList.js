@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { getAllCategories } from '../../services/PriceCardService'; // Import the API function
-import { Typography } from "@mui/material";
+import {
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+} from "@mui/material";
 import { Link } from "react-router-dom";
+import { Stack, Typography } from "@mui/material";
+import Theme from "../../Theme/Theme";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 
 const PriceCardList = () => {
   const [categories, setCategories] = useState([]);
@@ -37,61 +50,93 @@ const PriceCardList = () => {
   }
 
   return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Timber Type</th>
-            <th>Area Length</th>
-            <th>Area Width</th>
-            <th>Min Length</th>
-            <th>Max Length</th>
-            <th>Thickness</th>
-            <th>Description</th>
-            <th>Unit Price</th>
-            <th>status</th>
-            <th>Created By</th>
-            {/* <th>Created Date</th> */}
-            <th>Modified by</th>
-            {/* <th>Modified Date</th> */}
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((category, index) => (
-            <tr key={index}>
-              <td>{category.id}</td>
-              <td>{category.timberType}</td>
-              <td>{category.areaLength}</td>
-              <td>{category.areaWidth}</td>
-              <td>{category.minlength}</td>
-              <td>{category.maxlength}</td>
-              <td>{category.thickness}</td>
-              <td>{category.description}</td>
-              <td>{category.unitPrice}</td>
-              <td>{category.status}</td>
-              <td>{category.createdBy}</td>
-              {/* <td>{category.createdDate}</td> */}
-              <td>{category.modifiedBy}</td>
-              {/* <td>{category.modifiedDate}</td> */}
-              <td>
-                <Link to={`/price/update/${category.id}`}>
-                  <button>Update</button>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <Typography
-        component={Link}
-        to={"/price/add"}
-        variant="body2"
-        sx={{ textAlign: "center", textDecoration: "none" }}
-      >
-        Create price
+<>
+<Grid container spacing={2}>
+  <Grid item xs={12}>
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
+      spacing={2}
+    >
+      <Typography variant="h4" color="primary">
+        Load Details
       </Typography>
-    </div>
+      <Button
+        variant="outlined"
+        startIcon={<AddCircleOutlineOutlinedIcon />}
+        component={Link}
+        to={"/load/add"}
+      >
+        New Load
+      </Button>
+    </Stack>
+  </Grid>
+  <Grid item xs={12}>
+    <TableContainer
+      component={Paper}
+      sx={{
+        bgcolor: "background.default",
+      }}
+    >
+      <Table>
+        <TableHead
+          sx={{
+            bgcolor: Theme.palette.primary.mainBgS1,
+          }}
+        >
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>Tymber Type</TableCell>
+            <TableCell>Length</TableCell>
+            <TableCell>Width</TableCell>
+            <TableCell>Min Length</TableCell>
+            <TableCell>Max Length</TableCell>
+            <TableCell>Thickness</TableCell>
+            <TableCell>Descrption</TableCell>
+            <TableCell>Unit Price</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Created By</TableCell>
+            <TableCell>modified By</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {categories.map((category, index) => (
+            <TableRow key={index}>
+              <TableCell>{category.id}</TableCell>
+              <TableCell>{category.timberType}</TableCell>
+              <TableCell>{category.areaLength}</TableCell>
+              <TableCell>{category.areaWidth}</TableCell>
+              <TableCell>{category.minlength}</TableCell>
+              <TableCell>{category.maxlength}</TableCell>
+              <TableCell>{category.thickness}</TableCell>
+              <TableCell>{category.description}</TableCell>
+              <TableCell>{category.unitPrice}</TableCell>
+              <TableCell>{category.status}</TableCell>
+              <TableCell>{category.createdBy}</TableCell>
+              <TableCell>{category.modifiedBy}</TableCell>
+              <TableCell>
+                <Link>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    size="small"
+                    to={`/load/timber/view/${category.id}`}
+                  >
+                    View
+                  </Button>
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </Grid>
+</Grid>
+</>
+
   );
 };
 
