@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getAllLoadDetails } from '../../../services/InventoryManagementService/LoadDetailsService'; // Import the API function
-import { Divider, Stack, Typography } from "@mui/material";
 import {
+  Stack,
+  Typography,
   Grid,
   Table,
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
-  Paper,
   Button,
 } from "@mui/material";
 
