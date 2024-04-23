@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Container, Grid, Typography, TextField, Button } from "@mui/material";
-import { getActiveStockSummaryDetails, createStockSummary, updateStockSummaryDetails } from "../../services/InventoryManagementService/StockSummaryManagementService"; // Import getCategoryById and updateCategory functions
+import { getActiveStockSummaryDetails, } from "../../services/InventoryManagementService/StockSummaryManagementService"; // Import getCategoryById and updateCategory functions
 import {getCategoryIdBytimberType } from "../../services/PriceCardService";
 import {createOrder } from "../../services/BillAndOrderService/OrderManagmentService";
 

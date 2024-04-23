@@ -15,24 +15,23 @@ const CreateDailyDetails = () => {
   const [advancePerDay, setAdvancePerDay] = useState("");
   const [eid_fk, setEid_fk] = useState("");
   const [createdBy, setCreatedBy] = useState("");
-  const [createdDate, setCreatedDate] = useState("");
   const [modifiedBy, setModifiedBy] = useState("");
   const [modifiedDate, setModifiedDate] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-        // Combine date and time into a single value
-  const combinedDateTime = new Date(selectedDateTime);
-  const currentDate = new Date().toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-    timeZoneName: "short"
-}); 
+    // Combine date and time into a single value
+    const combinedDateTime = new Date(selectedDateTime);
+    const currentDate = new Date().toLocaleString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZoneName: "short",
+    });
 
     const formData = {
       dateTime: combinedDateTime,
@@ -44,7 +43,7 @@ const CreateDailyDetails = () => {
       eid_fk,
       status: "A",
       createdBy,
-      createdDate : currentDate,
+      createdDate: currentDate,
       modifiedBy,
       modifiedDate,
     };
@@ -53,29 +52,28 @@ const CreateDailyDetails = () => {
       const dailyDetailId = await newDailyDetail(formData);
       console.log("New category ID:", dailyDetailId);
 
-      if(dailyDetailId != null){
-
+      if (dailyDetailId != null) {
         const saveExpData = {
-          date: combinedDateTime , 
-          type:  "EmployeEXP",
+          date: combinedDateTime,
+          type: "EmployeEXP",
           des: "EmployeEXP",
-          amount : advancePerDay,
+          amount: advancePerDay,
           status: "A",
-          createdBy:"",
-          createdDate:"",
-          modifiedBy:"",
-          modifiedDate:"",
+          createdBy: "",
+          createdDate: "",
+          modifiedBy: "",
+          modifiedDate: "",
         };
-      
+
         const expenseId = await newExpense(saveExpData);
 
-        if(expenseId != null){         
+        if (expenseId != null) {
           const data = await getActiveAccountSummaryDetails();
-            const accountSummaryData = {
-              status: "D",
-            };
+          const accountSummaryData = {
+            status: "D",
+          };
 
-            const updatedAccountSummary = await updateAccountSummary(data.id, accountSummaryData)
+          await updateAccountSummary(data.id, accountSummaryData);
 
           const newAccountSummaryData = {
             totalAmount: Number(data.totalAmount) - Number(advancePerDay),
@@ -84,17 +82,14 @@ const CreateDailyDetails = () => {
             expId_fk: expenseId,
             incId_fk: "",
             status: "A",
-            createdBy:"",
-            createdDate:"",
-            modifiedBy:"",
-            modifiedDate:"",
+            createdBy: "",
+            createdDate: "",
+            modifiedBy: "",
+            modifiedDate: "",
           };
 
-          const AccountSummaryId = await newAccountSummary(newAccountSummaryData)
-      
-
+          await newAccountSummary(newAccountSummaryData);
         }
-
       }
 
       window.location.href = "/employee/daily";

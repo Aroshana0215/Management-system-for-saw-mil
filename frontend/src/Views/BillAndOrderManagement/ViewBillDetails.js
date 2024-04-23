@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Grid, Typography, TextField, Button, TableContainer, Table, TableHead, TableBody, TableRow, TableCell } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Typography,
+  TextField,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@mui/material";
 import { getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService";
 import { getorderIdByBillId } from "../../services/BillAndOrderService/OrderManagmentService";
 import { Link } from "react-router-dom";
@@ -8,18 +19,20 @@ import { Link } from "react-router-dom";
 const ViewBillDetails = () => {
   const { billId } = useParams();
   const [categories, setCategories] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [totalTimberValue, setTotalTimberValue] = useState(0);
+  // eslint-disable-next-line no-unused-vars
   const [totalCubicValue, setTotalCubicValue] = useState(0);
   const [categoryData, setCategoryData] = useState({
-    dateAndTime : "",
-    cusName : "",
-    cusAddress:"",
-    cusNIC : "",
-    cusPhoneNumber : "",
-    totalAmount : "",
-    advance : "",
-    remainningAmount : "",
-    PromizeDate : "",
+    dateAndTime: "",
+    cusName: "",
+    cusAddress: "",
+    cusNIC: "",
+    cusPhoneNumber: "",
+    totalAmount: "",
+    advance: "",
+    remainningAmount: "",
+    PromizeDate: "",
     description: "",
     billStatus: "",
     totalIncome: "",
@@ -41,7 +54,7 @@ const ViewBillDetails = () => {
         if (Array.isArray(loadData)) {
           setCategories(loadData);
         } else {
-          throw new Error('Invalid data format received from API');
+          throw new Error("Invalid data format received from API");
         }
       } catch (error) {
         console.error("Error fetching category data:", error.message);
@@ -61,13 +74,18 @@ const ViewBillDetails = () => {
           </Typography>
         </Grid>
         <Grid item xs={12}>
-        <form>
+          <form>
             <TextField
               fullWidth
               label="dateAndTime"
               variant="outlined"
               value={categoryData.dateAndTime}
-              onChange={(e) => setCategoryData({ ...categoryData, dateAndTime: e.target.value })}
+              onChange={(e) =>
+                setCategoryData({
+                  ...categoryData,
+                  dateAndTime: e.target.value,
+                })
+              }
               sx={{ mt: 2 }}
             />
             <TextField
@@ -75,7 +93,9 @@ const ViewBillDetails = () => {
               label="cusName"
               variant="outlined"
               value={categoryData.cusName}
-              onChange={(e) => setCategoryData({ ...categoryData, cusName: e.target.value })}
+              onChange={(e) =>
+                setCategoryData({ ...categoryData, cusName: e.target.value })
+              }
               sx={{ mt: 2 }}
             />
             <TextField
@@ -83,7 +103,9 @@ const ViewBillDetails = () => {
               label="cusAddress"
               variant="outlined"
               value={categoryData.cusAddress}
-              onChange={(e) => setCategoryData({ ...categoryData, cusAddress: e.target.value })}
+              onChange={(e) =>
+                setCategoryData({ ...categoryData, cusAddress: e.target.value })
+              }
               sx={{ mt: 2 }}
             />
             <TextField
@@ -91,7 +113,9 @@ const ViewBillDetails = () => {
               label="cusNIC"
               variant="outlined"
               value={categoryData.cusNIC}
-              onChange={(e) => setCategoryData({ ...categoryData, cusNIC: e.target.value })}
+              onChange={(e) =>
+                setCategoryData({ ...categoryData, cusNIC: e.target.value })
+              }
               sx={{ mt: 2 }}
             />
             {/* <TextField
@@ -118,15 +142,13 @@ const ViewBillDetails = () => {
               onChange={(e) => setCategoryData({ ...categoryData, createdBy: e.target.value })}
               sx={{ mt: 2 }}
             /> */}
-
-
           </form>
         </Grid>
         <Grid item xs={12}>
           <TableContainer>
             <Table>
               <TableHead>
-              <TableRow>
+                <TableRow>
                   <TableCell>availablePiecesAmount</TableCell>
                   <TableCell>neededPiecesAmount</TableCell>
                   <TableCell>remainPiecesAmount</TableCell>
@@ -156,10 +178,16 @@ const ViewBillDetails = () => {
                   </TableRow>
                 ))}
                 <TableRow>
-                  <TableCell colSpan={7}><strong>Total Value:</strong></TableCell>
-                  <TableCell><strong>{totalTimberValue}</strong></TableCell>      
+                  <TableCell colSpan={7}>
+                    <strong>Total Value:</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>{totalTimberValue}</strong>
+                  </TableCell>
                   <TableCell colSpan={5}></TableCell>
-                  <TableCell><strong>{totalCubicValue}</strong></TableCell>
+                  <TableCell>
+                    <strong>{totalCubicValue}</strong>
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>

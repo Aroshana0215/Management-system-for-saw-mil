@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllSummaryDetails } from '../../../services/InventoryManagementService/StockSummaryManagementService'; // Import the API function
-import { Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { getAllSummaryDetails } from "../../../services/InventoryManagementService/StockSummaryManagementService"; 
 
 const StockSummaryList = () => {
     const [categories, setCategories] = useState([]);

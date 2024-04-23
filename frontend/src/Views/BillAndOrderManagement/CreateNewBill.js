@@ -3,11 +3,17 @@ import { Container, Grid, Typography, TextField, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { newBill, getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService"; 
 import { useParams } from "react-router-dom";
-import { createStockSummary, getActiveStockSummaryDetails, updateStockSummaryDetails } from "../../services/InventoryManagementService/StockSummaryManagementService"; 
-import {createOrder } from "../../services/BillAndOrderService/OrderManagmentService";
-import {newIncome } from "../../services/AccountManagementService/IncomeManagmentService";
-import {newAccountSummary, updateAccountSummary , getActiveAccountSummaryDetails } from "../../services/AccountManagementService/AccountSummaryManagmentService";
-import { current } from "@reduxjs/toolkit";
+import {
+  createStockSummary,
+  updateStockSummaryDetails,
+} from "../../services/InventoryManagementService/StockSummaryManagementService";
+import { createOrder } from "../../services/BillAndOrderService/OrderManagmentService";
+import { newIncome } from "../../services/AccountManagementService/IncomeManagmentService";
+import {
+  newAccountSummary,
+  updateAccountSummary,
+  getActiveAccountSummaryDetails,
+} from "../../services/AccountManagementService/AccountSummaryManagmentService";
 
 const CreateNewBill = () => {
   const { orderData } = useParams();
@@ -15,17 +21,16 @@ const CreateNewBill = () => {
   const currentDate = new Date();
   const currentDateTime = currentDate.toISOString();
 
-
   const [formData, setFormData] = useState({
-    dateAndTime : "",
-    cusName : "",
-    cusAddress:"",
-    cusNIC : "",
-    cusPhoneNumber : "",
-    totalAmount : "",
-    advance : "",
-    remainningAmount : "",
-    PromizeDate : "",
+    dateAndTime: "",
+    cusName: "",
+    cusAddress: "",
+    cusNIC: "",
+    cusPhoneNumber: "",
+    totalAmount: "",
+    advance: "",
+    remainningAmount: "",
+    PromizeDate: "",
     description: "",
     billStatus: "",
     totalIncome: "",
@@ -51,8 +56,7 @@ const CreateNewBill = () => {
     try {
       const billId = await newBill(formData);
 
-      if(billId != null){
-
+      if (billId != null) {
         const stockUpdateData = {
           totalPieces: decodedwoodData.totalPieces,
           changedAmount: decodedwoodData.changedAmount,
@@ -60,103 +64,105 @@ const CreateNewBill = () => {
           categoryId_fk: decodedwoodData.categoryId_fk,
           stk_id_fk: decodedwoodData.stk_id_fk,
           status: "D",
-          billId_fk:"",
-          createdBy:"",
-          createdDate:"",
-          modifiedBy:"",
-          modifiedDate:"",
+          billId_fk: "",
+          createdBy: "",
+          createdDate: "",
+          modifiedBy: "",
+          modifiedDate: "",
         };
-        const updatedkData = await updateStockSummaryDetails(decodedwoodData.summaryId, stockUpdateData);
-  
+        await updateStockSummaryDetails(
+          decodedwoodData.summaryId,
+          stockUpdateData
+        );
+
         const stockSumData = {
-          totalPieces: Number(decodedwoodData.totalPieces) - Number(decodedwoodData.requirePices),
+          totalPieces:
+            Number(decodedwoodData.totalPieces) -
+            Number(decodedwoodData.requirePices),
           changedAmount: decodedwoodData.requirePices,
           previousAmount: decodedwoodData.totalPieces,
           categoryId_fk: decodedwoodData.categoryId_fk,
-          stk_id_fk:  "",
+          stk_id_fk: "",
           status: "A",
           billId_fk: billId,
-          createdBy:"",
-          createdDate:"",
-          modifiedBy:"",
-          modifiedDate:"",
+          createdBy: "",
+          createdDate: "",
+          modifiedBy: "",
+          modifiedDate: "",
         };
         const newstockSummaryData = await createStockSummary(stockSumData);
-  
+
         console.log("Category updated successfully");
 
-        if(newstockSummaryData != null){
+        if (newstockSummaryData != null) {
+          const data = await getbillDetailsById(billId);
 
-    const data = await getbillDetailsById(billId);
+          const saveOrderData = {
+            discountPrice: data.discountPrice || "",
+            categoryId_fk: data.categoryId_fk || "",
+            availablePiecesAmount: data.availablePiecesAmount || "",
+            remainPiecesAmount: data.remainPiecesAmount || "",
+            neededPiecesAmount: data.neededPiecesAmount || "",
+            status: "A",
+            billId_fk: billId,
+            createdBy: "",
+            createdDate: "",
+            modifiedBy: "",
+            modifiedDate: "",
+          };
 
-      const saveOrderData = {
-        discountPrice: data.discountPrice || "" , 
-        categoryId_fk: data.categoryId_fk || "",
-        availablePiecesAmount: data.availablePiecesAmount || "",
-        remainPiecesAmount : data.remainPiecesAmount || "",
-        neededPiecesAmount : data.neededPiecesAmount || "",
-        status: "A",
-        billId_fk: billId,
-        createdBy:"",
-        createdDate:"",
-        modifiedBy:"",
-        modifiedDate:"",
-      };
-    
-      const orderId = await createOrder(saveOrderData)
-    }
+          await createOrder(saveOrderData);
+        }
 
-    const saveIncomeData = {
-      date: currentDateTime , 
-      type:  "Bill",
-      des: "Nothing",
-      amount : formData.totalAmount,
-      BilId : billId || "",
-      status: "A",
-      createdBy:"",
-      createdDate:"",
-      modifiedBy:"",
-      modifiedDate:"",
-    };
-  
-    const incomeId = await newIncome(saveIncomeData)
+        const saveIncomeData = {
+          date: currentDateTime,
+          type: "Bill",
+          des: "Nothing",
+          amount: formData.totalAmount,
+          BilId: billId || "",
+          status: "A",
+          createdBy: "",
+          createdDate: "",
+          modifiedBy: "",
+          modifiedDate: "",
+        };
 
-        if (incomeId != null){   
+        const incomeId = await newIncome(saveIncomeData);
+
+        if (incomeId != null) {
           const data = await getActiveAccountSummaryDetails();
-          
+
           console.log("data.totalAmount:", data.totalAmount);
 
-          if(data != null){
+          if (data != null) {
             const accountSummaryData = {
               status: "D",
             };
 
-            const updatedAccountSummary = await updateAccountSummary(data.id, accountSummaryData)
+            await updateAccountSummary(data.id, accountSummaryData);
 
-          const newAccountSummaryData = {
-            totalAmount: Number(data.totalAmount) + Number(formData.totalAmount),
-            changedAmount: formData.totalAmount,
-            previousAmount: data.totalAmount,
-            expId_fk:"",
-            incId_fk: incomeId,
-            status: "A",
-            createdBy:"",
-            createdDate:"",
-            modifiedBy:"",
-            modifiedDate:"",
-          };
+            const newAccountSummaryData = {
+              totalAmount:
+                Number(data.totalAmount) + Number(formData.totalAmount),
+              changedAmount: formData.totalAmount,
+              previousAmount: data.totalAmount,
+              expId_fk: "",
+              incId_fk: incomeId,
+              status: "A",
+              createdBy: "",
+              createdDate: "",
+              modifiedBy: "",
+              modifiedDate: "",
+            };
 
-          const AccountSummaryId = await newAccountSummary(newAccountSummaryData)
-      }
-          
+            await newAccountSummary(newAccountSummaryData);
+          }
         }
-
-    }
+      }
 
       window.location.href = `/bill/view/${billId}`;
     } catch (error) {
       console.error("Error creating category:", error.message);
-  
     }
   };
 
@@ -181,7 +187,10 @@ const CreateNewBill = () => {
               <TextField
                 key={key}
                 fullWidth
-                label={key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                label={
+                  key.charAt(0).toUpperCase() +
+                  key.slice(1).replace(/([A-Z])/g, " $1")
+                }
                 variant="outlined"
                 name={key}
                 value={value}
