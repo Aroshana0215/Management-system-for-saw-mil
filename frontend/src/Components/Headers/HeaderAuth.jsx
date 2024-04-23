@@ -3,6 +3,7 @@ import { Box, Stack, AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import sawMillLogo from "../../assets/images/sawMillLogo.png";
 import Theme from "../../Theme/Theme";
+import LoginIcon from "@mui/icons-material/Login";
 
 export default function HeaderAuth() {
   const mainBgS1 = Theme.palette.primary.mainBgS1;
@@ -49,13 +50,7 @@ export default function HeaderAuth() {
             alignItems="center"
             columnGap={2}
           >
-            <Button
-              variant="text"
-              sx={{ color: "#111" }}
-              //TODO:
-              // component={Link}
-              // to={"/where/to"}
-            >
+            <Button variant="text" startIcon={<LoginIcon />}>
               Sign In
             </Button>
           </Stack>

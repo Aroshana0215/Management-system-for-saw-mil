@@ -54,7 +54,16 @@ export const signUp = async (payload) => {
       phoneNumber: payload.phoneNumber,
     });
     console.log("Registered with:", user.email);
-    return user;
+    let userDetails = {
+      uid: user.uid,
+      email: payload.email,
+      displayName: payload.fullName,
+      photoURL: user.photoURL,
+      phoneNumber: payload.phoneNumber,
+      accessToken: user.accessToken,
+      refreshToken: user.refreshToken,
+    };
+    return userDetails;
   } catch (error) {
     console.error(error.message);
     throw error;
