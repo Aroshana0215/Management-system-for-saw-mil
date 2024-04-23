@@ -31,7 +31,7 @@ const CreateNewLoadRec = () => {
     otherDetails: "",
     unloadedDate: "",
     status: "a",
-    createdBy: user.uid,
+    createdBy: user.displayName,
     modifiedBy: "",
   });
 
