@@ -14,7 +14,6 @@ import ReceiptIcon from "@mui/icons-material/ReceiptOutlined";
 import BadgeIcon from "@mui/icons-material/BadgeOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
-import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -43,7 +42,7 @@ export default function MainSideBar() {
       sx={{
         width: "100%",
         maxWidth: "xsm",
-        bgcolor: Theme.palette.primary.mainBgS1,
+        bgcolor: "background.default",
       }}
     >
       <Box component={Link} to={"/"} paddingX={2}>
@@ -235,7 +234,7 @@ export default function MainSideBar() {
                 color: isSelected("/Inventory") ? primaryColor : secondaryColor,
               }}
             >
-              <AccountBalanceOutlinedIcon/>
+              <AccountBalanceOutlinedIcon />
             </ListItemIcon>
             <ListItemText
               sx={{ marginLeft: "-18px" }}

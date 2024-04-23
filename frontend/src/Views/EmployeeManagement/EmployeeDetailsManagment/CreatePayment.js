@@ -41,41 +41,38 @@ const CreatePayment = () => {
     const formatedFromDate = new Date(fromDate);
     const formatedToDate = new Date(toDate);
     const formData = {
-        totalPayment, 
-        totalAdvance,
-        totalDay,
-        totalOt,
-        fromDate : formatedFromDate,
-        toDate : formatedToDate,
-        currentDate: currentDate.toISOString(),
-        // dateRangeLendAmount : ,
-        eid_fk : eid,
-        paymentStatus,
-        reduceAmount, 
-        actualPayment,  
-        status : "A",
-        createdBy,
-        createdDate,
-        modifiedBy,
-        modifiedDate,
+      totalPayment,
+      totalAdvance,
+      totalDay,
+      totalOt,
+      fromDate: formatedFromDate,
+      toDate: formatedToDate,
+      currentDate: currentDate.toISOString(),
+      // dateRangeLendAmount : ,
+      eid_fk: eid,
+      paymentStatus,
+      reduceAmount,
+      actualPayment,
+      status: "A",
+      createdBy,
+      createdDate,
+      modifiedBy,
+      modifiedDate,
     };
-    
 
     try {
       const paysheetId = await newPaySheet(formData);
-      if(paysheetId != null){
-
-        if(empData.currentLendAmount > 0.00){
-          if(reduceAmount > 0.00){
-
+      if (paysheetId != null) {
+        if (empData.currentLendAmount > 0.0) {
+          if (reduceAmount > 0.0) {
             const employeeData = {
-              currentLendAmount: parseFloat(previous) - parseFloat(reduceAmount)
+              currentLendAmount:
+                parseFloat(previous) - parseFloat(reduceAmount),
             };
 
-            const paysheetId = await updateemployeeDetails(eid, employeeData);
+            await updateemployeeDetails(eid, employeeData);
           }
         }
-
       }
       console.log("New category ID:", paysheetId);
 
@@ -85,7 +82,6 @@ const CreatePayment = () => {
       // Handle error
     }
   };
-
 
   const formatDate = (timestamp) => {
     if (!timestamp || !timestamp.seconds) return ""; // Handle case where timestamp is undefined or has no seconds property
@@ -100,64 +96,55 @@ const CreatePayment = () => {
     return date.toLocaleString("en-US", options);
   };
 
+  const calculateTotalPayment = () => {
+    try {
+      let totPayment = 0.0;
+      let empSalaryTotDate = 0.0;
+      let valueForTotalOt = 0.0;
 
+      empSalaryTotDate = parseFloat(empData.salaryPerDay) * totalDay;
+      valueForTotalOt = totalOt * parseFloat(empData.otValuePerHour);
+      totPayment = parseFloat(empSalaryTotDate) + parseFloat(valueForTotalOt);
 
-    const calculateTotalPayment = () => {
-        try {
-            let totPayment = 0.00;
-            let empSalaryTotDate = 0.00;
-            let valueForTotalOt = 0.00;
-
-                empSalaryTotDate = parseFloat(empData.salaryPerDay) * totalDay;
-                valueForTotalOt = totalOt * parseFloat(empData.otValuePerHour);
-                totPayment = parseFloat(empSalaryTotDate) + parseFloat(valueForTotalOt);
-            
-
-            console.log('In:',empData.salaryPerDay);
-            setTotalPayment(totPayment.toFixed(2));
-        } catch (error) {
-            console.log('Error Calculating Total Payment:', error);
-        }
-    };
-
-
-
+      console.log("In:", empData.salaryPerDay);
+      setTotalPayment(totPayment.toFixed(2));
+    } catch (error) {
+      console.log("Error Calculating Total Payment:", error);
+    }
+  };
 
   const calculate = (data) => {
-    if (data && data.length > 0) { 
-        let totOt = 0.00;
-        let totDays = 0.00;
-        let totAdvance = 0.00;
+    if (data && data.length > 0) {
+      let totOt = 0.0;
+      let totDays = 0.0;
+      let totAdvance = 0.0;
 
-        
-        data.forEach(workDetailItem => {
+      data.forEach((workDetailItem) => {
+        if (workDetailItem.isPresent === true) {
+          if (workDetailItem.otHours != null) {
+            totOt += parseFloat(workDetailItem.otHours);
+          }
 
-            if(workDetailItem.isPresent == true){
-                if (workDetailItem.otHours != null) {
-                    totOt += parseFloat(workDetailItem.otHours); 
-                }
-                
-                if (workDetailItem.isPresent) {
-                    totDays++;
-                }
-                
-                if (workDetailItem.advancePerDay != null) {
-                    totAdvance += parseFloat(workDetailItem.advancePerDay); 
-                }
-            }
-            
-        });
+          if (workDetailItem.isPresent) {
+            totDays++;
+          }
 
-        setTotalAdvance(totAdvance.toFixed(2)); 
-        setTotalDay(totDays);
-        setTotalOt(totOt.toFixed(2));
-        calculateTotalPayment();   
+          if (workDetailItem.advancePerDay != null) {
+            totAdvance += parseFloat(workDetailItem.advancePerDay);
+          }
+        }
+      });
 
-        return true; 
+      setTotalAdvance(totAdvance.toFixed(2));
+      setTotalDay(totDays);
+      setTotalOt(totOt.toFixed(2));
+      calculateTotalPayment();
+
+      return true;
     }
 
-    return false; 
-};
+    return false;
+  };
 
 
 useEffect(() => {
