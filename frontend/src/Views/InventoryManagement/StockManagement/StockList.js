@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { getAllInventoryDetails } from '../../../services/InventoryManagementService/StockManagementService'; // Import the API function
-import { Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
+import {
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+} from "@mui/material";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import Theme from "../../../Theme/Theme";
+
 
 const StockList = () => {
     const [categories, setCategories] = useState([]);
@@ -37,63 +51,101 @@ const StockList = () => {
     }
   
     return (
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>categoryId_fk</th>
-              <th>Section Number</th>
-              <th>TimberId_fk</th>
-              <th>Amount Of Pieces</th>
-              <th>MachineNo</th>
-              <th>status</th>
-              <th>Created By</th>
-              {/* <th>Created Date</th> */}
-              <th>Modified by</th>
-              {/* <th>Modified Date</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((category, index) => (
-              <tr key={index}>
-                <td>{category.categoryId_fk}</td>
-                <td>{category.sectionNumber}</td>
-                <td>{category.timberId_fk}</td>
-                <td>{category.amountOfPieces}</td>
-                <td>{category.MachineNo}</td>
-                <td>{category.status}</td>
-                <td>{category.createdBy}</td>
-                {/* <td>{category.createdDate}</td> */}
-                <td>{category.modifiedBy}</td>
-                {/* <td>{category.modifiedDate}</td> */}
-                <td>
-                  <Link to={`/stock/view/${category.id}`}>
-                    <button>View</button>
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <Typography
-          component={Link}
-          to={"/stock/add"}
-          variant="body2"
-          sx={{ textAlign: "center", textDecoration: "none" }}
-        >
-          New Load
-        </Typography>
-        <br/>
-        <br/>
-        <Typography
-          component={Link}
-          to={"/stockSummary"}
-          variant="body2"
-          sx={{ textAlign: "center", textDecoration: "none" }}
-        >
-          Stock Summary
-        </Typography>
-      </div>
+      <>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            spacing={2}
+          >
+            <Typography variant="h4" color="primary">
+              Load Details
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<AddCircleOutlineOutlinedIcon />}
+              component={Link}
+              to={"/load/add"}
+            >
+              New Load
+            </Button>
+          </Stack>
+        </Grid>
+        <Grid item xs={12}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              bgcolor: "background.default",
+            }}
+          >
+            <Table>
+              <TableHead
+                sx={{
+                  bgcolor: Theme.palette.primary.mainBgS1,
+                }}
+              >
+                <TableRow>
+                  <TableCell>CategoryId Fk</TableCell>
+                  <TableCell>Section No</TableCell>
+                  <TableCell>TimberId Fk</TableCell>
+                  <TableCell>Amount of Pieces</TableCell>
+                  <TableCell>Machine No</TableCell>
+                  <TableCell>Driver</TableCell>
+                  <TableCell>Other Details</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Created By</TableCell>
+                  <TableCell>Modified By</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {categories.map((category, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{category.categoryId_fk}</TableCell>
+                    <TableCell>{category.sectionNumber}</TableCell>
+                    <TableCell>{category.timberId_fk}</TableCell>
+                    <TableCell>{category.amountOfPieces}</TableCell>
+                    <TableCell>{category.MachineNo}</TableCell>
+                    <TableCell>{category.driver}</TableCell>
+                    <TableCell>{category.otherDetails}</TableCell>
+                    <TableCell>{category.status}</TableCell>
+                    <TableCell>{category.createdBy}</TableCell>
+                    <TableCell>{category.modifiedBy}</TableCell>
+                    <td>{category.categoryId_fk}</td>
+                    <TableCell>
+                      <Link>
+                        <Button
+                          variant="contained"
+                          component={Link}
+                          size="small"
+                          to={`/stock/view/${category.id}`}
+                        >
+                          View
+                        </Button>
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link>
+                        <Button
+                          variant="contained"
+                          component={Link}
+                          size="small"
+                          to={`/stockSummary`}
+                        >
+                          Summary
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+      </Grid>
+    </>
     );
   };
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getAllbillDetails } from '../../services/BillAndOrderService/BilllManagemntService'; // Import the API function
+import { getAllincome } from '../../../services/AccountManagementService/IncomeManagmentService'; // Import the API function
 import { Stack, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
 import {
   Grid,
   Table,
@@ -13,44 +12,46 @@ import {
   Paper,
   Button,
 } from "@mui/material";
-import Theme from "../../Theme/Theme";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 
-const BillDetailList = () => {
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const data = await getAllbillDetails();
-          console.log('Fetched data:', data); // Log fetched data to inspect its format
-          if (Array.isArray(data)) {
-            setCategories(data);
-            setLoading(false);
-          } else {
-            throw new Error('Invalid data format received from API');
-          }
-        } catch (error) {
-          setError(error.message);
+import { Link } from "react-router-dom";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import Theme from "../../../Theme/Theme";
+
+const IncomeList = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAllincome();
+        console.log("Fetched data:", data); // Log fetched data to inspect its format
+        if (Array.isArray(data)) {
+          setCategories(data);
           setLoading(false);
+        } else {
+          throw new Error("Invalid data format received from API");
         }
-      };
-  
-      fetchData();
-    }, []);
-  
-    if (loading) {
-      return <div>Loading...</div>;
-    }
-  
-    if (error) {
-      return <div>Error: {error}</div>;
-    }
-  
-    return (
-<>
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  return (
+    <>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Stack
@@ -60,15 +61,15 @@ const BillDetailList = () => {
             spacing={2}
           >
             <Typography variant="h4" color="primary">
-              Load Details
+              Income Details
             </Typography>
             <Button
               variant="outlined"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
-              to={"/load/add"}
+              to={"/income/add"}
             >
-              New Load
+              New Income
             </Button>
           </Stack>
         </Grid>
@@ -87,16 +88,12 @@ const BillDetailList = () => {
               >
                 <TableRow>
                   <TableCell>ID</TableCell>
-                  <TableCell>Customer Name</TableCell>
-                  <TableCell>Customer Address</TableCell>
-                  <TableCell>Customer NIC</TableCell>
-                  <TableCell>Phone No</TableCell>
-                  <TableCell>Total</TableCell>
-                  <TableCell>Advance</TableCell>
-                  <TableCell>Remaining Amount</TableCell>
-                  <TableCell>Descrption</TableCell>
-                  <TableCell>Bill status</TableCell>
-                  <TableCell>status</TableCell>
+                  {/* <TableCell>Date</TableCell> */}
+                  <TableCell>Income Type</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>Bill Details</TableCell>
+                  <TableCell>Status</TableCell>
                   <TableCell>Created By</TableCell>
                   <TableCell>Modified By</TableCell>
                   <TableCell>Actions</TableCell>
@@ -106,15 +103,11 @@ const BillDetailList = () => {
                 {categories.map((category, index) => (
                   <TableRow key={index}>
                     <TableCell>{category.id}</TableCell>
-                    <TableCell>{category.cusName}</TableCell>
-                    <TableCell>{category.cusAddress}</TableCell>
-                    <TableCell>{category.cusNIC}</TableCell>
-                    <TableCell>{category.cusPhoneNumber}</TableCell>
-                    <TableCell>{category.totalAmount}</TableCell>
-                    <TableCell>{category.advance}</TableCell>
-                    <TableCell>{category.remainningAmount}</TableCell>
-                    <TableCell>{category.description}</TableCell>
-                    <TableCell>{category.billStatus}</TableCell>
+                    {/* <TableCell>{category.date}</TableCell> */}
+                    <TableCell>{category.type}</TableCell>
+                    <TableCell>{category.des}</TableCell>
+                    <TableCell>{category.amount}</TableCell>
+                    <TableCell>{category.BilId}</TableCell>
                     <TableCell>{category.status}</TableCell>
                     <TableCell>{category.createdBy}</TableCell>
                     <TableCell>{category.modifiedBy}</TableCell>
@@ -138,7 +131,7 @@ const BillDetailList = () => {
         </Grid>
       </Grid>
     </>
-    );
-  };
+  );
+};
 
-export default BillDetailList;
+export default IncomeList;

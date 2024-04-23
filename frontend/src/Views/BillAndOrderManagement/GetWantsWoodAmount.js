@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Container, Grid, Typography, TextField, Button } from "@mui/material";
-import {getCategoryIdBytimberType } from "../../services/PriceCardService";
 
 const GetWantsWood = () => {
   const [formData, setFormData] = useState({

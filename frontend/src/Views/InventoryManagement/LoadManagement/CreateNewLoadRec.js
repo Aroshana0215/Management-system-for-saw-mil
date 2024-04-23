@@ -1,33 +1,44 @@
 import React, { useState } from "react";
-import { Grid, Typography, TextField, Button, Box } from "@mui/material";
-import { Link } from "react-router-dom";
-import { NewLoad } from "../../../services/InventoryManagementService/LoadDetailsService"; // Import the createCategory function
+import {
+  Grid,
+  Typography,
+  Button,
+  OutlinedInput,
+  FormControl,
+  Stack,
+} from "@mui/material";
+import { NewLoad } from "../../../services/InventoryManagementService/LoadDetailsService";
+import { useSelector } from "react-redux";
 
 const CreateNewLoadRec = () => {
+  const { user } = useSelector((state) => state.auth);
+  // eslint-disable-next-line no-unused-vars
   const [formData, setFormData] = useState({
+    sellerName: { bpMD: 6 },
+    permitNumber: { bpMD: 6 },
+    region: { bpMD: 6 },
+    lorryNumber: { bpMD: 6 },
+    driver: { bpMD: 6 },
+    unloadedDate: { bpMD: 6 },
+    otherDetails: { bpMD: 12 },
+  });
+  const [payload, setPayload] = useState({
     sellerName: "",
     permitNumber: "",
     region: "",
     lorryNumber: "",
     driver: "",
     otherDetails: "",
-    isLoadCompleted: false,
-    totalLoadPrice: "",
-    afterCuttingPrice: "",
-    totalIncome: "",
-    incomeAsPercentage: "",
     unloadedDate: "",
-    status: "",
-    createdBy: "",
-    createdDate: "",
+    status: "a",
+    createdBy: user.uid,
     modifiedBy: "",
-    modifiedDate: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    setPayload((prevPayload) => ({
+      ...prevPayload,
       [name]: value,
     }));
   };
@@ -35,10 +46,10 @@ const CreateNewLoadRec = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const loadId = await NewLoad(formData);
+      const loadId = await NewLoad(payload);
       console.log("New category ID:", loadId);
       // Redirect to "/price" after successful submission
-      window.location.href = `/load/timber/add/${loadId}`;
+      window.location.href = `/load/timber/view/${loadId}`;
     } catch (error) {
       console.error("Error creating category:", error.message);
       // Handle error
@@ -52,49 +63,62 @@ const CreateNewLoadRec = () => {
         direction="row"
         justifyContent="center"
         alignItems="stretch"
-        spacing={2}
       >
         <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
-            Create Load Details
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Box component={"form"} onSubmit={handleSubmit}>
-            {Object.entries(formData).map(([key, value]) => (
-              <TextField
-                key={key}
-                fullWidth
-                label={
-                  key.charAt(0).toUpperCase() +
-                  key.slice(1).replace(/([A-Z])/g, " $1")
-                }
-                variant="outlined"
-                name={key}
-                value={value}
-                onChange={handleChange}
-                sx={{ mt: 2 }}
-              />
-            ))}
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2 }}
-            >
-              Create Load
-            </Button>
-          </Box>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography
-            component={Link}
-            to={"/load"}
-            variant="body2"
-            sx={{ textAlign: "center", textDecoration: "none" }}
+          <Grid
+            container
+            component={"form"}
+            onSubmit={handleSubmit}
+            padding={2}
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 2,
+            }}
           >
-            Go to Price Page
-          </Typography>
+            <Grid item xs={12} padding={1}>
+              <Stack
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={2}
+              >
+                <Typography variant="h6" color="primary" align="center">
+                  Create Load Details
+                </Typography>
+              </Stack>
+            </Grid>
+            {Object.entries(formData).map(([key, item]) => (
+              <Grid item key={key} xs={12} md={item.bpMD} padding={1}>
+                <FormControl fullWidth>
+                  <Typography>
+                    {key.charAt(0).toUpperCase() +
+                      key.slice(1).replace(/([A-Z])/g, " $1")}
+                  </Typography>
+                  <OutlinedInput
+                    name={key}
+                    value={payload[key]}
+                    onChange={handleChange}
+                  />
+                  {/* <FormHelperText/> */}
+                </FormControl>
+              </Grid>
+            ))}
+            <Grid
+              item
+              xs={12}
+              padding={2}
+              sx={{
+                display: "flex",
+                direction: "row",
+                justifyContent: "flex-end",
+                alignItems: "flex-end",
+              }}
+            >
+              <Button type="submit" variant="contained">
+                Create Load
+              </Button>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </>

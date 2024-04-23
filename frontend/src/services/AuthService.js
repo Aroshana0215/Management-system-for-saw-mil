@@ -4,6 +4,9 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { firebaseAuth } from "../firebase/firebaseConfig";
+import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
+
+const db = getFirestore();
 
 export const signIn = async (payload) => {
   try {
@@ -14,15 +17,19 @@ export const signIn = async (payload) => {
     );
     const user = userCredentials.user;
     console.log("Logged in with:", user.email);
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+    } else {
+      console.log("No such user!");
+    }
+    let userData = docSnap.data();
     let userDetails = {
+      ...userData,
       accessToken: user.accessToken,
-      displayName: user.displayName,
-      email: user.email,
-      uid: user.ss,
       refreshToken: user.refreshToken,
-      emailVerified: user.emailVerified,
-      photoURL: user.photoURL,
-      phoneNumber: user.phoneNumber,
     };
     return userDetails;
   } catch (error) {
@@ -39,6 +46,13 @@ export const signUp = async (payload) => {
       payload.password
     );
     const user = userCredentials.user;
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: payload.email,
+      displayName: payload.fullName,
+      photoURL: user.photoURL,
+      phoneNumber: payload.phoneNumber,
+    });
     console.log("Registered with:", user.email);
     return user;
   } catch (error) {
