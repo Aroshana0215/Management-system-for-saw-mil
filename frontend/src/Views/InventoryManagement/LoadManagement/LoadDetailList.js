@@ -127,34 +127,49 @@ const LoadDetailList = () => {
               >
                 {categories.map((category, index) => (
                   <>
-                    <TableRow
-                      key={index}
-                      sx={{
-                        bgcolor: "background.default",
-                      }}
-                    >
+                    <TableRow key={index}>
                       {" "}
-                      <TableCell colSpan={11}></TableCell>
+                      <TableCell
+                        colSpan={11}
+                        sx={{
+                          bgcolor: Theme.palette.primary.mainBgS1,
+                          borderRadius: 2,
+                          border: 0,
+                        }}
+                      ></TableCell>
                     </TableRow>
-                    <TableRow
-                      key={index}
-                      sx={{
-                        bgcolor: Theme.palette.primary.mainBgS1,
-                      }}
-                    >
-                      <TableCell sx={{ color: "primary.main" }}>
+                    <TableRow key={index}>
+                      <TableCell sx={{ color: "primary.main", border: 0 }}>
                         {category.id}
                       </TableCell>
-                      <TableCell>{category.sellerName}</TableCell>
-                      <TableCell>{category.permitNumber}</TableCell>
-                      <TableCell>{category.region}</TableCell>
-                      <TableCell>{category.lorryNumber}</TableCell>
-                      <TableCell>{category.driver}</TableCell>
-                      <TableCell>{category.otherDetails}</TableCell>
-                      <TableCell>{category.status}</TableCell>
-                      <TableCell>{category.createdBy}</TableCell>
-                      <TableCell>{category.modifiedBy}</TableCell>
-                      <TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.sellerName}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.permitNumber}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.region}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.lorryNumber}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.driver}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.otherDetails}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.status}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.createdBy}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
+                        {category.modifiedBy}
+                      </TableCell>
+                      <TableCell sx={{ border: 0 }}>
                         <Link>
                           <Button
                             variant="contained"

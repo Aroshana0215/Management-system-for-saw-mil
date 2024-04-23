@@ -21,6 +21,7 @@ import { Link } from "react-router-dom";
 import Theme from "../../../Theme/Theme";
 import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const UpdateCategory = () => {
   const { loadId } = useParams();
@@ -90,6 +91,11 @@ const UpdateCategory = () => {
     fetchData();
   }, [loadId]);
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    //TODO: handle update load
+  };
+
   return (
     <Container>
       <Grid container>
@@ -102,7 +108,7 @@ const UpdateCategory = () => {
           <Grid
             container
             component={"form"}
-            // onSubmit={handleSubmit}
+            onSubmit={handleSubmit}
             padding={2}
             sx={{
               bgcolor: "background.default",
@@ -120,13 +126,13 @@ const UpdateCategory = () => {
                   Load Details
                 </Typography>
                 <Button
-                  startIcon={<EditIcon />}
+                  startIcon={isLoadDataEditable ? <CancelIcon /> : <EditIcon />}
                   variant="outlined"
                   onClick={() => {
                     setIsLoadDataEditable(!isLoadDataEditable);
                   }}
                 >
-                  Edit
+                  {isLoadDataEditable ? "Cancel" : "Edit"}
                 </Button>
               </Stack>
             </Grid>
@@ -152,6 +158,20 @@ const UpdateCategory = () => {
                 </FormControl>
               </Grid>
             ))}
+            {isLoadDataEditable && (
+              <Grid item xs={12} padding={1}>
+                <Stack
+                  direction="row"
+                  justifyContent="flex-end"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <Button variant="contained" type="submit">
+                    Save
+                  </Button>
+                </Stack>
+              </Grid>
+            )}
           </Grid>
           <Grid
             container
@@ -257,37 +277,67 @@ const UpdateCategory = () => {
                   <TableBody>
                     {categories.map((category, index) => (
                       <>
-                        <TableRow
-                          key={index}
-                          sx={{
-                            bgcolor: "background.default",
-                          }}
-                        >
+                        <TableRow key={index}>
                           {" "}
-                          <TableCell colSpan={11}></TableCell>
+                          <TableCell
+                            colSpan={14}
+                            sx={{
+                              bgcolor: Theme.palette.primary.mainBgS1,
+                              borderRadius: 2,
+                              border: 0,
+                            }}
+                          ></TableCell>
                         </TableRow>
-                        <TableRow
-                          key={index}
-                          sx={{
-                            bgcolor: Theme.palette.primary.mainBgS1,
-                          }}
-                        >
-                          <TableCell>{category.timberNo}</TableCell>
-                          <TableCell>{category.treeType}</TableCell>
-                          <TableCell>{category.perimeter}</TableCell>
-                          <TableCell>{category.length}</TableCell>
-                          <TableCell>{category.cubicAmount}</TableCell>
-                          <TableCell>{category.otherDetails}</TableCell>
-                          <TableCell>{category.unitPrice}</TableCell>
-                          <TableCell>{category.totalTimerValue}</TableCell>
-                          <TableCell>{category.totalCuttingValue}</TableCell>
-                          <TableCell>{category.outComeValue}</TableCell>
-                          <TableCell>{category.status}</TableCell>
-                          <TableCell>{category.createdBy}</TableCell>
-                          <TableCell>{category.modifiedBy}</TableCell>
-                          <Link to={"/load"}>
-                            <button>Wood Pieces</button>
-                          </Link>
+                        <TableRow key={index}>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.timberNo}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.treeType}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.perimeter}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.length}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.cubicAmount}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.otherDetails}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.unitPrice}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.totalTimerValue}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.totalCuttingValue}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.outComeValue}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.status}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.createdBy}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            {category.modifiedBy}
+                          </TableCell>
+                          <TableCell sx={{ border: 0 }}>
+                            <Button
+                              variant="contained"
+                              component={Link}
+                              size="small"
+                              to={"/load"}
+                            >
+                              Wood Pieces
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       </>
                     ))}
