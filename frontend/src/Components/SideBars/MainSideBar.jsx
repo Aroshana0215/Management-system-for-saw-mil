@@ -43,7 +43,7 @@ export default function MainSideBar() {
       sx={{
         width: "100%",
         maxWidth: "xsm",
-        bgcolor: Theme.palette.primary.mainBgS1,
+        bgcolor: "background.default",
       }}
     >
       <Box component={Link} to={"/"} paddingX={2}>
@@ -235,7 +235,7 @@ export default function MainSideBar() {
                 color: isSelected("/Inventory") ? primaryColor : secondaryColor,
               }}
             >
-              <AccountBalanceOutlinedIcon/>
+              <AccountBalanceOutlinedIcon />
             </ListItemIcon>
             <ListItemText
               sx={{ marginLeft: "-18px" }}

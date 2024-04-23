@@ -2,8 +2,10 @@ import React from "react";
 import { Stack, AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { logout } from "../../Redux/features/auth/authSlice";
+import Theme from "../../Theme/Theme";
 
 export default function HeaderMain() {
+  const mainBgS1 = Theme.palette.primary.mainBgS1;
   const dispatch = useDispatch();
   const onClickLogOut = (e) => {
     e.preventDefault();
@@ -13,8 +15,7 @@ export default function HeaderMain() {
     <>
       <AppBar
         position="sticky"
-        color="inherit"
-        sx={{ boxShadow: 0, borderTopLeftRadius: 20 }}
+        sx={{ boxShadow: 0, borderTopLeftRadius: 20, bgcolor: mainBgS1 }}
       >
         <Toolbar>
           <Stack

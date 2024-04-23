@@ -1,9 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Grid, Typography, TextField, Button, TableContainer, Table, TableHead, TableBody, TableRow, TableCell } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  FormControl,
+  OutlinedInput,
+  Stack,
+  Button,
+} from "@mui/material";
 import { getLoadDetailsById } from "../../../services/InventoryManagementService/LoadDetailsService";
 import { getLdRelatedTimberByLoadId } from "../../../services/InventoryManagementService/LoadRelatedTimberDetailService";
 import { Link } from "react-router-dom";
+import Theme from "../../../Theme/Theme";
+import EditIcon from "@mui/icons-material/Edit";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 
 const UpdateCategory = () => {
   const { loadId } = useParams();
@@ -13,12 +30,34 @@ const UpdateCategory = () => {
   const [categoryData, setCategoryData] = useState({
     sellerName: "",
     permitNumber: "",
+    region: "",
     lorryNumber: "",
     driver: "",
-    otherDetails: "",
+    unloadedDate: "",
     status: "",
     createdBy: "",
+    otherDetails: "",
   });
+  const [isLoadDataEditable, setIsLoadDataEditable] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [loadData, setLoadData] = useState({
+    sellerName: { editable: false, bpMD: 6 },
+    permitNumber: { editable: false, bpMD: 6 },
+    region: { editable: false, bpMD: 6 },
+    lorryNumber: { editable: false, bpMD: 6 },
+    driver: { editable: false, bpMD: 6 },
+    unloadedDate: { editable: false, bpMD: 6 },
+    status: { editable: false, bpMD: 6 },
+    createdBy: { editable: false, bpMD: 6 },
+    otherDetails: { editable: true, bpMD: 12 },
+  });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCategoryData((prevPayload) => ({
+      ...prevPayload,
+      [name]: value,
+    }));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,12 +68,18 @@ const UpdateCategory = () => {
         if (Array.isArray(loadData)) {
           setCategories(loadData);
           // Calculate total timber value
-          const totalValue = loadData.reduce((acc, curr) => acc + parseFloat(curr.totalTimerValue || 0), 0);
+          const totalValue = loadData.reduce(
+            (acc, curr) => acc + parseFloat(curr.totalTimerValue || 0),
+            0
+          );
           setTotalTimberValue(totalValue.toFixed(2));
-          const totalCValue = loadData.reduce((acc, curr) => acc + parseFloat(curr.cubicAmount || 0), 0);
+          const totalCValue = loadData.reduce(
+            (acc, curr) => acc + parseFloat(curr.cubicAmount || 0),
+            0
+          );
           setTotalCubicValue(totalCValue.toFixed(2));
         } else {
-          throw new Error('Invalid data format received from API');
+          throw new Error("Invalid data format received from API");
         }
       } catch (error) {
         console.error("Error fetching category data:", error.message);
@@ -47,129 +92,222 @@ const UpdateCategory = () => {
 
   return (
     <Container>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
+      <Grid container>
+        <Grid item xs={12} padding={1}>
           <Typography variant="h4" color="primary" align="center">
             Load Details and related Timber details
           </Typography>
         </Grid>
-        <Grid item xs={12}>
-        <form>
-            <TextField
-              fullWidth
-              label="Seller Name"
-              variant="outlined"
-              value={categoryData.sellerName}
-              onChange={(e) => setCategoryData({ ...categoryData, sellerName: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Permit Number"
-              variant="outlined"
-              value={categoryData.permitNumber}
-              onChange={(e) => setCategoryData({ ...categoryData, permitNumber: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Lorry Number"
-              variant="outlined"
-              value={categoryData.lorryNumber}
-              onChange={(e) => setCategoryData({ ...categoryData, lorryNumber: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Driver"
-              variant="outlined"
-              value={categoryData.driver}
-              onChange={(e) => setCategoryData({ ...categoryData, driver: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Other Details"
-              variant="outlined"
-              value={categoryData.otherDetails}
-              onChange={(e) => setCategoryData({ ...categoryData, otherDetails: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Status"
-              variant="outlined"
-              value={categoryData.status}
-              onChange={(e) => setCategoryData({ ...categoryData, status: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Created By"
-              variant="outlined"
-              value={categoryData.createdBy}
-              onChange={(e) => setCategoryData({ ...categoryData, createdBy: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-
-
-          </form>
-        </Grid>
-        <Grid item xs={12}>
-          <Link to={`/load/timber/add/${loadId}`}>
-            <button>Add Timber</button>
-          </Link>
-        </Grid>
-        <Grid item xs={12}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-              <TableRow>
-                  <TableCell>Timber No</TableCell>
-                  <TableCell>Tree Type</TableCell>
-                  <TableCell>Perimeter</TableCell>
-                  <TableCell>Length</TableCell>
-                  <TableCell>Cubic Amount</TableCell>
-                  <TableCell>Other Details</TableCell>
-                  <TableCell>Unit Price</TableCell>
-                  <TableCell>Total Timer Value</TableCell>
-                  <TableCell>Total Cutting Value</TableCell>
-                  <TableCell>Out Come Value</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created By</TableCell>
-                  <TableCell>Modified By</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {categories.map((category, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{category.timberNo}</TableCell>
-                    <TableCell>{category.treeType}</TableCell>
-                    <TableCell>{category.perimeter}</TableCell>
-                    <TableCell>{category.length}</TableCell>
-                    <TableCell>{category.cubicAmount}</TableCell>
-                    <TableCell>{category.otherDetails}</TableCell>
-                    <TableCell>{category.unitPrice}</TableCell>
-                    <TableCell>{category.totalTimerValue}</TableCell>
-                    <TableCell>{category.totalCuttingValue}</TableCell>
-                    <TableCell>{category.outComeValue}</TableCell>
-                    <TableCell>{category.status}</TableCell>
-                    <TableCell>{category.createdBy}</TableCell>
-                    <TableCell>{category.modifiedBy}</TableCell>
-                    <Link to={"/load"}>
-                      <button>Wood Pieces</button>
-                    </Link>
-                  </TableRow>
-                ))}
-                <TableRow>
-                  <TableCell colSpan={7}><strong>Total Value:</strong></TableCell>
-                  <TableCell><strong>{totalTimberValue}</strong></TableCell>      
-                  <TableCell colSpan={5}></TableCell>
-                  <TableCell><strong>{totalCubicValue}</strong></TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <Grid item xs={12} padding={1}>
+          <Grid
+            container
+            component={"form"}
+            // onSubmit={handleSubmit}
+            padding={2}
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 2,
+            }}
+          >
+            <Grid item xs={12} padding={1}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                spacing={2}
+              >
+                <Typography variant="h6" color="primary" align="center">
+                  Load Details
+                </Typography>
+                <Button
+                  startIcon={<EditIcon />}
+                  variant="outlined"
+                  onClick={() => {
+                    setIsLoadDataEditable(!isLoadDataEditable);
+                  }}
+                >
+                  Edit
+                </Button>
+              </Stack>
+            </Grid>
+            {Object.entries(loadData).map(([key, item]) => (
+              <Grid item key={key} xs={12} md={item.bpMD} padding={2}>
+                <FormControl fullWidth>
+                  <Typography>
+                    {key.charAt(0).toUpperCase() +
+                      key.slice(1).replace(/([A-Z])/g, " $1")}
+                  </Typography>
+                  {!isLoadDataEditable || !item.editable ? (
+                    <Typography color={"primary"}>
+                      {categoryData[key]}
+                    </Typography>
+                  ) : (
+                    <OutlinedInput
+                      name={key}
+                      value={categoryData[key]}
+                      onChange={handleChange}
+                    />
+                  )}
+                  {/* <FormHelperText/> */}
+                </FormControl>
+              </Grid>
+            ))}
+          </Grid>
+          <Grid
+            container
+            padding={2}
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 2,
+              marginY: 2,
+            }}
+          >
+            <Grid item xs={12} padding={1}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                spacing={2}
+              >
+                <Typography variant="h6" color="primary" align="center">
+                  Load Details
+                </Typography>
+                <Button
+                  startIcon={<AddCircleOutlineOutlinedIcon />}
+                  component={Link}
+                  variant="outlined"
+                  to={`/load/timber/add/${loadId}`}
+                >
+                  Add Timber
+                </Button>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} padding={1}>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Timber No
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Tree Type
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Perimeter
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Length
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Cubic Amount
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Other Details
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Unit Price
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Total Timer Value
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Total Cutting Value
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Out Come Value
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Status
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Created By
+                      </TableCell>
+                      <TableCell
+                        sx={{ color: "primary.main", fontSize: "12px" }}
+                      >
+                        Modified By
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {categories.map((category, index) => (
+                      <>
+                        <TableRow
+                          key={index}
+                          sx={{
+                            bgcolor: "background.default",
+                          }}
+                        >
+                          {" "}
+                          <TableCell colSpan={11}></TableCell>
+                        </TableRow>
+                        <TableRow
+                          key={index}
+                          sx={{
+                            bgcolor: Theme.palette.primary.mainBgS1,
+                          }}
+                        >
+                          <TableCell>{category.timberNo}</TableCell>
+                          <TableCell>{category.treeType}</TableCell>
+                          <TableCell>{category.perimeter}</TableCell>
+                          <TableCell>{category.length}</TableCell>
+                          <TableCell>{category.cubicAmount}</TableCell>
+                          <TableCell>{category.otherDetails}</TableCell>
+                          <TableCell>{category.unitPrice}</TableCell>
+                          <TableCell>{category.totalTimerValue}</TableCell>
+                          <TableCell>{category.totalCuttingValue}</TableCell>
+                          <TableCell>{category.outComeValue}</TableCell>
+                          <TableCell>{category.status}</TableCell>
+                          <TableCell>{category.createdBy}</TableCell>
+                          <TableCell>{category.modifiedBy}</TableCell>
+                          <Link to={"/load"}>
+                            <button>Wood Pieces</button>
+                          </Link>
+                        </TableRow>
+                      </>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={7}>
+                        <strong>Total Value:</strong>
+                      </TableCell>
+                      <TableCell>
+                        <strong>{totalTimberValue}</strong>
+                      </TableCell>
+                      <TableCell colSpan={5}></TableCell>
+                      <TableCell>
+                        <strong>{totalCubicValue}</strong>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </Container>

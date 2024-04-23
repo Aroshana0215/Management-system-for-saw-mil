@@ -73,7 +73,13 @@ const LoadDetailList = () => {
           </Stack>
         </Grid>
         <Grid item xs={12}>
-          <TableContainer>
+          <TableContainer
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 2,
+              padding: 2,
+            }}
+          >
             <Table size="small">
               <TableBody>
                 <TableRow>

@@ -14,7 +14,7 @@ const MainLayout = () => {
         direction="row"
         justifyContent="center"
         alignItems="stretch"
-        sx={{ minHeight: "100vh", bgcolor: Theme.palette.primary.mainBgS1 }}
+        sx={{ minHeight: "100vh", bgcolor: "background.default" }}
       >
         <Grid item xs={2.5}>
           <MainSideBar />
@@ -23,7 +23,7 @@ const MainLayout = () => {
           <Box
             sx={{
               height: "100%",
-              bgcolor: "background.default",
+              bgcolor: Theme.palette.primary.mainBgS1,
               borderTopLeftRadius: 20,
               borderBottomLeftRadius: 20,
             }}

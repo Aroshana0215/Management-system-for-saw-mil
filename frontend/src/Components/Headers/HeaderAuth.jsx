@@ -2,14 +2,15 @@ import React from "react";
 import { Box, Stack, AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import sawMillLogo from "../../assets/images/sawMillLogo.png";
+import Theme from "../../Theme/Theme";
 
 export default function HeaderAuth() {
+  const mainBgS1 = Theme.palette.primary.mainBgS1;
   return (
     <>
       <AppBar
         position="sticky"
-        color="inherit"
-        sx={{ boxShadow: 0, borderTopLeftRadius: 20 }}
+        sx={{ boxShadow: 0, borderTopLeftRadius: 20, bgcolor: mainBgS1 }}
       >
         <Toolbar>
           <Box component={Link} to={"/"} paddingX={2}>
