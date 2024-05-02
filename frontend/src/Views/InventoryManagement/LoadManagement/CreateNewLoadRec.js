@@ -48,7 +48,6 @@ const CreateNewLoadRec = () => {
     try {
       const loadId = await NewLoad(payload);
       console.log("New category ID:", loadId);
-      // Redirect to "/price" after successful submission
       window.location.href = `/load/timber/view/${loadId}`;
     } catch (error) {
       console.error("Error creating category:", error.message);
