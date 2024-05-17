@@ -1,7 +1,6 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
@@ -40,155 +39,99 @@ export default function MainSideBar() {
   return (
     <Box
       sx={{
-        width: "100%",
-        maxWidth: "xsm",
         bgcolor: "background.default",
       }}
     >
-      <Box component={Link} to={"/"} paddingX={2}>
-        <img alt="Logo" src={sawMillLogo} width={60} />
-      </Box>
-      <List dense>
-        <ListItem
-          sx={{
-            borderLeft: isSelected("/price")
-              ? ` solid 2px ${primaryColor}`
-              : ` solid 2px ${mainBgS1}`,
-          }}
+      <List sx={{ paddingX: 2 }}>
+        <ListItemButton component={Link} to={"/price"}>
+          <ListItemIcon
+            sx={{
+              color: isSelected("/price") ? primaryColor : secondaryColor,
+            }}
+          >
+            <PriceChangeOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Timber Prices"
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color: isSelected("/price") ? primaryColor : secondaryColor,
+            }}
+          />
+        </ListItemButton>
+        <ListItemButton
+          component={Link}
+          to={"/bill"}
+          selected={isSelected("/bill")}
         >
-          <ListItemButton component={Link} to={"/price"}>
-            <ListItemIcon
-              sx={{
-                color: isSelected("/price") ? primaryColor : secondaryColor,
-              }}
-            >
-              <PriceChangeOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Timber Prices"
-              sx={{ marginLeft: "-18px" }}
-              primaryTypographyProps={{
-                fontWeight: isSelected("/price") ? "bold" : "normal",
-                color: isSelected("/price") ? primaryColor : secondaryColor,
-              }}
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem
-          sx={{
-            borderLeft: isSelected("/bill")
-              ? ` solid 2px ${primaryColor}`
-              : ` solid 2px ${mainBgS1}`,
-          }}
-        >
-          <ListItemButton component={Link} to={"/bill"}>
-            <ListItemIcon
-              sx={{
-                color: isSelected("/bill") ? primaryColor : secondaryColor,
-              }}
-            >
-              <ReceiptIcon />
-            </ListItemIcon>
-            <ListItemText
-              sx={{ marginLeft: "-18px" }}
-              primaryTypographyProps={{
-                fontWeight: isSelected("/bill") ? "bold" : "normal",
-                color: isSelected("/bill") ? primaryColor : secondaryColor,
-              }}
-              primary="Bill and Order"
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem
-          sx={{
-            borderLeft: isSelected("/employee")
-              ? ` solid 2px ${primaryColor}`
-              : ` solid 2px ${mainBgS1}`,
-          }}
-        >
-          <ListItemButton component={Link} to={"/employee"}>
-            <ListItemIcon
-              sx={{
-                color: isSelected("/employee") ? primaryColor : secondaryColor,
-              }}
-            >
-              <BadgeIcon />
-            </ListItemIcon>
-            <ListItemText
-              sx={{ marginLeft: "-18px" }}
-              primaryTypographyProps={{
-                fontWeight: isSelected("/employee") ? "bold" : "normal",
-                color: isSelected("/employee") ? primaryColor : secondaryColor,
-              }}
-              primary="Employee Management"
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem
-          sx={{
-            borderLeft: isSelected("/Inventory")
-              ? ` solid 2px ${primaryColor}`
-              : ` solid 2px ${mainBgS1}`,
-          }}
-        >
-          <ListItemButton onClick={handleInventoryClick}>
-            <ListItemIcon
-              sx={{
-                color: isSelected("/Inventory") ? primaryColor : secondaryColor,
-              }}
-            >
-              <Inventory2OutlinedIcon />
-            </ListItemIcon>
-            <ListItemText
-              sx={{ marginLeft: "-18px" }}
-              primaryTypographyProps={{
-                fontWeight:
-                  isSelected("/load") || isSelected("/stock")
-                    ? "bold"
-                    : "normal",
-                color:
-                  isSelected("/load") || isSelected("/stock")
-                    ? primaryColor
-                    : secondaryColor,
-              }}
-              primary="Inventory Management"
-            />
-            {openInventory ? (
-              <ExpandLess
-                sx={{
-                  color:
-                    isSelected("/load") || isSelected("/stock")
-                      ? primaryColor
-                      : secondaryColor,
-                }}
-              />
-            ) : (
-              <ExpandMore
-                sx={{
-                  color:
-                    isSelected("/load") || isSelected("/stock")
-                      ? primaryColor
-                      : secondaryColor,
-                }}
-              />
-            )}
-          </ListItemButton>
-        </ListItem>
+          <ListItemIcon
+            sx={{
+              color: isSelected("/bill") ? primaryColor : secondaryColor,
+            }}
+          >
+            <ReceiptIcon />
+          </ListItemIcon>
+          <ListItemText
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color: isSelected("/bill") ? primaryColor : secondaryColor,
+            }}
+            primary="Bill and Order"
+          />
+        </ListItemButton>
+        <ListItemButton component={Link} to={"/employee"}>
+          <ListItemIcon
+            sx={{
+              color: isSelected("/employee") ? primaryColor : secondaryColor,
+            }}
+          >
+            <BadgeIcon />
+          </ListItemIcon>
+          <ListItemText
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color: isSelected("/employee") ? primaryColor : secondaryColor,
+            }}
+            primary="Employee"
+          />
+        </ListItemButton>
+        <ListItemButton onClick={handleInventoryClick}>
+          <ListItemIcon
+            sx={{
+              color:
+                isSelected("/load") || isSelected("/stock")
+                  ? primaryColor
+                  : secondaryColor,
+            }}
+          >
+            <Inventory2OutlinedIcon />
+          </ListItemIcon>
+          <ListItemText
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color:
+                isSelected("/load") || isSelected("/stock")
+                  ? primaryColor
+                  : secondaryColor,
+            }}
+            primary="Inventory"
+          />
+        </ListItemButton>
         <Collapse in={openInventory} timeout="auto" unmountOnExit>
           <List dense disablePadding>
-            <ListItemButton sx={{ pl: 3 }} component={Link} to={"/load"}>
+            <ListItemButton component={Link} to={"/load"}>
               <ListItemIcon></ListItemIcon>
               <ListItemText
-                primary="Load Management"
+                primary="Load"
                 primaryTypographyProps={{
                   color: isSelected("/load") ? primaryColor : secondaryColor,
                 }}
               />
             </ListItemButton>
-            <ListItemButton sx={{ pl: 3 }} component={Link} to={"/stock"}>
+            <ListItemButton component={Link} to={"/stock"}>
               <ListItemIcon></ListItemIcon>
               <ListItemText
-                primary="Stock Management"
+                primary="Stock"
                 primaryTypographyProps={{
                   color: isSelected("/stock") ? primaryColor : secondaryColor,
                 }}
@@ -196,84 +139,47 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
-        <ListItem
-          sx={{
-            borderLeft: isSelected("/Machine")
-              ? ` solid 2px ${primaryColor}`
-              : ` solid 2px ${mainBgS1}`,
-          }}
-        >
-          <ListItemButton>
-            <ListItemIcon
-              sx={{
-                color: isSelected("/Machine") ? primaryColor : secondaryColor,
-              }}
-            >
-              <PrecisionManufacturingOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText
-              sx={{ marginLeft: "-18px" }}
-              primaryTypographyProps={{
-                fontWeight: isSelected("/Machine") ? "bold" : "normal",
-                color: isSelected("/Machine") ? primaryColor : secondaryColor,
-              }}
-              primary="Machine management"
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem
-          sx={{
-            borderLeft: isSelected("/Inventory")
-              ? ` solid 2px ${primaryColor}`
-              : ` solid 2px ${mainBgS1}`,
-          }}
-        >
-          <ListItemButton onClick={handleFinaceClick}>
-            <ListItemIcon
-              sx={{
-                color: isSelected("/Inventory") ? primaryColor : secondaryColor,
-              }}
-            >
-              <AccountBalanceOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText
-              sx={{ marginLeft: "-18px" }}
-              primaryTypographyProps={{
-                fontWeight:
-                  isSelected("/income") || isSelected("/exp")
-                    ? "bold"
-                    : "normal",
-                color:
-                  isSelected("/income") || isSelected("/exp")
-                    ? primaryColor
-                    : secondaryColor,
-              }}
-              primary="Finance management"
-            />
-            {openFinace ? (
-              <ExpandLess
-                sx={{
-                  color:
-                    isSelected("/income") || isSelected("/exp")
-                      ? primaryColor
-                      : secondaryColor,
-                }}
-              />
-            ) : (
-              <ExpandMore
-                sx={{
-                  color:
-                    isSelected("/income") || isSelected("/exp")
-                      ? primaryColor
-                      : secondaryColor,
-                }}
-              />
-            )}
-          </ListItemButton>
-        </ListItem>
+        <ListItemButton>
+          <ListItemIcon
+            sx={{
+              color: isSelected("/Machine") ? primaryColor : secondaryColor,
+            }}
+          >
+            <PrecisionManufacturingOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color: isSelected("/Machine") ? primaryColor : secondaryColor,
+            }}
+            primary="Machine"
+          />
+        </ListItemButton>
+        <ListItemButton onClick={handleFinaceClick}>
+          <ListItemIcon
+            sx={{
+              color:
+                isSelected("/income") || isSelected("/exp")
+                  ? primaryColor
+                  : secondaryColor,
+            }}
+          >
+            <AccountBalanceOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color:
+                isSelected("/income") || isSelected("/exp")
+                  ? primaryColor
+                  : secondaryColor,
+            }}
+            primary="Finance"
+          />
+        </ListItemButton>
         <Collapse in={openFinace} timeout="auto" unmountOnExit>
           <List dense disablePadding>
-            <ListItemButton sx={{ pl: 3 }} component={Link} to={"/income"}>
+            <ListItemButton component={Link} to={"/income"}>
               <ListItemIcon></ListItemIcon>
               <ListItemText
                 primary="Income"
@@ -282,7 +188,7 @@ export default function MainSideBar() {
                 }}
               />
             </ListItemButton>
-            <ListItemButton sx={{ pl: 3 }} component={Link} to={"/exp"}>
+            <ListItemButton component={Link} to={"/exp"}>
               <ListItemIcon></ListItemIcon>
               <ListItemText
                 primary="Expenses"
@@ -293,31 +199,22 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
-        <ListItem
-          sx={{
-            borderLeft: isSelected("/Report")
-              ? ` solid 2px ${primaryColor}`
-              : ` solid 2px ${mainBgS1}`,
-          }}
-        >
-          <ListItemButton>
-            <ListItemIcon
-              sx={{
-                color: isSelected("/Report") ? primaryColor : secondaryColor,
-              }}
-            >
-              <AssessmentOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText
-              sx={{ marginLeft: "-18px" }}
-              primaryTypographyProps={{
-                fontWeight: isSelected("/Report") ? "bold" : "normal",
-                color: isSelected("/Report") ? primaryColor : secondaryColor,
-              }}
-              primary="Report and Summary"
-            />
-          </ListItemButton>
-        </ListItem>
+        <ListItemButton>
+          <ListItemIcon
+            sx={{
+              color: isSelected("/Report") ? primaryColor : secondaryColor,
+            }}
+          >
+            <AssessmentOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color: isSelected("/Report") ? primaryColor : secondaryColor,
+            }}
+            primary="Report and Summary"
+          />
+        </ListItemButton>
       </List>
     </Box>
   );

@@ -9,6 +9,7 @@ const MainLayout = () => {
   return (
     <>
       <CssBaseline />
+      <HeaderMain />
       <Grid
         container
         direction="row"
@@ -16,19 +17,18 @@ const MainLayout = () => {
         alignItems="stretch"
         sx={{ minHeight: "100vh", bgcolor: "background.default" }}
       >
-        <Grid item xs={2.5}>
+        <Grid item xs={2}>
           <MainSideBar />
         </Grid>
-        <Grid item xs={9.5}>
+        <Grid item xs={10}>
           <Box
             sx={{
               height: "100%",
               bgcolor: Theme.palette.primary.mainBgS1,
-              borderTopLeftRadius: 20,
-              borderBottomLeftRadius: 20,
+              borderTopLeftRadius: 8,
+              borderBottomLeftRadius: 8,
             }}
           >
-            <HeaderMain />
             <Container>
               <Outlet />
             </Container>

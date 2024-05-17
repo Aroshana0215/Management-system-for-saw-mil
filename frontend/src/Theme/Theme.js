@@ -13,8 +13,11 @@ const Theme = createTheme({
   },
   palette: {
     primary: {
-      main: "#6C4A3F",
-      mainBgS1: "#f0ebe8",
+      main: "#0d66e4",
+      mainBgS1: "#f1f2f4",
+    },
+    background: {
+      default: "#fff",
     },
   },
   typography: {
@@ -32,15 +35,15 @@ const Theme = createTheme({
         disableRipple: true,
       },
     },
-    MuiListItemButton: {
-      styleOverrides: {
-        root: {
-          "&:hover": {
-            backgroundColor: "transparent",
-          },
-        },
-      },
-    },
+    // MuiListItemButton: {
+    //   styleOverrides: {
+    //     root: {
+    //       "&:hover": {
+    //         backgroundColor: "transparent",
+    //       },
+    //     },
+    //   },
+    // },
   },
 });
 

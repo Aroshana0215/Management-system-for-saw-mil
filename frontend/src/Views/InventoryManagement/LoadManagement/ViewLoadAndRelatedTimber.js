@@ -14,6 +14,7 @@ import {
   OutlinedInput,
   Stack,
   Button,
+  Divider,
 } from "@mui/material";
 import { getLoadDetailsById } from "../../../services/InventoryManagementService/LoadDetailsService";
 import { getLdRelatedTimberByLoadId } from "../../../services/InventoryManagementService/LoadRelatedTimberDetailService";
@@ -22,6 +23,7 @@ import Theme from "../../../Theme/Theme";
 import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { DataGrid } from "@mui/x-data-grid";
 
 const UpdateCategory = () => {
   const { loadId } = useParams();
@@ -42,16 +44,45 @@ const UpdateCategory = () => {
   const [isLoadDataEditable, setIsLoadDataEditable] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [loadData, setLoadData] = useState({
-    sellerName: { editable: false, bpMD: 6 },
-    permitNumber: { editable: false, bpMD: 6 },
-    region: { editable: false, bpMD: 6 },
-    lorryNumber: { editable: false, bpMD: 6 },
-    driver: { editable: false, bpMD: 6 },
-    unloadedDate: { editable: false, bpMD: 6 },
-    status: { editable: false, bpMD: 6 },
-    createdBy: { editable: false, bpMD: 6 },
+    sellerName: { editable: false, bpMD: 4 },
+    permitNumber: { editable: false, bpMD: 4 },
+    region: { editable: false, bpMD: 4 },
+    lorryNumber: { editable: false, bpMD: 4 },
+    driver: { editable: false, bpMD: 4 },
+    unloadedDate: { editable: false, bpMD: 4 },
+    status: { editable: false, bpMD: 4 },
+    createdBy: { editable: false, bpMD: 4 },
     otherDetails: { editable: true, bpMD: 12 },
   });
+  const columns = [
+    { field: "timberNo", headerName: "Timber No", width: 120 },
+    { field: "treeType", headerName: "Tree Type", width: 120 },
+    { field: "perimeter", headerName: "Perimeter", width: 120 },
+    { field: "length", headerName: "Length", width: 120 },
+    { field: "cubicAmount", headerName: "Cubic Amount", width: 140 },
+    { field: "otherDetails", headerName: "Other Details", width: 140 },
+    { field: "unitPrice", headerName: "Unit Price", width: 120 },
+    { field: "totalTimerValue", headerName: "Total Timer Value", width: 160 },
+    {
+      field: "totalCuttingValue",
+      headerName: "Total Cutting Value",
+      width: 180,
+    },
+    { field: "outComeValue", headerName: "Out Come Value", width: 150 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      renderCell: (params) => (
+        <Button variant="contained" component={Link} size="small" to="/load">
+          Wood Pieces
+        </Button>
+      ),
+    },
+  ];
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCategoryData((prevPayload) => ({
@@ -97,14 +128,20 @@ const UpdateCategory = () => {
   };
 
   return (
-    <Container>
+    <>
       <Grid container>
-        <Grid item xs={12} padding={1}>
-          <Typography variant="h4" color="primary" align="center">
-            Load Details and related Timber details
-          </Typography>
+        <Grid item xs={12} p={2}>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+          >
+            <Typography variant="h5" color="primary">
+              Load Details and related Timber details
+            </Typography>
+          </Stack>
         </Grid>
-        <Grid item xs={12} padding={1}>
+        <Grid item xs={12} padding={2}>
           <Grid
             container
             component={"form"}
@@ -144,7 +181,7 @@ const UpdateCategory = () => {
                       key.slice(1).replace(/([A-Z])/g, " $1")}
                   </Typography>
                   {!isLoadDataEditable || !item.editable ? (
-                    <Typography color={"primary"}>
+                    <Typography color={"primary"} variant="h5">
                       {categoryData[key]}
                     </Typography>
                   ) : (
@@ -205,162 +242,36 @@ const UpdateCategory = () => {
             <Grid item xs={12} padding={1}>
               <TableContainer>
                 <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Timber No
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Tree Type
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Perimeter
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Length
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Cubic Amount
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Other Details
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Unit Price
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Total Timer Value
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Total Cutting Value
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Out Come Value
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Status
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Created By
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: "primary.main", fontSize: "12px" }}
-                      >
-                        Modified By
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
                   <TableBody>
-                    {categories.map((category, index) => (
-                      <>
-                        <TableRow key={index}>
-                          {" "}
-                          <TableCell
-                            colSpan={14}
-                            sx={{
-                              bgcolor: Theme.palette.primary.mainBgS1,
-                              borderRadius: 2,
-                              border: 0,
-                            }}
-                          ></TableCell>
-                        </TableRow>
-                        <TableRow key={index}>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.timberNo}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.treeType}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.perimeter}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.length}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.cubicAmount}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.otherDetails}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.unitPrice}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.totalTimerValue}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.totalCuttingValue}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.outComeValue}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.status}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.createdBy}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            {category.modifiedBy}
-                          </TableCell>
-                          <TableCell sx={{ border: 0 }}>
-                            <Button
-                              variant="contained"
-                              component={Link}
-                              size="small"
-                              to={"/load"}
-                            >
-                              Wood Pieces
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      </>
-                    ))}
                     <TableRow>
-                      <TableCell colSpan={7}>
-                        <strong>Total Value:</strong>
-                      </TableCell>
-                      <TableCell>
-                        <strong>{totalTimberValue}</strong>
-                      </TableCell>
+                      <TableCell colSpan={7}>Total Value</TableCell>
+                      <TableCell>{totalTimberValue}</TableCell>
                       <TableCell colSpan={5}></TableCell>
-                      <TableCell>
-                        <strong>{totalCubicValue}</strong>
-                      </TableCell>
+                      <TableCell>{totalCubicValue}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
             </Grid>
+            <Grid item xs={12} padding={1}>
+              <DataGrid
+                rows={categories}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 10,
+                    },
+                  },
+                }}
+                pageSizeOptions={[10]}
+                disableRowSelectionOnClick
+              />
+            </Grid>
           </Grid>
         </Grid>
       </Grid>
-    </Container>
+    </>
   );
 };
 

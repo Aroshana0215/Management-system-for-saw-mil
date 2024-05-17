@@ -2,151 +2,122 @@ import React, { useState, useEffect } from 'react';
 import { getAllInventoryDetails } from '../../../services/InventoryManagementService/StockManagementService'; // Import the API function
 import { Stack, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-import {
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-} from "@mui/material";
+import { Grid, Button } from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import Theme from "../../../Theme/Theme";
-
+import { DataGrid } from "@mui/x-data-grid";
 
 const StockList = () => {
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const data = await getAllInventoryDetails();
-          console.log('Fetched data:', data); // Log fetched data to inspect its format
-          if (Array.isArray(data)) {
-            setCategories(data);
-            setLoading(false);
-          } else {
-            throw new Error('Invalid data format received from API');
-          }
-        } catch (error) {
-          setError(error.message);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const columns = [
+    { field: "categoryId_fk", headerName: "Category ID FK", width: 150 },
+    { field: "sectionNumber", headerName: "Section No", width: 120 },
+    { field: "timberId_fk", headerName: "Timber ID FK", width: 150 },
+    { field: "amountOfPieces", headerName: "Amount of Pieces", width: 160 },
+    { field: "MachineNo", headerName: "Machine No", width: 120 },
+    { field: "driver", headerName: "Driver", width: 120 },
+    { field: "otherDetails", headerName: "Other Details", width: 140 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "view",
+      headerName: "View",
+      width: 120,
+      renderCell: ({ row }) => (
+        <Link to={`/stock/view/${row.id}`}>
+          <Button variant="contained" size="small">
+            View
+          </Button>
+        </Link>
+      ),
+    },
+    {
+      field: "summary",
+      headerName: "Summary",
+      width: 120,
+      renderCell: (params) => (
+        <Link to="/stockSummary">
+          <Button variant="contained" size="small">
+            Summary
+          </Button>
+        </Link>
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAllInventoryDetails();
+        console.log("Fetched data:", data); // Log fetched data to inspect its format
+        if (Array.isArray(data)) {
+          setCategories(data);
           setLoading(false);
+        } else {
+          throw new Error("Invalid data format received from API");
         }
-      };
-  
-      fetchData();
-    }, []);
-  
-    if (loading) {
-      return <div>Loading...</div>;
-    }
-  
-    if (error) {
-      return <div>Error: {error}</div>;
-    }
-  
-    return (
-      <>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  return (
+    <>
+      <Grid container>
+        <Grid item xs={12} p={2}>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
-            spacing={2}
           >
-            <Typography variant="h4" color="primary">
-              Load Details
+            <Typography variant="h5" color="primary">
+              Stock Details
             </Typography>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
               to={"/load/add"}
             >
-              New Load
+              New Stock
             </Button>
           </Stack>
         </Grid>
-        <Grid item xs={12}>
-          <TableContainer
-            component={Paper}
+        <Grid item xs={12} p={2}>
+          <DataGrid
             sx={{
               bgcolor: "background.default",
             }}
-          >
-            <Table>
-              <TableHead
-                sx={{
-                  bgcolor: Theme.palette.primary.mainBgS1,
-                }}
-              >
-                <TableRow>
-                  <TableCell>CategoryId Fk</TableCell>
-                  <TableCell>Section No</TableCell>
-                  <TableCell>TimberId Fk</TableCell>
-                  <TableCell>Amount of Pieces</TableCell>
-                  <TableCell>Machine No</TableCell>
-                  <TableCell>Driver</TableCell>
-                  <TableCell>Other Details</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created By</TableCell>
-                  <TableCell>Modified By</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {categories.map((category, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{category.categoryId_fk}</TableCell>
-                    <TableCell>{category.sectionNumber}</TableCell>
-                    <TableCell>{category.timberId_fk}</TableCell>
-                    <TableCell>{category.amountOfPieces}</TableCell>
-                    <TableCell>{category.MachineNo}</TableCell>
-                    <TableCell>{category.driver}</TableCell>
-                    <TableCell>{category.otherDetails}</TableCell>
-                    <TableCell>{category.status}</TableCell>
-                    <TableCell>{category.createdBy}</TableCell>
-                    <TableCell>{category.modifiedBy}</TableCell>
-                    <td>{category.categoryId_fk}</td>
-                    <TableCell>
-                      <Link>
-                        <Button
-                          variant="contained"
-                          component={Link}
-                          size="small"
-                          to={`/stock/view/${category.id}`}
-                        >
-                          View
-                        </Button>
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link>
-                        <Button
-                          variant="contained"
-                          component={Link}
-                          size="small"
-                          to={`/stockSummary`}
-                        >
-                          Summary
-                        </Button>
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+            rows={categories}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
+              },
+            }}
+            pageSizeOptions={[10]}
+            disableRowSelectionOnClick
+          />
         </Grid>
       </Grid>
     </>
-    );
-  };
+  );
+};
 
 export default StockList;
