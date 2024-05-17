@@ -1,37 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { getAllemployeeDetails } from '../../../services/EmployeeManagementService/EmployeeDetailService';
 import { Stack,Typography } from "@mui/material";
-import {
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-} from "@mui/material";
+import { Grid, Button } from "@mui/material";
 import { Link } from "react-router-dom";
-import Theme from "../../../Theme/Theme";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-
+import { DataGrid } from "@mui/x-data-grid";
+import Loading from "../../../Components/Progress/Loading";
+import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 
 const EmployeeList = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    { field: "name", headerName: "Name", width: 150 },
+    { field: "address", headerName: "Address", width: 180 },
+    { field: "nic", headerName: "NIC", width: 120 },
+    {
+      field: "dateOfBirth",
+      headerName: "BOD",
+      width: 120,
+      renderCell: ({ row }) => formatDateOfBirth(row.dateOfBirth),
+    },
+    { field: "currentLendAmount", headerName: "Lend Amount", width: 140 },
+    { field: "otValuePerHour", headerName: "OT Value", width: 120 },
+    { field: "salaryPerDay", headerName: "Salary", width: 120 },
+    {
+      field: "joinDate",
+      headerName: "Join Date",
+      width: 150,
+      renderCell: ({ row }) => formatDateOfBirth(row.joinDate),
+    },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 240,
+      renderCell: ({ row }) => (
+        <>
+          <Link to={`/employee/payment/${row.id}`}>
+            <Button sx={{ marginX: 1 }} variant="contained" size="small">
+              Payment
+            </Button>
+          </Link>
+          {/* TODO : Change the path */}
+          <Link to={`/employee/dependatnt/${row.id}`}>
+            <Button sx={{ marginX: 1 }} variant="contained" size="small">
+              View
+            </Button>
+          </Link>
+        </>
+      ),
+    },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getAllemployeeDetails();
-        console.log('Fetched data:', data);
+        console.log("Fetched data:", data);
         if (Array.isArray(data)) {
           setCategories(data);
           setLoading(false);
         } else {
-          throw new Error('Invalid data format received from API');
+          throw new Error("Invalid data format received from API");
         }
       } catch (error) {
         setError(error.message);
@@ -43,118 +77,52 @@ const EmployeeList = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <ErrorAlert error={error} />;
   }
 
   const formatDateOfBirth = (dateObject) => {
     const date = new Date(dateObject.seconds * 1000);
-    return date.toISOString().slice(0, 19).replace('T', ' ');
+    return date.toISOString().slice(0, 19).replace("T", " ");
   };
 
   return (
-
     <>
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          spacing={2}
-        >
-          <Typography variant="h4" color="primary">
-            Load Details
-          </Typography>
-          <Button
-            variant="outlined"
-            startIcon={<AddCircleOutlineOutlinedIcon />}
-            component={Link}
-            to={"/load/add"}
+      <Grid container>
+        <Grid item xs={12} p={2}>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
           >
-            New Load
-          </Button>
-        </Stack>
+            <Typography variant="h6" fontWeight="bold" color="primary">
+              Employee Details
+            </Typography>
+          </Stack>
+        </Grid>
+        <Grid item xs={12} p={2}>
+          <DataGrid
+            sx={{
+              bgcolor: "background.default",
+            }}
+            rows={categories}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 8,
+                },
+              },
+            }}
+            pageSizeOptions={[8]}
+            disableRowSelectionOnClick
+          />
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <TableContainer
-          component={Paper}
-          sx={{
-            bgcolor: "background.default",
-          }}
-        >
-          <Table>
-            <TableHead
-              sx={{
-                bgcolor: Theme.palette.primary.mainBgS1,
-              }}
-            >
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Address</TableCell>
-                <TableCell>NIC</TableCell>
-                <TableCell>BOD</TableCell>
-                <TableCell>Lend Amount</TableCell>
-                <TableCell>Ot value</TableCell>
-                <TableCell>Salaray</TableCell>
-                <TableCell>Join Date</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>created By</TableCell>
-                <TableCell>modified By</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {categories.map((category, index) => (
-                <TableRow key={index}>
-                  <TableCell>{category.id}</TableCell>
-                  <TableCell>{category.name}</TableCell>
-                  <TableCell>{category.address}</TableCell>
-                  <TableCell>{category.nic}</TableCell>
-                  <TableCell>{formatDateOfBirth(category.dateOfBirth)}</TableCell>
-                  <TableCell>{category.currentLendAmount}</TableCell>
-                  <TableCell>{category.otValuePerHour}</TableCell>
-                  <TableCell>{category.salaryPerDay}</TableCell>
-                  <TableCell>{formatDateOfBirth(category.joinDate)}</TableCell>
-                  <TableCell>{category.status}</TableCell>
-                  <TableCell>{category.createdBy}</TableCell>
-                  <TableCell>{category.modifiedBy}</TableCell>
-                  <TableCell>
-                    <Link>
-                      <Button
-                        variant="contained"
-                        component={Link}
-                        size="small"
-                        to={`/employee/payment/${category.id}`}
-                      >
-                        Payment
-                      </Button>
-                    </Link>
-                    </TableCell>
-                    <TableCell>  
-                    <Link>
-                      <Button
-                        variant="contained"
-                        component={Link}
-                        size="small"
-                        to={`/load/timber/view/${category.id}`}
-                      >
-                        View
-                      </Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Grid>
-    </Grid>
-  </>
+    </>
   );
 };
 

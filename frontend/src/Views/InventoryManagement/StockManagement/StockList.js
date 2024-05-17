@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { Grid, Button } from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { DataGrid } from "@mui/x-data-grid";
+import Loading from "../../../Components/Progress/Loading";
+import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 
 const StockList = () => {
   const [categories, setCategories] = useState([]);
@@ -68,11 +70,11 @@ const StockList = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <ErrorAlert error={error} />;
   }
 
   return (
@@ -84,7 +86,7 @@ const StockList = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h5" color="primary">
+            <Typography variant="h6" fontWeight="bold" color="primary">
               Stock Details
             </Typography>
             <Button
@@ -107,11 +109,11 @@ const StockList = () => {
             initialState={{
               pagination: {
                 paginationModel: {
-                  pageSize: 10,
+                  pageSize: 8,
                 },
               },
             }}
-            pageSizeOptions={[10]}
+            pageSizeOptions={[8]}
             disableRowSelectionOnClick
           />
         </Grid>

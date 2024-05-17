@@ -132,7 +132,7 @@ const UpdateCategory = () => {
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Typography variant="h5" color="primary">
+            <Typography variant="h6" fontWeight="bold" color="primary">
               Load Details and related Timber details
             </Typography>
           </Stack>
@@ -256,11 +256,11 @@ const UpdateCategory = () => {
                 initialState={{
                   pagination: {
                     paginationModel: {
-                      pageSize: 10,
+                      pageSize: 8,
                     },
                   },
                 }}
-                pageSizeOptions={[10]}
+                pageSizeOptions={[8]}
                 disableRowSelectionOnClick
               />
             </Grid>

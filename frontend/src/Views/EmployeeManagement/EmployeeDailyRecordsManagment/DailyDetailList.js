@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getAllemployeeDailyDetails } from '../../../services/EmployeeManagementService/EmployeeDailyDetailService';
 import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
+import Loading from "../../../Components/Progress/Loading";
+import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 
 const DailyDetailList = () => {
   const [categories, setCategories] = useState([]);
@@ -12,12 +14,12 @@ const DailyDetailList = () => {
     const fetchData = async () => {
       try {
         const data = await getAllemployeeDailyDetails();
-        console.log('Fetched data:', data);
+        console.log("Fetched data:", data);
         if (Array.isArray(data)) {
           setCategories(data);
           setLoading(false);
         } else {
-          throw new Error('Invalid data format received from API');
+          throw new Error("Invalid data format received from API");
         }
       } catch (error) {
         setError(error.message);
@@ -29,11 +31,11 @@ const DailyDetailList = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <ErrorAlert error={error} />;
   }
 
   const formatDate = (timestamp) => {
@@ -48,16 +50,21 @@ const DailyDetailList = () => {
     };
     return date.toLocaleString("en-US", options);
   };
-  
-  
 
   return (
-    <div style={{ padding: '20px' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd', borderRadius: '8px' }}>
+    <div style={{ padding: "20px" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          border: "1px solid #ddd",
+          borderRadius: "8px",
+        }}
+      >
         <thead>
-          <tr style={{ backgroundColor: '#f2f2f2' }}>
-            <th >ID</th>
-            <th >Date</th>
+          <tr style={{ backgroundColor: "#f2f2f2" }}>
+            <th>ID</th>
+            <th>Date</th>
             <th>IsPresent</th>
             <th>In Time</th>
             <th>Out Time</th>
@@ -73,23 +80,60 @@ const DailyDetailList = () => {
         </thead>
         <tbody>
           {categories.map((category, index) => (
-            <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.id}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{formatDate(category.dateTime)}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.isPresent.toString()}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.inTime}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.outTime}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.otHours}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.advancePerDay}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.eid_fk}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.status}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.createdBy}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{formatDate(category.createdDate)}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.modifiedBy}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{formatDate(category.modifiedDate)}</td>
+            <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.id}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {formatDate(category.dateTime)}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.isPresent.toString()}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.inTime}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.outTime}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.otHours}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.advancePerDay}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.eid_fk}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.status}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.createdBy}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {formatDate(category.createdDate)}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {category.modifiedBy}
+              </td>
+              <td style={{ padding: "8px", borderRight: "1px solid #ddd" }}>
+                {formatDate(category.modifiedDate)}
+              </td>
               <td>
                 <Link to={`/employee/daily/${category.id}`}>
-                  <button style={{ padding: '8px 16px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Update</button>
+                  <button
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: "#4CAF50",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Update
+                  </button>
                 </Link>
               </td>
             </tr>
@@ -100,7 +144,12 @@ const DailyDetailList = () => {
         component={Link}
         to={"/employee/daily/add"}
         variant="body2"
-        sx={{ textAlign: "center", textDecoration: "none", display: "block", marginTop: "20px" }}
+        sx={{
+          textAlign: "center",
+          textDecoration: "none",
+          display: "block",
+          marginTop: "20px",
+        }}
       >
         Create New Employee
       </Typography>

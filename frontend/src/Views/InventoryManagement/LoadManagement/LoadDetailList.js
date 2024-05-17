@@ -4,6 +4,8 @@ import { Stack, Typography, Grid, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Link } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import Loading from "../../../Components/Progress/Loading";
+import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 
 const LoadDetailList = () => {
   const [categories, setCategories] = useState([]);
@@ -57,11 +59,11 @@ const LoadDetailList = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <ErrorAlert error={error} />;
   }
 
   return (
@@ -73,7 +75,7 @@ const LoadDetailList = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h5" color="primary">
+            <Typography variant="h6" fontWeight="bold" color="primary">
               Load Details
             </Typography>
             <Button
@@ -96,11 +98,11 @@ const LoadDetailList = () => {
             initialState={{
               pagination: {
                 paginationModel: {
-                  pageSize: 10,
+                  pageSize: 8,
                 },
               },
             }}
-            pageSizeOptions={[10]}
+            pageSizeOptions={[8]}
             disableRowSelectionOnClick
           />
         </Grid>

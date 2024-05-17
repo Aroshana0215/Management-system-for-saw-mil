@@ -2,143 +2,106 @@ import React, { useState, useEffect } from 'react';
 import { getAllbillDetails } from '../../services/BillAndOrderService/BilllManagemntService'; // Import the API function
 import { Stack, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-import {
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-} from "@mui/material";
-import Theme from "../../Theme/Theme";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import { Grid, Button } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import Loading from "../../Components/Progress/Loading";
+import ErrorAlert from "../../Components/Alert/ErrorAlert";
 
 const BillDetailList = () => {
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const data = await getAllbillDetails();
-          console.log('Fetched data:', data); // Log fetched data to inspect its format
-          if (Array.isArray(data)) {
-            setCategories(data);
-            setLoading(false);
-          } else {
-            throw new Error('Invalid data format received from API');
-          }
-        } catch (error) {
-          setError(error.message);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    { field: "cusName", headerName: "Customer Name", width: 150 },
+    { field: "cusAddress", headerName: "Customer Address", width: 180 },
+    { field: "cusNIC", headerName: "Customer NIC", width: 150 },
+    { field: "cusPhoneNumber", headerName: "Phone No", width: 120 },
+    { field: "totalAmount", headerName: "Total", width: 120 },
+    { field: "advance", headerName: "Advance", width: 120 },
+    { field: "remainningAmount", headerName: "Remaining Amount", width: 160 },
+    { field: "description", headerName: "Description", width: 150 },
+    { field: "billStatus", headerName: "Bill Status", width: 130 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      renderCell: (params) => (
+        <Link to={`/bill/view/${params.row.id}`}>
+          <Button variant="contained" size="small">
+            View
+          </Button>
+        </Link>
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAllbillDetails();
+        console.log("Fetched data:", data); // Log fetched data to inspect its format
+        if (Array.isArray(data)) {
+          setCategories(data);
           setLoading(false);
+        } else {
+          throw new Error("Invalid data format received from API");
         }
-      };
-  
-      fetchData();
-    }, []);
-  
-    if (loading) {
-      return <div>Loading...</div>;
-    }
-  
-    if (error) {
-      return <div>Error: {error}</div>;
-    }
-  
-    return (
-<>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return <ErrorAlert error={error} />;
+  }
+
+  return (
+    <>
+      <Grid container>
+        <Grid item xs={12} p={2}>
           <Stack
             direction="row"
-            justifyContent="space-between"
+            justifyContent="flex-start"
             alignItems="center"
-            spacing={2}
           >
-            <Typography variant="h4" color="primary">
-              Load Details
+            <Typography variant="h6" fontWeight="bold" color="primary">
+              Bill & Order Details
             </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<AddCircleOutlineOutlinedIcon />}
-              component={Link}
-              to={"/load/add"}
-            >
-              New Load
-            </Button>
           </Stack>
         </Grid>
-        <Grid item xs={12}>
-          <TableContainer
-            component={Paper}
+        <Grid item xs={12} p={2}>
+          <DataGrid
             sx={{
               bgcolor: "background.default",
             }}
-          >
-            <Table>
-              <TableHead
-                sx={{
-                  bgcolor: Theme.palette.primary.mainBgS1,
-                }}
-              >
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Customer Name</TableCell>
-                  <TableCell>Customer Address</TableCell>
-                  <TableCell>Customer NIC</TableCell>
-                  <TableCell>Phone No</TableCell>
-                  <TableCell>Total</TableCell>
-                  <TableCell>Advance</TableCell>
-                  <TableCell>Remaining Amount</TableCell>
-                  <TableCell>Descrption</TableCell>
-                  <TableCell>Bill status</TableCell>
-                  <TableCell>status</TableCell>
-                  <TableCell>Created By</TableCell>
-                  <TableCell>Modified By</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {categories.map((category, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{category.id}</TableCell>
-                    <TableCell>{category.cusName}</TableCell>
-                    <TableCell>{category.cusAddress}</TableCell>
-                    <TableCell>{category.cusNIC}</TableCell>
-                    <TableCell>{category.cusPhoneNumber}</TableCell>
-                    <TableCell>{category.totalAmount}</TableCell>
-                    <TableCell>{category.advance}</TableCell>
-                    <TableCell>{category.remainningAmount}</TableCell>
-                    <TableCell>{category.description}</TableCell>
-                    <TableCell>{category.billStatus}</TableCell>
-                    <TableCell>{category.status}</TableCell>
-                    <TableCell>{category.createdBy}</TableCell>
-                    <TableCell>{category.modifiedBy}</TableCell>
-                    <TableCell>
-                      <Link>
-                        <Button
-                          variant="contained"
-                          component={Link}
-                          size="small"
-                          to={`/load/timber/view/${category.id}`}
-                        >
-                          View
-                        </Button>
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+            rows={categories}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 8,
+                },
+              },
+            }}
+            pageSizeOptions={[8]}
+            disableRowSelectionOnClick
+          />
         </Grid>
       </Grid>
     </>
-    );
-  };
+  );
+};
 
 export default BillDetailList;

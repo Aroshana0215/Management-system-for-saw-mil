@@ -40,7 +40,7 @@ const ViewStockDetail = () => {
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Typography variant="h5" color="primary">
+            <Typography variant="h6" fontWeight="bold" color="primary">
               Stock Information
             </Typography>
           </Stack>
@@ -65,19 +65,25 @@ const ViewStockDetail = () => {
               </Typography>
             </Box>
             <Box>
-              <Typography>Section Number</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Section Number
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {categoryData.sectionNumber}
               </Typography>
             </Box>
             <Box>
-              <Typography>Amount of Pieces</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Amount of Pieces
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {categoryData.amountOfPieces}
               </Typography>
             </Box>
             <Box>
-              <Typography>Machine Number</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Machine Number
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {categoryData.MachineNo}
               </Typography>
@@ -104,43 +110,57 @@ const ViewStockDetail = () => {
               </Typography>
             </Box>
             <Box>
-              <Typography>Timber Type</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Timber Type
+              </Typography>
               <Typography variant="h4" color={"primary"}>
                 {cData.timberType}
               </Typography>
             </Box>
             <Box>
-              <Typography>Area Length</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Area Length
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {cData.areaLength}
               </Typography>
             </Box>
             <Box>
-              <Typography>Area Width</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Area Width
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {cData.areaWidth}
               </Typography>
             </Box>
             <Box>
-              <Typography>Min Length</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Min Length
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {cData.minlength}
               </Typography>
             </Box>
             <Box>
-              <Typography>Max Length</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Max Length
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {cData.maxlength}
               </Typography>
             </Box>
             <Box>
-              <Typography>Thickness</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Thickness
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {cData.thickness}
               </Typography>
             </Box>
             <Box>
-              <Typography>Unit Price</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Unit Price
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {cData.unitPrice}
               </Typography>
@@ -167,43 +187,55 @@ const ViewStockDetail = () => {
               </Typography>
             </Box>
             <Box>
-              <Typography>Timber No</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Timber No
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {timberData.timberNo}
               </Typography>
             </Box>
             <Box>
-              <Typography>Tree Type</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Tree Type
+              </Typography>
               <Typography variant="h4" color={"primary"}>
                 {timberData.treeType}
               </Typography>
             </Box>
             <Box>
-              <Typography>Perimeter</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Perimeter
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {timberData.perimeter}
               </Typography>
             </Box>
             <Box>
-              <Typography>Length</Typography>
+              <Typography sx={{ color: "text.secondary" }}>Length</Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {timberData.length}
               </Typography>
             </Box>
             <Box>
-              <Typography>Cubic Amount</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Cubic Amount
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {timberData.cubicAmount}
               </Typography>
             </Box>
             <Box>
-              <Typography>Other Details</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Other Details
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {timberData.otherDetails}
               </Typography>
             </Box>
             <Box>
-              <Typography>Unit Price</Typography>
+              <Typography sx={{ color: "text.secondary" }}>
+                Unit Price
+              </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {timberData.unitPrice}
               </Typography>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getAllSummaryDetails } from "../../../services/InventoryManagementService/StockSummaryManagementService"; 
 import { Grid, Stack, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import Loading from "../../../Components/Progress/Loading";
+import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 
 const StockSummaryList = () => {
   const [categories, setCategories] = useState([]);
@@ -40,11 +42,11 @@ const StockSummaryList = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <ErrorAlert error={error} />;
   }
 
   return (
@@ -56,7 +58,7 @@ const StockSummaryList = () => {
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Typography variant="h5" color="primary">
+            <Typography variant="h6" fontWeight="bold" color="primary">
               Stock Summary
             </Typography>
           </Stack>
@@ -71,11 +73,11 @@ const StockSummaryList = () => {
             initialState={{
               pagination: {
                 paginationModel: {
-                  pageSize: 10,
+                  pageSize: 8,
                 },
               },
             }}
-            pageSizeOptions={[10]}
+            pageSizeOptions={[8]}
             disableRowSelectionOnClick
           />
         </Grid>

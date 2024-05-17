@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
-  Container,
   Grid,
   Typography,
-  TextField,
   TableContainer,
   Table,
-  TableHead,
   TableBody,
   TableRow,
   TableCell,
+  Stack,
+  Button,
+  FormControl,
+  OutlinedInput,
 } from "@mui/material";
 import { getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService";
 import { getorderIdByBillId } from "../../services/BillAndOrderService/OrderManagmentService";
-import { Link } from "react-router-dom";
+import { DataGrid } from "@mui/x-data-grid";
+import EditIcon from "@mui/icons-material/Edit";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const ViewBillDetails = () => {
   const { billId } = useParams();
@@ -44,6 +47,37 @@ const ViewBillDetails = () => {
     modifiedBy: "",
     modifiedDate: "",
   });
+  const [isLoadDataEditable, setIsLoadDataEditable] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [loadData, setLoadData] = useState({
+    dateAndTime: { editable: false, bpMD: 4 },
+    cusName: { editable: false, bpMD: 4 },
+    cusAddress: { editable: false, bpMD: 4 },
+    cusNIC: { editable: false, bpMD: 4 },
+  });
+  const columns = [
+    {
+      field: "availablePiecesAmount",
+      headerName: "Available Pieces Amount",
+      width: 180,
+    },
+    {
+      field: "neededPiecesAmount",
+      headerName: "Needed Pieces Amount",
+      width: 180,
+    },
+    {
+      field: "remainPiecesAmount",
+      headerName: "Remain Pieces Amount",
+      width: 180,
+    },
+    { field: "discountPrice", headerName: "Discount Price", width: 150 },
+    { field: "bill_id_fk", headerName: "Bill ID FK", width: 120 },
+    { field: "catergoryId_fk", headerName: "Category ID FK", width: 150 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,137 +98,156 @@ const ViewBillDetails = () => {
 
     fetchData();
   }, [billId]);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    //TODO: handle update load
+  };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCategoryData((prevPayload) => ({
+      ...prevPayload,
+      [name]: value,
+    }));
+  };
 
   return (
-    <Container>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
-            Load Details and related Timber details
-          </Typography>
+    <>
+      <Grid container>
+        <Grid item xs={12} p={2}>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+          >
+            <Typography variant="h4" color="primary" align="center">
+              Bill & Order details
+            </Typography>
+          </Stack>
         </Grid>
-        <Grid item xs={12}>
-          <form>
-            <TextField
-              fullWidth
-              label="dateAndTime"
-              variant="outlined"
-              value={categoryData.dateAndTime}
-              onChange={(e) =>
-                setCategoryData({
-                  ...categoryData,
-                  dateAndTime: e.target.value,
-                })
-              }
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="cusName"
-              variant="outlined"
-              value={categoryData.cusName}
-              onChange={(e) =>
-                setCategoryData({ ...categoryData, cusName: e.target.value })
-              }
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="cusAddress"
-              variant="outlined"
-              value={categoryData.cusAddress}
-              onChange={(e) =>
-                setCategoryData({ ...categoryData, cusAddress: e.target.value })
-              }
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="cusNIC"
-              variant="outlined"
-              value={categoryData.cusNIC}
-              onChange={(e) =>
-                setCategoryData({ ...categoryData, cusNIC: e.target.value })
-              }
-              sx={{ mt: 2 }}
-            />
-            {/* <TextField
-              fullWidth
-              label="Other Details"
-              variant="outlined"
-              value={categoryData.otherDetails}
-              onChange={(e) => setCategoryData({ ...categoryData, otherDetails: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Status"
-              variant="outlined"
-              value={categoryData.status}
-              onChange={(e) => setCategoryData({ ...categoryData, status: e.target.value })}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Created By"
-              variant="outlined"
-              value={categoryData.createdBy}
-              onChange={(e) => setCategoryData({ ...categoryData, createdBy: e.target.value })}
-              sx={{ mt: 2 }}
-            /> */}
-          </form>
-        </Grid>
-        <Grid item xs={12}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>availablePiecesAmount</TableCell>
-                  <TableCell>neededPiecesAmount</TableCell>
-                  <TableCell>remainPiecesAmount</TableCell>
-                  <TableCell>discountPrice</TableCell>
-                  <TableCell>bill_id_fk</TableCell>
-                  <TableCell>catergoryId_fk</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created By</TableCell>
-                  <TableCell>Modified By</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {categories.map((category, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{category.availablePiecesAmount}</TableCell>
-                    <TableCell>{category.neededPiecesAmount}</TableCell>
-                    <TableCell>{category.remainPiecesAmount}</TableCell>
-                    <TableCell>{category.discountPrice}</TableCell>
-                    <TableCell>{category.bill_id_fk}</TableCell>
-                    <TableCell>{category.catergoryId_fk}</TableCell>
-                    <TableCell>{category.status}</TableCell>
-                    <TableCell>{category.createdBy}</TableCell>
-                    <TableCell>{category.modifiedBy}</TableCell>
-                    <Link to={"/load"}>
-                      <button>Wood Pieces</button>
-                    </Link>
-                  </TableRow>
-                ))}
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <strong>Total Value:</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>{totalTimberValue}</strong>
-                  </TableCell>
-                  <TableCell colSpan={5}></TableCell>
-                  <TableCell>
-                    <strong>{totalCubicValue}</strong>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <Grid item xs={12} padding={2}>
+          <Grid
+            container
+            component={"form"}
+            onSubmit={handleSubmit}
+            padding={2}
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 2,
+            }}
+          >
+            <Grid item xs={12} padding={1}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                spacing={2}
+              >
+                <Typography variant="h6" color="primary" align="center">
+                  Bill details
+                </Typography>
+                <Button
+                  startIcon={isLoadDataEditable ? <CancelIcon /> : <EditIcon />}
+                  variant="outlined"
+                  onClick={() => {
+                    setIsLoadDataEditable(!isLoadDataEditable);
+                  }}
+                >
+                  {isLoadDataEditable ? "Cancel" : "Edit"}
+                </Button>
+              </Stack>
+            </Grid>
+            {Object.entries(loadData).map(([key, item]) => (
+              <Grid item key={key} xs={12} md={item.bpMD} padding={2}>
+                <FormControl fullWidth>
+                  <Typography>
+                    {key.charAt(0).toUpperCase() +
+                      key.slice(1).replace(/([A-Z])/g, " $1")}
+                  </Typography>
+                  {!isLoadDataEditable || !item.editable ? (
+                    <Typography color={"primary"} variant="h5">
+                      {categoryData[key]}
+                    </Typography>
+                  ) : (
+                    <OutlinedInput
+                      name={key}
+                      value={categoryData[key]}
+                      onChange={handleChange}
+                    />
+                  )}
+                  {/* <FormHelperText/> */}
+                </FormControl>
+              </Grid>
+            ))}
+            {isLoadDataEditable && (
+              <Grid item xs={12} padding={1}>
+                <Stack
+                  direction="row"
+                  justifyContent="flex-end"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <Button variant="contained" type="submit">
+                    Save
+                  </Button>
+                </Stack>
+              </Grid>
+            )}
+          </Grid>
+          <Grid
+            container
+            padding={2}
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 2,
+              marginY: 2,
+            }}
+          >
+            <Grid item xs={12} padding={1}>
+              <Stack
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={2}
+              >
+                {/* TODO: change title */}
+                <Typography variant="h6" color="primary" align="center">
+                  Order details
+                </Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} padding={1}>
+              <TableContainer>
+                <Table size="small">
+                  <TableBody>
+                    <TableRow>
+                      <TableCell colSpan={7}>Total Value</TableCell>
+                      <TableCell>{totalTimberValue}</TableCell>
+                      <TableCell colSpan={5}></TableCell>
+                      <TableCell>{totalCubicValue}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
+            <Grid item xs={12} padding={1}>
+              <DataGrid
+                rows={categories}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 8,
+                    },
+                  },
+                }}
+                pageSizeOptions={[8]}
+                disableRowSelectionOnClick
+              />
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
-    </Container>
+    </>
   );
 };
 

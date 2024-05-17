@@ -21,7 +21,8 @@ const Theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "Jost",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;",
     button: {
       textTransform: "none",
     },

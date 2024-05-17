@@ -1,4 +1,4 @@
-import { Box, Container, CssBaseline, Grid } from "@mui/material";
+import { Box, CssBaseline, Grid } from "@mui/material";
 import React from "react";
 import { Outlet } from "react-router-dom";
 import HeaderMain from "../Components/Headers/HeaderMain";
@@ -15,9 +15,13 @@ const MainLayout = () => {
         direction="row"
         justifyContent="center"
         alignItems="stretch"
-        sx={{ minHeight: "100vh", bgcolor: "background.default" }}
+        sx={{
+          height: "100%",
+          minHeight: "calc(100vh - 64px)",
+          bgcolor: "background.default",
+        }}
       >
-        <Grid item xs={2}>
+        <Grid item xs={2} paddingTop={2}>
           <MainSideBar />
         </Grid>
         <Grid item xs={10}>
@@ -27,11 +31,10 @@ const MainLayout = () => {
               bgcolor: Theme.palette.primary.mainBgS1,
               borderTopLeftRadius: 8,
               borderBottomLeftRadius: 8,
+              padding: 2,
             }}
           >
-            <Container>
-              <Outlet />
-            </Container>
+            <Outlet />
           </Box>
         </Grid>
       </Grid>
