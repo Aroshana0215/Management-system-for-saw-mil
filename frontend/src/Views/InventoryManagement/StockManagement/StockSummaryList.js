@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllSummaryDetails } from "../../../services/InventoryManagementService/StockSummaryManagementService"; 
-import { Button, Grid, Stack, Typography } from "@mui/material";
+import { Grid, Stack, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
 const StockSummaryList = () => {

@@ -5,7 +5,6 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Collapse } from "@mui/material";
-import sawMillLogo from "../../assets/images/sawMillLogo.png";
 import { Link, useLocation } from "react-router-dom";
 import Theme from "../../Theme/Theme";
 import PriceChangeOutlinedIcon from "@mui/icons-material/PriceChangeOutlined";
@@ -15,8 +14,6 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
 
 export default function MainSideBar() {
   const location = useLocation();
@@ -25,16 +22,15 @@ export default function MainSideBar() {
     return location.pathname.includes(path);
   };
   const primaryColor = Theme.palette.primary.main;
-  const mainBgS1 = Theme.palette.primary.mainBgS1;
   const secondaryColor = "text.secondary";
   const [openInventory, setOpenInventory] = React.useState(true);
-  const [openFinace, setOpenFinace] = React.useState(true);
+  const [openFinance, setOpenFinance] = React.useState(true);
 
   const handleInventoryClick = () => {
     setOpenInventory(!openInventory);
   };
-  const handleFinaceClick = () => {
-    setOpenFinace(!openFinace);
+  const handleFinanceClick = () => {
+    setOpenFinance(!openFinance);
   };
   return (
     <Box
@@ -42,8 +38,12 @@ export default function MainSideBar() {
         bgcolor: "background.default",
       }}
     >
-      <List sx={{ paddingX: 2 }}>
-        <ListItemButton component={Link} to={"/price"}>
+      <List dense sx={{ paddingX: 2 }}>
+        <ListItemButton
+          component={Link}
+          to={"/price"}
+          selected={isSelected("/price")}
+        >
           <ListItemIcon
             sx={{
               color: isSelected("/price") ? primaryColor : secondaryColor,
@@ -79,7 +79,11 @@ export default function MainSideBar() {
             primary="Bill and Order"
           />
         </ListItemButton>
-        <ListItemButton component={Link} to={"/employee"}>
+        <ListItemButton
+          component={Link}
+          to={"/employee"}
+          selected={isSelected("/employee")}
+        >
           <ListItemIcon
             sx={{
               color: isSelected("/employee") ? primaryColor : secondaryColor,
@@ -95,7 +99,10 @@ export default function MainSideBar() {
             primary="Employee"
           />
         </ListItemButton>
-        <ListItemButton onClick={handleInventoryClick}>
+        <ListItemButton
+          onClick={handleInventoryClick}
+          selected={isSelected("/load") || isSelected("/stock")}
+        >
           <ListItemIcon
             sx={{
               color:
@@ -139,7 +146,7 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
-        <ListItemButton>
+        <ListItemButton selected={isSelected("/Machine")}>
           <ListItemIcon
             sx={{
               color: isSelected("/Machine") ? primaryColor : secondaryColor,
@@ -155,7 +162,10 @@ export default function MainSideBar() {
             primary="Machine"
           />
         </ListItemButton>
-        <ListItemButton onClick={handleFinaceClick}>
+        <ListItemButton
+          onClick={handleFinanceClick}
+          selected={isSelected("/income") || isSelected("/exp")}
+        >
           <ListItemIcon
             sx={{
               color:
@@ -177,7 +187,7 @@ export default function MainSideBar() {
             primary="Finance"
           />
         </ListItemButton>
-        <Collapse in={openFinace} timeout="auto" unmountOnExit>
+        <Collapse in={openFinance} timeout="auto" unmountOnExit>
           <List dense disablePadding>
             <ListItemButton component={Link} to={"/income"}>
               <ListItemIcon></ListItemIcon>
@@ -199,7 +209,7 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
-        <ListItemButton>
+        <ListItemButton selected={isSelected("/Report")}>
           <ListItemIcon
             sx={{
               color: isSelected("/Report") ? primaryColor : secondaryColor,
