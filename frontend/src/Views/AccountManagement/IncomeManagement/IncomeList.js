@@ -1,26 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { getAllincome } from '../../../services/AccountManagementService/IncomeManagmentService'; // Import the API function
 import { Stack, Typography } from "@mui/material";
-import {
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-} from "@mui/material";
+import { Grid, Button } from "@mui/material";
 
 import { Link } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import Theme from "../../../Theme/Theme";
+import { DataGrid } from "@mui/x-data-grid";
+import Loading from "../../../Components/Progress/Loading";
+import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 
 const IncomeList = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    // { field: 'date', headerName: 'Date', width: 150 },
+    { field: "type", headerName: "Income Type", width: 150 },
+    { field: "des", headerName: "Description", width: 180 },
+    { field: "amount", headerName: "Amount", width: 120 },
+    { field: "BilId", headerName: "Bill Details", width: 150 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      renderCell: ({ row }) => (
+        // TODO : change the path
+        <Link to={`/load/timber/view/${row.id}`}>
+          <Button variant="contained" size="small">
+            View
+          </Button>
+        </Link>
+      ),
+    },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,28 +59,27 @@ const IncomeList = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <ErrorAlert error={error} />;
   }
 
   return (
     <>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
+      <Grid container>
+        <Grid item xs={12} p={2}>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
-            spacing={2}
           >
-            <Typography variant="h4" color="primary">
+            <Typography variant="h6" fontWeight="bold" color="primary">
               Income Details
             </Typography>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
               to={"/income/add"}
@@ -73,61 +88,23 @@ const IncomeList = () => {
             </Button>
           </Stack>
         </Grid>
-        <Grid item xs={12}>
-          <TableContainer
-            component={Paper}
+        <Grid item xs={12} p={2}>
+          <DataGrid
             sx={{
               bgcolor: "background.default",
             }}
-          >
-            <Table>
-              <TableHead
-                sx={{
-                  bgcolor: Theme.palette.primary.mainBgS1,
-                }}
-              >
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  {/* <TableCell>Date</TableCell> */}
-                  <TableCell>Income Type</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Bill Details</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created By</TableCell>
-                  <TableCell>Modified By</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {categories.map((category, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{category.id}</TableCell>
-                    {/* <TableCell>{category.date}</TableCell> */}
-                    <TableCell>{category.type}</TableCell>
-                    <TableCell>{category.des}</TableCell>
-                    <TableCell>{category.amount}</TableCell>
-                    <TableCell>{category.BilId}</TableCell>
-                    <TableCell>{category.status}</TableCell>
-                    <TableCell>{category.createdBy}</TableCell>
-                    <TableCell>{category.modifiedBy}</TableCell>
-                    <TableCell>
-                      <Link>
-                        <Button
-                          variant="contained"
-                          component={Link}
-                          size="small"
-                          to={`/load/timber/view/${category.id}`}
-                        >
-                          View
-                        </Button>
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+            rows={categories}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 8,
+                },
+              },
+            }}
+            pageSizeOptions={[8]}
+            disableRowSelectionOnClick
+          />
         </Grid>
       </Grid>
     </>

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Grid, Typography } from "@mui/material";
-import { getInventoryDetailsById} from "../../../services/InventoryManagementService/StockManagementService"; 
-import { getCategoryById } from "../../../services/PriceCardService"; 
+import { Box, Grid, Stack, Typography } from "@mui/material";
+import { getInventoryDetailsById } from "../../../services/InventoryManagementService/StockManagementService";
+import { getCategoryById } from "../../../services/PriceCardService";
 import { getLdRelatedTimberById } from "../../../services/InventoryManagementService/LoadRelatedTimberDetailService";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import CategoryIcon from "@mui/icons-material/Category";
+import ForestIcon from "@mui/icons-material/Forest";
 
 const ViewStockDetail = () => {
   const { stockId } = useParams();
@@ -29,89 +32,218 @@ const ViewStockDetail = () => {
   }, [stockId]);
 
   return (
-    <Container>
-      <Grid
-        container
-        direction="row"
-        justifyContent="center"
-        alignItems="stretch"
-        spacing={2}
-        p={2}
-      >
-        <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
-            View Stock Details
-          </Typography>
+    <>
+      <Grid container>
+        <Grid item xs={12} p={2}>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+          >
+            <Typography variant="h6" fontWeight="bold" color="primary">
+              Stock Information
+            </Typography>
+          </Stack>
         </Grid>
-        <Grid item xs={12}>
-          {/* Category Data Fields */}
-          <Typography variant="h6" color="primary">
-            stock Data Fields
-          </Typography>
-          <Typography>
-            Section Number: {categoryData.sectionNumber}
-          </Typography>
-          <Typography>
-            Amount of Pieces: {categoryData.amountOfPieces}
-          </Typography>
-          <Typography>
-            Machine Number: {categoryData.MachineNo}
-          </Typography>
-
-          {/* C Data Fields */}
-          <Typography variant="h6" color="primary">
-            Category Data Fields
-          </Typography>
-          <Typography>
-            Timber Type: {cData.timberType}
-          </Typography>
-          <Typography>
-            Area Length: {cData.areaLength}
-          </Typography>
-          <Typography>
-            Area Width: {cData.areaWidth}
-          </Typography>
-          <Typography>
-            Minimum Length: {cData.minlength}
-          </Typography>
-          <Typography>
-            Maximum Length: {cData.maxlength}
-          </Typography>
-          <Typography>
-            Thickness: {cData.thickness}
-          </Typography>
-          <Typography>
-            Unit Price: {cData.unitPrice}
-          </Typography>
-
-          {/* Timber Data Fields */}
-          <Typography variant="h6" color="primary">
-            Timber Data Fields
-          </Typography>
-          <Typography>
-            Timber No: {timberData.timberNo}
-          </Typography>
-          <Typography>
-            Tree Type: {timberData.treeType}
-          </Typography>
-          <Typography>
-            Perimeter: {timberData.perimeter}
-          </Typography>
-          <Typography>
-            Length: {timberData.length}
-          </Typography>
-          <Typography>
-            Cubic Amount: {timberData.cubicAmount}
-          </Typography>
-          <Typography>
-            Other Details: {timberData.otherDetails}
-          </Typography>
-          <Typography>
-            Unit Price: {timberData.unitPrice}
-          </Typography>
+        <Grid item xs={12} sm={4} p={2}>
+          <Stack
+            spacing={{ xs: 1, sm: 2 }}
+            direction="row"
+            useFlexGap
+            flexWrap="wrap"
+            sx={{
+              bgcolor: "background.default",
+              boxShadow: 1,
+              padding: 2,
+              borderRadius: 2,
+            }}
+          >
+            <Box sx={{ width: "100%" }}>
+              <InventoryIcon color="primary" fontSize="large" />
+              <Typography variant="h6" color="primary">
+                Stock Details
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Section Number
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {categoryData.sectionNumber}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Amount of Pieces
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {categoryData.amountOfPieces}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Machine Number
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {categoryData.MachineNo}
+              </Typography>
+            </Box>
+          </Stack>
+        </Grid>
+        <Grid item xs={12} sm={4} p={2}>
+          <Stack
+            spacing={{ xs: 1, sm: 2 }}
+            direction="row"
+            useFlexGap
+            flexWrap="wrap"
+            sx={{
+              bgcolor: "background.default",
+              boxShadow: 1,
+              padding: 2,
+              borderRadius: 2,
+            }}
+          >
+            <Box sx={{ width: "100%" }}>
+              <CategoryIcon color="primary" fontSize="large" />
+              <Typography variant="h6" color="primary">
+                Category Details
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Timber Type
+              </Typography>
+              <Typography variant="h4" color={"primary"}>
+                {cData.timberType}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Area Length
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {cData.areaLength}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Area Width
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {cData.areaWidth}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Min Length
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {cData.minlength}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Max Length
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {cData.maxlength}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Thickness
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {cData.thickness}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Unit Price
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {cData.unitPrice}
+              </Typography>
+            </Box>
+          </Stack>
+        </Grid>
+        <Grid item xs={12} sm={4} p={2}>
+          <Stack
+            spacing={{ xs: 1, sm: 2 }}
+            direction="row"
+            useFlexGap
+            flexWrap="wrap"
+            sx={{
+              bgcolor: "background.default",
+              boxShadow: 1,
+              padding: 2,
+              borderRadius: 2,
+            }}
+          >
+            <Box sx={{ width: "100%" }}>
+              <ForestIcon color="primary" fontSize="large" />
+              <Typography variant="h6" color="primary">
+                Timber Details
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Timber No
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {timberData.timberNo}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Tree Type
+              </Typography>
+              <Typography variant="h4" color={"primary"}>
+                {timberData.treeType}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Perimeter
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {timberData.perimeter}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>Length</Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {timberData.length}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Cubic Amount
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {timberData.cubicAmount}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Other Details
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {timberData.otherDetails}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography sx={{ color: "text.secondary" }}>
+                Unit Price
+              </Typography>
+              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
+                {timberData.unitPrice}
+              </Typography>
+            </Box>
+          </Stack>
         </Grid>
       </Grid>
-    </Container>
+    </>
   );
 };
 

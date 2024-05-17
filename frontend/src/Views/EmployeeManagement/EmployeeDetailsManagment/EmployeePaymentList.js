@@ -1,26 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { getPaysheetDetailsByEmployee } from '../../../services/EmployeeManagementService/EmployeePaySheetService';
-import { Typography } from "@mui/material";
+import { Button, Grid, Stack, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { DataGrid } from "@mui/x-data-grid";
+import CreditScoreIcon from "@mui/icons-material/CreditScore";
+import Loading from "../../../Components/Progress/Loading";
+import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 
 const EPaymentList = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  const { eid } = useParams(); // Get categoryId from URL params
+  const { eid } = useParams();
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    {
+      field: "fromDate",
+      headerName: "From Date",
+      width: 150,
+      renderCell: ({ row }) => formatDateOfBirth(row.fromDate),
+    },
+    {
+      field: "toDate",
+      headerName: "To Date",
+      width: 150,
+      renderCell: ({ row }) => formatDateOfBirth(row.toDate),
+    },
+    { field: "totalDay", headerName: "Total Days", width: 120 },
+    { field: "totalOt", headerName: "Total Ot", width: 120 },
+    { field: "reduceAmount", headerName: "Reduce Amount", width: 150 },
+    { field: "paymentStatus", headerName: "Payment Status", width: 150 },
+    { field: "eid_fk", headerName: "eid_fk", width: 120 },
+    { field: "totalPayment", headerName: "Total Payment", width: 150 },
+    { field: "totalAdvance", headerName: "Total Advance", width: 150 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    // { field: 'createdDate', headerName: 'Created Date', width: 150, valueGetter: (params) => formatDateOfBirth(params.value) },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    // { field: 'modifiedDate', headerName: 'Modified Date', width: 150, valueGetter: (params) => formatDateOfBirth(params.value) },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getPaysheetDetailsByEmployee(eid);
-        console.log('Fetched data:', data);
+        console.log("Fetched data:", data);
         if (Array.isArray(data)) {
           setCategories(data);
           setLoading(false);
         } else {
-          throw new Error('Invalid data format received from API');
+          throw new Error("Invalid data format received from API");
         }
       } catch (error) {
         setError(error.message);
@@ -32,73 +62,60 @@ const EPaymentList = () => {
   }, [eid]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <ErrorAlert error={error} />;
   }
 
   const formatDateOfBirth = (dateObject) => {
     const date = new Date(dateObject.seconds * 1000);
-    return date.toISOString().slice(0, 19).replace('T', ' ');
+    return date.toISOString().slice(0, 19).replace("T", " ");
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd', borderRadius: '8px' }}>
-        <thead>
-          <tr style={{ backgroundColor: '#f2f2f2' }}>
-            <th >ID</th>
-            <th >From Date</th>
-            <th >To Date</th>
-            <th >Total Days</th>
-            <th>Total Ot</th>
-            <th>Reduce Amount</th>
-            <th>Payment Status</th>
-            {/* <th>Paid Date</th> */}
-            <th>eid_fk</th>
-            <th>Total Payement</th>
-            <th>Total Advance</th>
-            <th>Status</th>
-            <th>Created By</th>
-            <th>Created Date</th>
-            <th>Modified by</th>
-            <th>Modified Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((category, index) => (
-            <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.id}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{formatDateOfBirth(category.fromDate)}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{formatDateOfBirth(category.toDate)}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.totalDay}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.totalOt}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.reduceAmount}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.paymentStatus}</td>
-              {/* <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{formatDateOfBirth(category.currentDate)}</td> */}
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.eid_fk}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.totalPayment}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.totalAdvance}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.status}</td>
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.createdBy}</td>
-              {/* <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{formatDateOfBirth(category.createdDate)}</td> */}
-              <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{category.modifiedBy}</td>
-              {/* <td style={{ padding: '8px', borderRight: '1px solid #ddd' }}>{formatDateOfBirth(category.modifiedDate)}</td> */}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <Typography
-        component={Link}
-        to={`/employee/payment/add/${eid}`}
-        variant="body2"
-        sx={{ textAlign: "center", textDecoration: "none", display: "block", marginTop: "20px" }}
-      >
-        Process Payment
-      </Typography>
-    </div>
+    <>
+      <Grid container>
+        <Grid item xs={12} p={2}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6" fontWeight="bold" color="primary">
+              Employee Payment Details
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<CreditScoreIcon />}
+              component={Link}
+              to={`/employee/payment/add/${eid}`}
+            >
+              Process Payment
+            </Button>
+          </Stack>
+        </Grid>
+        <Grid item xs={12} p={2}>
+          <DataGrid
+            sx={{
+              bgcolor: "background.default",
+            }}
+            rows={categories}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 8,
+                },
+              },
+            }}
+            pageSizeOptions={[8]}
+            disableRowSelectionOnClick
+          />
+        </Grid>
+      </Grid>
+    </>
   );
 };
 

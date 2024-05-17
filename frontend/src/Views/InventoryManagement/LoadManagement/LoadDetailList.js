@@ -1,25 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { getAllLoadDetails } from '../../../services/InventoryManagementService/LoadDetailsService'; // Import the API function
-import {
-  Stack,
-  Typography,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Button,
-} from "@mui/material";
-
+import { Stack, Typography, Grid, Button } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import { Link } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import Theme from "../../../Theme/Theme";
+import Loading from "../../../Components/Progress/Loading";
+import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 
 const LoadDetailList = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    { field: "sellerName", headerName: "Seller Name", width: 150 },
+    { field: "permitNumber", headerName: "Permit Number", width: 150 },
+    { field: "region", headerName: "Region", width: 120 },
+    { field: "lorryNumber", headerName: "Lorry Number", width: 150 },
+    { field: "driver", headerName: "Driver", width: 120 },
+    { field: "otherDetails", headerName: "Other Details", width: 150 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      renderCell: ({ row }) => {
+        return (
+          <Link to={`/load/timber/view/${row.id}`}>
+            <Button variant="contained" size="small">
+              View
+            </Button>
+          </Link>
+        );
+      },
+    },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,28 +59,27 @@ const LoadDetailList = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <ErrorAlert error={error} />;
   }
 
   return (
     <>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
+      <Grid container>
+        <Grid item xs={12} p={2}>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
-            spacing={2}
           >
-            <Typography variant="h4" color="primary">
+            <Typography variant="h6" fontWeight="bold" color="primary">
               Load Details
             </Typography>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
               to={"/load/add"}
@@ -72,121 +88,23 @@ const LoadDetailList = () => {
             </Button>
           </Stack>
         </Grid>
-        <Grid item xs={12}>
-          <TableContainer
+        <Grid item xs={12} p={2}>
+          <DataGrid
             sx={{
               bgcolor: "background.default",
-              borderRadius: 2,
-              padding: 2,
             }}
-          >
-            <Table size="small">
-              <TableBody>
-                <TableRow>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    ID
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Seller Name
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Permit Number
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Region
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Lorry Number
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Driver
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Other Details
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Status
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Created By
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Modified By
-                  </TableCell>
-                  <TableCell sx={{ color: "primary.main", fontSize: "12px" }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-              <TableBody
-              // sx={{
-              //   "& > :not(:last-child)": {
-              //     borderBottom: `6px solid #fff`,
-              //   },
-              // }}
-              >
-                {categories.map((category, index) => (
-                  <>
-                    <TableRow key={index}>
-                      {" "}
-                      <TableCell
-                        colSpan={11}
-                        sx={{
-                          bgcolor: Theme.palette.primary.mainBgS1,
-                          borderRadius: 2,
-                          border: 0,
-                        }}
-                      ></TableCell>
-                    </TableRow>
-                    <TableRow key={index}>
-                      <TableCell sx={{ color: "primary.main", border: 0 }}>
-                        {category.id}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.sellerName}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.permitNumber}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.region}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.lorryNumber}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.driver}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.otherDetails}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.status}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.createdBy}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        {category.modifiedBy}
-                      </TableCell>
-                      <TableCell sx={{ border: 0 }}>
-                        <Link>
-                          <Button
-                            variant="contained"
-                            component={Link}
-                            size="small"
-                            to={`/load/timber/view/${category.id}`}
-                          >
-                            View
-                          </Button>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  </>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+            rows={categories}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 8,
+                },
+              },
+            }}
+            pageSizeOptions={[8]}
+            disableRowSelectionOnClick
+          />
         </Grid>
       </Grid>
     </>
