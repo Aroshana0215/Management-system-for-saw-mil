@@ -12,6 +12,7 @@ import {
   Button,
   FormControl,
   OutlinedInput,
+  FormLabel,
 } from "@mui/material";
 import { getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService";
 import { getorderIdByBillId } from "../../services/BillAndOrderService/OrderManagmentService";
@@ -159,16 +160,17 @@ const ViewBillDetails = () => {
             {Object.entries(loadData).map(([key, item]) => (
               <Grid item key={key} xs={12} md={item.bpMD} padding={2}>
                 <FormControl fullWidth>
-                  <Typography>
+                  <FormLabel>
                     {key.charAt(0).toUpperCase() +
                       key.slice(1).replace(/([A-Z])/g, " $1")}
-                  </Typography>
+                  </FormLabel>
                   {!isLoadDataEditable || !item.editable ? (
-                    <Typography color={"primary"} variant="h5">
+                    <Typography color={"primary"} variant="h6">
                       {categoryData[key]}
                     </Typography>
                   ) : (
                     <OutlinedInput
+                      size="small"
                       name={key}
                       value={categoryData[key]}
                       onChange={handleChange}

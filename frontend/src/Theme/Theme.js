@@ -36,6 +36,13 @@ const Theme = createTheme({
         disableRipple: true,
       },
     },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#f1f2f4",
+        },
+      },
+    },
     // MuiListItemButton: {
     //   styleOverrides: {
     //     root: {

@@ -72,7 +72,7 @@ const Register = () => {
       <Card sx={{ maxWidth: 500, mx: "auto", mt: 5 }}>
         <CardContent>
           <Typography
-            variant="h4"
+            variant="h5"
             component="div"
             sx={{ textAlign: "center", mb: 3 }}
           >
