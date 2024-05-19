@@ -6,6 +6,7 @@ import {
   FormControl,
   OutlinedInput,
   Stack,
+  FormLabel,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { newDependant } from "../../../services/EmployeeManagementService/EmployeeDependentService"; // Import the createCategory function
@@ -98,12 +99,20 @@ const EmpDependatnt = () => {
             </Grid>
             {Object.entries(formData).map(([key, item]) => (
               <Grid item key={key} xs={12} md={item.bpMD} padding={1}>
-                <FormControl fullWidth>
-                  <Typography>
+                <FormControl
+                  fullWidth
+                  sx={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <FormLabel>
                     {key.charAt(0).toUpperCase() +
                       key.slice(1).replace(/([A-Z])/g, " $1")}
-                  </Typography>
+                  </FormLabel>
                   <OutlinedInput
+                    size="small"
                     type={key === "dateOfBirth" ? "datetime-local" : null}
                     name={key}
                     value={payload[key]}

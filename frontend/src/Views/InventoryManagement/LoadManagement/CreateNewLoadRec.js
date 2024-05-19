@@ -6,6 +6,7 @@ import {
   OutlinedInput,
   FormControl,
   Stack,
+  FormLabel,
 } from "@mui/material";
 import { NewLoad } from "../../../services/InventoryManagementService/LoadDetailsService";
 import { useSelector } from "react-redux";
@@ -20,7 +21,7 @@ const CreateNewLoadRec = () => {
     lorryNumber: { bpMD: 6 },
     driver: { bpMD: 6 },
     unloadedDate: { bpMD: 6 },
-    otherDetails: { bpMD: 12 },
+    otherDetails: { bpMD: 6 },
   });
   const [payload, setPayload] = useState({
     sellerName: "",
@@ -87,12 +88,20 @@ const CreateNewLoadRec = () => {
             </Grid>
             {Object.entries(formData).map(([key, item]) => (
               <Grid item key={key} xs={12} md={item.bpMD} padding={1}>
-                <FormControl fullWidth>
-                  <Typography>
+                <FormControl
+                  fullWidth
+                  sx={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <FormLabel>
                     {key.charAt(0).toUpperCase() +
                       key.slice(1).replace(/([A-Z])/g, " $1")}
-                  </Typography>
+                  </FormLabel>
                   <OutlinedInput
+                    size="small"
                     name={key}
                     value={payload[key]}
                     onChange={handleChange}

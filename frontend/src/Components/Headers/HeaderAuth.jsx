@@ -1,17 +1,20 @@
 import React from "react";
 import { Box, Stack, AppBar, Toolbar, Typography, Button } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import sawMillLogo from "../../assets/images/sawMillLogo.png";
-import Theme from "../../Theme/Theme";
-import LoginIcon from "@mui/icons-material/Login";
 
 export default function HeaderAuth() {
-  const mainBgS1 = Theme.palette.primary.mainBgS1;
+  const location = useLocation();
+  const isInSignUp = location.pathname.includes("sign-up");
   return (
     <>
       <AppBar
         position="sticky"
-        sx={{ boxShadow: 0, borderTopLeftRadius: 20, bgcolor: mainBgS1 }}
+        sx={{
+          borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+          boxShadow: 0,
+          bgcolor: "background.default",
+        }}
       >
         <Toolbar>
           <Box component={Link} to={"/"} paddingX={2}>
@@ -50,8 +53,12 @@ export default function HeaderAuth() {
             alignItems="center"
             columnGap={2}
           >
-            <Button variant="text" startIcon={<LoginIcon />}>
-              Sign In
+            <Button
+              variant="contained"
+              component={Link}
+              to={isInSignUp ? "/" : "/auth/sign-up"}
+            >
+              {isInSignUp ? "Sign In" : "Sign Up"}
             </Button>
           </Stack>
         </Toolbar>

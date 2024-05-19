@@ -1,14 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { getAllSummaryDetails } from '../../services/InventoryManagementService/StockSummaryManagementService'; // Import the API function
-import { Typography } from "@mui/material";
+import { Button, Grid, Stack, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import Loading from "../../Components/Progress/Loading";
 import ErrorAlert from "../../Components/Alert/ErrorAlert";
+import { DataGrid } from "@mui/x-data-grid";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 
 const StockHistory = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const columns = [
+    { field: "totalPieces", headerName: "Total Pieces", width: 120 },
+    { field: "changedAmount", headerName: "Changed Amount", width: 150 },
+    { field: "previousAmount", headerName: "Previous Amount", width: 150 },
+    { field: "billId_fk", headerName: "Bill Id", width: 120 },
+    { field: "stk_id_fk", headerName: "Stock Id", width: 120 },
+    { field: "categoryId_fk", headerName: "Category", width: 120 },
+    // { field: 'PromizeDate', headerName: 'Promized Date', width: 150 },
+    { field: "description", headerName: "Description", width: 180 },
+    { field: "billStatus", headerName: "Bill Status", width: 150 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "createdBy", headerName: "Created By", width: 120 },
+    // { field: 'createdDate', headerName: 'Created Date', width: 150 },
+    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    // { field: 'modifiedDate', headerName: 'Modified Date', width: 150 },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,58 +57,47 @@ const StockHistory = () => {
   }
 
   return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Total Pieces</th>
-            <th>Changed Amount</th>
-            <th>Previous Amount</th>
-            <th>bill Id</th>
-            <th>stock Id</th>
-            <th>category</th>
-            {/* <th>Promized Date</th> */}
-            <th>description</th>
-            <th>BillStatus</th>
-
-            <th>status</th>
-            <th>Created By</th>
-            {/* <th>Created Date</th> */}
-            <th>Modified by</th>
-            {/* <th>Modified Date</th> */}
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((category, index) => (
-            <tr key={index}>
-              <td>{category.totalPieces}</td>
-              <td>{category.changedAmount}</td>
-              <td>{category.previousAmount}</td>
-              <td>{category.billId_fk}</td>
-              <td>{category.stk_id_fk}</td>
-              <td>{category.categoryId_fk}</td>
-              {/* <td>{category.PromizeDate}</td> */}
-              <td>{category.description}</td>
-              <td>{category.billStatus}</td>
-              <td>{category.status}</td>
-              <td>{category.createdBy}</td>
-              {/* <td>{category.createdDate}</td> */}
-              <td>{category.modifiedBy}</td>
-              {/* <td>{category.modifiedDate}</td> */}
-              <td></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <Typography
-        component={Link}
-        to={"/bill/wants/wood"}
-        variant="body2"
-        sx={{ textAlign: "center", textDecoration: "none" }}
-      >
-        New Bill
-      </Typography>
-    </div>
+    <>
+      <Grid container>
+        <Grid item xs={12} p={2}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6" fontWeight="bold" color="primary">
+              Stock History
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddCircleOutlineOutlinedIcon />}
+              component={Link}
+              to={"/bill/wants/wood"}
+            >
+              New Bill
+            </Button>
+          </Stack>
+        </Grid>
+        <Grid item xs={12} p={2}>
+          <DataGrid
+            sx={{
+              bgcolor: "background.default",
+            }}
+            rows={categories}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 8,
+                },
+              },
+            }}
+            pageSizeOptions={[8]}
+            disableRowSelectionOnClick
+          />
+        </Grid>
+      </Grid>
+    </>
   );
 };
 
