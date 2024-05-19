@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
-  Container,
   Grid,
   Typography,
   Button,
-  FormControl,
-  OutlinedInput,
   Stack,
-  FormLabel,
+  TextField,
+  Divider,
+  IconButton,
 } from "@mui/material";
 import { NewLdRelatedTimber } from "../../../services/InventoryManagementService/LoadRelatedTimberDetailService";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 const AddLoadRelatedTimber = () => {
   const { loadId } = useParams();
@@ -55,7 +56,20 @@ const AddLoadRelatedTimber = () => {
     modifiedDate: "",
     permitid_fk: loadId,
   });
+  const [payloadBulk, setPayloadBulk] = useState([
+    {
+      timberNo: "",
+      treeType: "",
+      perimeter: "",
+      length: "",
+      cubicAmount: "",
+      otherDetails: "",
+      unitPrice: "",
+      permitid_fk: loadId,
+    },
+  ]);
 
+  // eslint-disable-next-line no-unused-vars
   const handleChange = (e) => {
     const { name, value } = e.target;
     const newFormData = {
@@ -71,6 +85,7 @@ const AddLoadRelatedTimber = () => {
     setFormData(newFormData);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -83,83 +98,167 @@ const AddLoadRelatedTimber = () => {
       // Handle error
     }
   };
+  const handleInputChange = (index, event) => {
+    const values = [...payloadBulk];
+    values[index][event.target.name] = event.target.value;
+    setPayloadBulk(values);
+  };
+
+  const addRow = () => {
+    setPayloadBulk([
+      ...payloadBulk,
+      {
+        timberNo: "",
+        treeType: "",
+        perimeter: "",
+        length: "",
+        cubicAmount: "",
+        otherDetails: "",
+        unitPrice: "",
+        permitid_fk: loadId,
+      },
+    ]);
+  };
+
+  const removeRow = (index) => {
+    const values = [...payloadBulk];
+    values.splice(index, 1);
+    setPayloadBulk(values);
+  };
 
   return (
-    <Container>
+    <>
       <Grid
         container
-        direction="row"
-        justifyContent="center"
-        alignItems="stretch"
-        spacing={2}
+        sx={{
+          bgcolor: "background.default",
+          borderRadius: 2,
+        }}
         p={2}
       >
-        <Grid item xs={12}>
-          <Grid
-            container
-            component={"form"}
-            onSubmit={handleSubmit}
-            padding={2}
-            sx={{
-              bgcolor: "background.default",
-              borderRadius: 2,
-            }}
+        <Grid item xs={12} padding={1}>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+            spacing={2}
           >
-            <Grid item xs={12} padding={1}>
+            <Typography variant="h6" color="primary" align="center">
+              Add Timber
+            </Typography>
+          </Stack>
+        </Grid>
+        {payloadBulk.map((row, index) => (
+          <Grid container key={index} sx={{ marginBottom: 2 }}>
+            <Grid item xs={12}>
               <Stack
                 direction="row"
-                justifyContent="flex-start"
+                justifyContent="space-between"
                 alignItems="center"
-                spacing={2}
               >
-                <Typography variant="h6" color="primary" align="center">
-                  Add Timber
+                <Typography variant="body1" color="textSecondary">
+                  Row {index + 1}
                 </Typography>
+                <IconButton color="error" onClick={() => removeRow(index)}>
+                  <HighlightOffIcon />
+                </IconButton>
               </Stack>
             </Grid>
-            {Object.entries(formData).map(([key, item]) => (
-              <Grid item key={key} xs={12} md={item.bpMD} padding={1}>
-                <FormControl
-                  fullWidth
-                  sx={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <FormLabel>
-                    {key.charAt(0).toUpperCase() +
-                      key.slice(1).replace(/([A-Z])/g, " $1")}
-                  </FormLabel>
-                  <OutlinedInput
-                    size="small"
-                    name={key}
-                    value={payload[key]}
-                    onChange={handleChange}
-                  />
-                  {/* <FormHelperText/> */}
-                </FormControl>
-              </Grid>
-            ))}
-            <Grid
-              item
-              xs={12}
-              padding={2}
-              sx={{
-                display: "flex",
-                direction: "row",
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
-              }}
-            >
-              <Button type="submit" variant="contained">
-                Add Timber
-              </Button>
+            <Grid item xs={12} sm={6} md={3} p={1}>
+              <TextField
+                size="small"
+                label="Timber No"
+                name="timberNo"
+                value={row.timberNo}
+                onChange={(event) => handleInputChange(index, event)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} p={1}>
+              <TextField
+                size="small"
+                label="Tree Type"
+                name="treeType"
+                value={row.treeType}
+                onChange={(event) => handleInputChange(index, event)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} p={1}>
+              <TextField
+                size="small"
+                label="Perimeter"
+                name="perimeter"
+                value={row.perimeter}
+                onChange={(event) => handleInputChange(index, event)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} p={1}>
+              <TextField
+                size="small"
+                label="Length"
+                name="length"
+                value={row.length}
+                onChange={(event) => handleInputChange(index, event)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} p={1}>
+              <TextField
+                size="small"
+                label="Cubic Amount"
+                name="cubicAmount"
+                value={row.cubicAmount}
+                onChange={(event) => handleInputChange(index, event)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} p={1}>
+              <TextField
+                size="small"
+                label="Other Details"
+                name="otherDetails"
+                value={row.otherDetails}
+                onChange={(event) => handleInputChange(index, event)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} p={1}>
+              <TextField
+                size="small"
+                label="Unit Price"
+                name="unitPrice"
+                value={row.unitPrice}
+                onChange={(event) => handleInputChange(index, event)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Divider />
             </Grid>
           </Grid>
+        ))}
+        <IconButton variant="contained" color="primary" onClick={addRow}>
+          <AddCircleOutlineOutlinedIcon />
+        </IconButton>
+        <Grid
+          item
+          xs={12}
+          padding={2}
+          sx={{
+            display: "flex",
+            direction: "row",
+            justifyContent: "flex-end",
+            alignItems: "flex-end",
+          }}
+        >
+          <Button type="submit" variant="contained">
+            Add Timber
+          </Button>
         </Grid>
       </Grid>
-    </Container>
+    </>
   );
 };
 
