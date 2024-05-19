@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { getAllCategories } from '../../services/PriceCardService'; // Import the API function
-import { Grid } from "@mui/material";
-import { Stack, Typography } from "@mui/material";
+import { Stack, Typography, Grid, Button, TextField, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../Components/Progress/Loading";
 import ErrorAlert from "../../Components/Alert/ErrorAlert";
+import { Link } from "react-router-dom";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 
 const PriceCardList = () => {
   const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [timberTypeQuery, setTimberTypeQuery] = useState('');
+  const [generalQuery, setGeneralQuery] = useState('');
+
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
+    // { field: "id", headerName: "ID", width: 90 },
     { field: "timberType", headerName: "Timber Type", width: 120 },
     { field: "areaLength", headerName: "Length", width: 100 },
     { field: "areaWidth", headerName: "Width", width: 100 },
@@ -23,6 +28,20 @@ const PriceCardList = () => {
     { field: "status", headerName: "Status", width: 120 },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      renderCell: ({ row }) => {
+        return (
+          <Link to={`/price/update/${row.id}`}>
+            <Button variant="contained" size="small">
+              Update
+            </Button>
+          </Link>
+        );
+      },
+    },
   ];
 
   useEffect(() => {
@@ -32,6 +51,7 @@ const PriceCardList = () => {
         console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
           setCategories(data);
+          setFilteredCategories(data);
           setLoading(false);
         } else {
           throw new Error("Invalid data format received from API");
@@ -45,6 +65,28 @@ const PriceCardList = () => {
     fetchData();
   }, []);
 
+  const handleSearch = () => {
+    let filteredData = categories;
+
+    if (timberTypeQuery) {
+      const lowercasedTimberTypeQuery = timberTypeQuery.toLowerCase();
+      filteredData = filteredData.filter((category) =>
+        category.timberType.toLowerCase().includes(lowercasedTimberTypeQuery)
+      );
+    }
+
+    if (generalQuery) {
+      const lowercasedGeneralQuery = generalQuery.toLowerCase();
+      filteredData = filteredData.filter((category) =>
+        Object.values(category).some(value =>
+          String(value).toLowerCase().includes(lowercasedGeneralQuery)
+        )
+      );
+    }
+
+    setFilteredCategories(filteredData);
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -55,11 +97,11 @@ const PriceCardList = () => {
 
   return (
     <>
-      <Grid container>
+      <Grid container spacing={2}>
         <Grid item xs={12} p={2}>
           <Stack
             direction="row"
-            justifyContent="flex-start"
+            justifyContent="space-between"
             alignItems="center"
           >
             <Typography variant="h6" fontWeight="bold" color="primary">
@@ -68,11 +110,70 @@ const PriceCardList = () => {
           </Stack>
         </Grid>
         <Grid item xs={12} p={2}>
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Stack direction="row" spacing={2} alignItems="center">
+              <FormControl
+                sx={{
+                  width: '270px',
+                  height: '45px',
+                  padding: '5px 0',
+                }}
+              >
+                <InputLabel>Timber Type</InputLabel>
+                <Select
+                  value={timberTypeQuery}
+                  onChange={(e) => setTimberTypeQuery(e.target.value)}
+                  label="Timber Type"
+                  sx={{
+                    height: '45px',
+                    width: '270px',
+                  }}
+                >
+                  <MenuItem value=""><em>None</em></MenuItem>
+                  <MenuItem value="Sapu">Sapu</MenuItem>
+                  <MenuItem value="Grandis">Grandis</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                label="Search All Fields"
+                variant="outlined"
+                value={generalQuery}
+                onChange={(e) => setGeneralQuery(e.target.value)}
+                sx={{ maxWidth: '270px', height: '45px', padding: '5px 0' }}
+                InputProps={{ sx: { height: '45px' } }}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSearch}
+                sx={{ padding: '5px 15px', height: '45px' }}
+              >
+                Search
+              </Button>
+            </Stack>
+            <Button
+              variant="contained"
+              startIcon={<AddCircleOutlineOutlinedIcon />}
+              component={Link}
+              to={"/price/add"}
+              sx={{ padding: '5px 15px', height: '45px' }}
+            >
+              New
+            </Button>
+          </Stack>
+        </Grid>
+
+        <Grid item xs={12} p={2}>
           <DataGrid
             sx={{
               bgcolor: "background.default",
             }}
-            rows={categories}
+            rows={filteredCategories}
             columns={columns}
             initialState={{
               pagination: {

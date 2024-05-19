@@ -31,7 +31,7 @@ const CreateNewLoadRec = () => {
     driver: "",
     otherDetails: "",
     unloadedDate: "",
-    status: "a",
+    status: "A",
     createdBy: user.displayName,
     modifiedBy: "",
   });
@@ -48,7 +48,6 @@ const CreateNewLoadRec = () => {
     event.preventDefault();
     try {
       const loadId = await NewLoad(payload);
-      console.log("New category ID:", loadId);
       window.location.href = `/load/timber/view/${loadId}`;
     } catch (error) {
       console.error("Error creating category:", error.message);
