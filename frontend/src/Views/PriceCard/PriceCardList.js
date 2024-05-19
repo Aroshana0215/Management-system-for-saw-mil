@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllCategories } from '../../services/PriceCardService'; // Import the API function
-import { Stack, Typography, Grid, Button, TextField } from "@mui/material";
+import { Stack, Typography, Grid, Button, TextField, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../Components/Progress/Loading";
 import ErrorAlert from "../../Components/Alert/ErrorAlert";
@@ -28,6 +28,20 @@ const PriceCardList = () => {
     { field: "status", headerName: "Status", width: 120 },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      renderCell: ({ row }) => {
+        return (
+          <Link to={`/price/update/${row.id}`}>
+            <Button variant="contained" size="small">
+              Update
+            </Button>
+          </Link>
+        );
+      },
+    },
   ];
 
   useEffect(() => {
@@ -93,49 +107,67 @@ const PriceCardList = () => {
             <Typography variant="h6" fontWeight="bold" color="primary">
               Price Details
             </Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddCircleOutlineOutlinedIcon />}
-              component={Link}
-              to={"/price/add"}
-            >
-              New 
-            </Button>
           </Stack>
         </Grid>
         <Grid item xs={12} p={2}>
           <Stack
             direction="row"
             spacing={2}
-            alignItems="right"
-            justifyContent="flex-start"
+            alignItems="center"
+            justifyContent="space-between"
           >
-            <TextField
-              label="Search by Timber Type"
-              variant="outlined"
-              value={timberTypeQuery}
-              onChange={(e) => setTimberTypeQuery(e.target.value)}
-              sx={{ maxWidth: '270px', height: '45px', padding: '5px 0' }}
-              InputProps={{ sx: { height: '45px' } }}
-            />
-            <TextField
-              label="Search All Fields"
-              variant="outlined"
-              value={generalQuery}
-              onChange={(e) => setGeneralQuery(e.target.value)}
-              sx={{ maxWidth: '270px', height: '45px' ,padding: '5px 0'}}
-              InputProps={{ sx: { height: '45px' } }}
-            />
+            <Stack direction="row" spacing={2} alignItems="center">
+              <FormControl
+                sx={{
+                  width: '270px',
+                  height: '45px',
+                  padding: '5px 0',
+                }}
+              >
+                <InputLabel>Timber Type</InputLabel>
+                <Select
+                  value={timberTypeQuery}
+                  onChange={(e) => setTimberTypeQuery(e.target.value)}
+                  label="Timber Type"
+                  sx={{
+                    height: '45px',
+                    width: '270px',
+                  }}
+                >
+                  <MenuItem value=""><em>None</em></MenuItem>
+                  <MenuItem value="Sapu">Sapu</MenuItem>
+                  <MenuItem value="Grandis">Grandis</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                label="Search All Fields"
+                variant="outlined"
+                value={generalQuery}
+                onChange={(e) => setGeneralQuery(e.target.value)}
+                sx={{ maxWidth: '270px', height: '45px', padding: '5px 0' }}
+                InputProps={{ sx: { height: '45px' } }}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSearch}
+                sx={{ padding: '5px 15px', height: '45px' }}
+              >
+                Search
+              </Button>
+            </Stack>
             <Button
               variant="contained"
-              color="primary"
-              onClick={handleSearch}
-              sx={{ padding: '5px 15px', height: '45px'}}
+              startIcon={<AddCircleOutlineOutlinedIcon />}
+              component={Link}
+              to={"/price/add"}
+              sx={{ padding: '5px 15px', height: '45px' }}
             >
-              Search
+              New
             </Button>
           </Stack>
         </Grid>
+
         <Grid item xs={12} p={2}>
           <DataGrid
             sx={{
