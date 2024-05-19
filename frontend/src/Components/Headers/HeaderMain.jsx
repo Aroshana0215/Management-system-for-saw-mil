@@ -10,13 +10,14 @@ export default function HeaderMain() {
       <AppBar
         position="sticky"
         sx={{
+          borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
           boxShadow: 0,
           bgcolor: "background.default",
         }}
       >
         <Toolbar>
-          <Box component={Link} to={"/"} paddingX={2}>
-            <img alt="Logo" src={sawMillLogo} width={50} />
+          <Box component={Link} to={"/"}>
+            <img alt="Logo" src={sawMillLogo} height={32} />
           </Box>
           <Typography component="div" sx={{ flexGrow: 1 }}></Typography>
 
