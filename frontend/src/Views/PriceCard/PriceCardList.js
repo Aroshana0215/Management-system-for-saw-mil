@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { getAllCategories } from '../../services/PriceCardService'; // Import the API function
-import { Stack, Typography, Grid, Button, TextField, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import {
+  Stack,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  MenuItem,
+  InputAdornment,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../Components/Progress/Loading";
 import ErrorAlert from "../../Components/Alert/ErrorAlert";
 import { Link } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 
 const PriceCardList = () => {
   const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timberTypeQuery, setTimberTypeQuery] = useState('');
-  const [generalQuery, setGeneralQuery] = useState('');
+  const [timberTypeQuery, setTimberTypeQuery] = useState("");
+  const [generalQuery, setGeneralQuery] = useState("");
 
   const columns = [
     // { field: "id", headerName: "ID", width: 90 },
@@ -78,13 +87,18 @@ const PriceCardList = () => {
     if (generalQuery) {
       const lowercasedGeneralQuery = generalQuery.toLowerCase();
       filteredData = filteredData.filter((category) =>
-        Object.values(category).some(value =>
+        Object.values(category).some((value) =>
           String(value).toLowerCase().includes(lowercasedGeneralQuery)
         )
       );
     }
 
     setFilteredCategories(filteredData);
+  };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   if (loading) {
@@ -97,7 +111,7 @@ const PriceCardList = () => {
 
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container>
         <Grid item xs={12} p={2}>
           <Stack
             direction="row"
@@ -107,64 +121,59 @@ const PriceCardList = () => {
             <Typography variant="h6" fontWeight="bold" color="primary">
               Price Details
             </Typography>
-          </Stack>
-        </Grid>
-        <Grid item xs={12} p={2}>
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="row" spacing={2} alignItems="center">
-              <FormControl
-                sx={{
-                  width: '270px',
-                  height: '45px',
-                  padding: '5px 0',
-                }}
-              >
-                <InputLabel>Timber Type</InputLabel>
-                <Select
-                  value={timberTypeQuery}
-                  onChange={(e) => setTimberTypeQuery(e.target.value)}
-                  label="Timber Type"
-                  sx={{
-                    height: '45px',
-                    width: '270px',
-                  }}
-                >
-                  <MenuItem value=""><em>None</em></MenuItem>
-                  <MenuItem value="Sapu">Sapu</MenuItem>
-                  <MenuItem value="Grandis">Grandis</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField
-                label="Search All Fields"
-                variant="outlined"
-                value={generalQuery}
-                onChange={(e) => setGeneralQuery(e.target.value)}
-                sx={{ maxWidth: '270px', height: '45px', padding: '5px 0' }}
-                InputProps={{ sx: { height: '45px' } }}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSearch}
-                sx={{ padding: '5px 15px', height: '45px' }}
-              >
-                Search
-              </Button>
-            </Stack>
             <Button
               variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
               to={"/price/add"}
-              sx={{ padding: '5px 15px', height: '45px' }}
+              sx={{ padding: "5px 15px", height: "45px" }}
             >
               New
             </Button>
+          </Stack>
+        </Grid>
+        <Grid item xs={12} p={2}>
+          <Stack
+            p={2}
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 1,
+            }}
+          >
+            <TextField
+              select
+              size="small"
+              value={timberTypeQuery}
+              onChange={(e) => setTimberTypeQuery(e.target.value)}
+              label="Timber Type"
+              sx={{
+                minWidth: "180px",
+              }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value="Sapu">Sapu</MenuItem>
+              <MenuItem value="Grandis">Grandis</MenuItem>
+            </TextField>
+            <TextField
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Search All Fields"
+              variant="outlined"
+              value={generalQuery}
+              onChange={(e) => setGeneralQuery(e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e)}
+            />
           </Stack>
         </Grid>
 
