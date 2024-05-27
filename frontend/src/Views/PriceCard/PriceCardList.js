@@ -22,25 +22,43 @@ const PriceCardList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timberTypeQuery, setTimberTypeQuery] = useState("");
+  const [timberNatuerQuery, setTimberNatuerQuery] = useState("");
   const [generalQuery, setGeneralQuery] = useState("");
 
   const columns = [
-    // { field: "id", headerName: "ID", width: 90 },
-    { field: "timberType", headerName: "Timber Type", width: 120 },
-    { field: "areaLength", headerName: "Length", width: 100 },
-    { field: "areaWidth", headerName: "Width", width: 100 },
-    { field: "minlength", headerName: "Min Length", width: 120 },
-    { field: "maxlength", headerName: "Max Length", width: 120 },
-    { field: "thickness", headerName: "Thickness", width: 120 },
-    { field: "description", headerName: "Description", width: 150 },
-    { field: "unitPrice", headerName: "Unit Price", width: 120 },
-    { field: "status", headerName: "Status", width: 120 },
-    { field: "createdBy", headerName: "Created By", width: 120 },
-    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    { field: "timberType", headerName: "Timber Type", width: 130 },
+    { field: "timberNature", headerName: "Timber Nature", width: 140 },
+    {
+      field: "dimensions",
+      headerName: "Dimensions",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.areaLength} x ${row.areaWidth}`;
+      },
+    },
+    {
+      field: "lengthRange",
+      headerName: "Length",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.minlength} - ${row.maxlength}`;
+      },
+    },
+    {
+      field: "unitPrice",
+      headerName: "Unit Price (RS:)",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.unitPrice}.00`;
+      },
+    },
+    { field: "description", headerName: "Description", width: 160 },
+    { field: "createdBy", headerName: "Created By", width: 125 },
+    { field: "modifiedBy", headerName: "Modified By", width: 125 },
     {
       field: "actions",
       headerName: "Actions",
-      width: 120,
+      width: 130,
       renderCell: ({ row }) => {
         return (
           <Link to={`/price/update/${row.id}`}>
@@ -84,6 +102,13 @@ const PriceCardList = () => {
       );
     }
 
+    if (timberNatuerQuery) {
+      const lowercasedTimberNatuerQuery = timberNatuerQuery.toLowerCase();
+      filteredData = filteredData.filter((category) =>
+        category.timberNature.toLowerCase().includes(lowercasedTimberNatuerQuery)
+      );
+    }
+
     if (generalQuery) {
       const lowercasedGeneralQuery = generalQuery.toLowerCase();
       filteredData = filteredData.filter((category) =>
@@ -95,6 +120,7 @@ const PriceCardList = () => {
 
     setFilteredCategories(filteredData);
   };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       handleSearch();
@@ -158,6 +184,23 @@ const PriceCardList = () => {
               </MenuItem>
               <MenuItem value="Sapu">Sapu</MenuItem>
               <MenuItem value="Grandis">Grandis</MenuItem>
+            </TextField>
+            <TextField
+              select
+              size="small"
+              value={timberNatuerQuery}
+              onChange={(e) => setTimberNatuerQuery(e.target.value)}
+              label="Timber Nature"
+              sx={{
+                minWidth: "180px",
+              }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
+              <MenuItem value="Planks">Planks</MenuItem>
+              <MenuItem value="Dust">Dust</MenuItem>
             </TextField>
             <TextField
               size="small"
