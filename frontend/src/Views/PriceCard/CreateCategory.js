@@ -139,10 +139,14 @@ const [isLumber, setisLumber] = useState(false);
                 onChange={handleChange}
                 required
               >
-                <MenuItem value="Sapu">Sapu</MenuItem>
-                <MenuItem value="Grandis">Grandis</MenuItem>
-                <MenuItem value="Thekka">Thekka</MenuItem>
-                <MenuItem value="Micro">Micro</MenuItem>
+              <MenuItem value="Sapu">Sapu</MenuItem>
+              <MenuItem value="Grandis">Grandis</MenuItem>
+              <MenuItem value="Thekka">Thekka</MenuItem>
+              <MenuItem value="Micro">Micro</MenuItem>
+              <MenuItem value="Amba">Amba</MenuItem>
+              <MenuItem value="Kos">Kos</MenuItem>
+              <MenuItem value="Maara">Maara</MenuItem>
+              <MenuItem value="LunuMidella">LunuMidella</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -262,7 +266,7 @@ const [isLumber, setisLumber] = useState(false);
             }}
           >
             <Button type="submit" variant="contained">
-              Create Category
+              Create
             </Button>
           </Grid>
         </Grid>
