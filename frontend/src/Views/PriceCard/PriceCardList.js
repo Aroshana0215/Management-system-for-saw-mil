@@ -184,6 +184,12 @@ const PriceCardList = () => {
               </MenuItem>
               <MenuItem value="Sapu">Sapu</MenuItem>
               <MenuItem value="Grandis">Grandis</MenuItem>
+              <MenuItem value="Thekka">Thekka</MenuItem>
+              <MenuItem value="Micro">Micro</MenuItem>
+              <MenuItem value="Amba">Amba</MenuItem>
+              <MenuItem value="Kos">Kos</MenuItem>
+              <MenuItem value="Maara">Maara</MenuItem>
+              <MenuItem value="LunuMidella">LunuMidella</MenuItem>
             </TextField>
             <TextField
               select
