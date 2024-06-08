@@ -6,13 +6,14 @@ import { Grid, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../Components/Progress/Loading";
 import ErrorAlert from "../../Components/Alert/ErrorAlert";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 
 const BillDetailList = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
+    { field: "billID", headerName: "ID", width: 90 },
     { field: "cusName", headerName: "Customer Name", width: 150 },
     { field: "cusAddress", headerName: "Customer Address", width: 180 },
     { field: "cusNIC", headerName: "Customer NIC", width: 150 },
@@ -79,6 +80,14 @@ const BillDetailList = () => {
             <Typography variant="h6" fontWeight="bold" color="primary">
               Bill & Order Details
             </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddCircleOutlineOutlinedIcon />}
+              component={Link}
+              to={"/bill/wants/wood"}
+            >
+              ADD
+            </Button>
           </Stack>
         </Grid>
         <Grid item xs={12} p={2}>

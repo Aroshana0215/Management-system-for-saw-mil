@@ -8,19 +8,28 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
+import { getbillDetailsById } from '../../../services/BillAndOrderService/BilllManagemntService';
 
 const IncomeList = () => {
   const [categories, setCategories] = useState([]);
+  console.log("categories:",categories)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
+     { field: "incID", headerName: "ID", width: 90 },
     // { field: 'date', headerName: 'Date', width: 150 },
     { field: "type", headerName: "Income Type", width: 150 },
-    { field: "des", headerName: "Description", width: 180 },
-    { field: "amount", headerName: "Amount", width: 120 },
-    { field: "BilId", headerName: "Bill Details", width: 150 },
+    {
+      field: "amount",
+      headerName: "Amount (RS:)",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.amount}.00`;
+      },
+    },
+    { field: "billID", headerName: "Bill Details", width: 150 },
     { field: "status", headerName: "Status", width: 120 },
+    { field: "des", headerName: "Description", width: 180 },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
     {
@@ -44,6 +53,7 @@ const IncomeList = () => {
         const data = await getAllincome();
         console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
+          const data = await getbillDetailsById(data);
           setCategories(data);
           setLoading(false);
         } else {

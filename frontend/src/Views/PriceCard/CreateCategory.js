@@ -221,7 +221,7 @@ const [isLumber, setisLumber] = useState(false);
                 onChange={handleChange}
                 disabled={isTimberDust}
               >
-                {[...Array(30)].map((_, i) => (
+                {[...Array(25)].map((_, i) => (
                   <MenuItem key={i + 1} value={i + 1}>
                     {i + 1}
                   </MenuItem>

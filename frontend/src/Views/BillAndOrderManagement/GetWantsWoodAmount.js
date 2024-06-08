@@ -117,7 +117,7 @@ const GetWantsWood = () => {
               }}
             >
               <Button type="submit" variant="contained">
-                Create Bill
+                Create
               </Button>
             </Grid>
           </Grid>
