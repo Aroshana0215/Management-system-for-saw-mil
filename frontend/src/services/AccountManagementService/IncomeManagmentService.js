@@ -4,17 +4,41 @@ import {
   addDoc,
   getDocs,
   getDoc,
+  setDoc,
   updateDoc,
   doc,
+  runTransaction
 } from "firebase/firestore";
 
 const db = getFirestore();
 
-// Insert new income for price Card List
 export const newIncome = async (incomeData) => {
-  console.log("New income entered into the syste", incomeData);
+  console.log("New income entered into the system", incomeData);
+  
+  const counterDocRef = doc(db, "counters", "incomeCounter");
+
   try {
-    const docRef = await addDoc(collection(db, "income"), incomeData);
+    // Run a transaction to ensure atomicity
+    const incID = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterDocRef);
+      
+      if (!counterDoc.exists()) {
+        throw new Error("Counter document does not exist!");
+      }
+      
+      const currentID = counterDoc.data().currentID || 0;
+      const newID = currentID + 1;
+      const newIncID = `INC-${newID}`;
+      
+      // Update the counter document with the new ID
+      transaction.update(counterDocRef, { currentID: newID });
+      
+      return newIncID;
+    });
+    
+    // Add the new income record with the generated incID
+    const incomeDataWithID = { ...incomeData, incID: incID };
+    const docRef = await addDoc(collection(db, "income"), incomeDataWithID);
     console.log("New income entered into the system with ID: ", docRef.id);
     return docRef.id;
   } catch (error) {
@@ -22,6 +46,7 @@ export const newIncome = async (incomeData) => {
     throw error;
   }
 };
+
 
 export const getAllincome = async () => {
   try {

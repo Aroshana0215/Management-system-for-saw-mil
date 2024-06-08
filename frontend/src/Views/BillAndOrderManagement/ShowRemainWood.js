@@ -7,7 +7,7 @@ import {createOrder } from "../../services/BillAndOrderService/OrderManagmentSer
 
 const ShowRemainWood = () => {
   const { woodData } = useParams();
-
+  console.log("woodData intial :", woodData);
   const [totalPieces, setTotalPieces] = useState("");
   const [timberType, setTimberType] = useState("");
   const [length, setLength] = useState("");
@@ -28,9 +28,11 @@ const ShowRemainWood = () => {
     const fetchData = async () => {
       try {
         const decodedwoodData = JSON.parse(decodeURIComponent(woodData));
+        console.log("woodData:", woodData);
     
-        const ctegoryData = await getCategoryIdBytimberType(decodedwoodData.timberType, decodedwoodData.areaLength, decodedwoodData.areaWidth, decodedwoodData.thickness);
-        console.log("ctegoryData:", ctegoryData.id);
+        // const ctegoryData = await getCategoryIdBytimberType(decodedwoodData.timberType, decodedwoodData.areaLength, decodedwoodData.areaWidth, decodedwoodData.thickness);
+        const ctegoryData = await getCategoryIdBytimberType("CAT-1");
+        console.log("ctegoryData:", ctegoryData);
         if (ctegoryData.id != null) {
           const data = await getActiveStockSummaryDetails(ctegoryData.id);
           console.log(data);

@@ -1,19 +1,44 @@
-import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where, runTransaction } from "firebase/firestore";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const db = getFirestore();
 
 // Insert new category for price Card List
-export const createCategory = async(categoryData) => {
-    try {
-        const docRef = await addDoc(collection(db, "priceCard"), categoryData);
-        console.log("New Category entered into the system with ID: ", docRef.id);
-        return docRef.id;
-    } catch (error) {
-        console.error("Error Entering New Category: ", error.message);
-        throw error;
-    }
+export const createCategory = async (categoryData) => {
+  console.log("New Category entered into the system", categoryData);
+
+  const counterDocRef = doc(db, "counters", "categoryCounter");
+
+  try {
+    // Run a transaction to ensure atomicity
+    const categoryID = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterDocRef);
+
+      if (!counterDoc.exists()) {
+        throw new Error("Counter document does not exist!");
+      }
+
+      const currentID = counterDoc.data().currentID || 0;
+      const newID = currentID + 1;
+      const newCategoryID = `CAT-${newID}`;
+
+      // Update the counter document with the new ID
+      transaction.update(counterDocRef, { currentID: newID });
+
+      return newCategoryID;
+    });
+
+    // Add the new category record with the generated categoryID
+    const categoryDataWithID = { ...categoryData, categoryID: categoryID };
+    const docRef = await addDoc(collection(db, "priceCard"), categoryDataWithID);
+    console.log("New Category entered into the system with ID: ", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error Entering New Category: ", error.message);
+    throw error;
+  }
 };
+
 
 
 
@@ -76,28 +101,27 @@ export const deleteCategory = createAsyncThunk("category/delete", async (categor
 });
 
 
-// Get CategoryId By timberType and area Parameters
-export const getCategoryIdBytimberType = async (timberType, areaLength, areaWidth , thickness) => {
+
+export const getCategoryIdBytimberType  = async (id) => {
+
     try {
         const q = query(
             collection(db, "priceCard"),
-            where("timberType", "==", timberType),
-            where("areaLength", "==", areaLength),
-            where("areaWidth", "==", areaWidth),
-            where("thickness", "==", thickness),
+            where("categoryID", "==", id),
+            // where("status", "==", "A"),
+            // where("areaWidth", "==", areaWidth),
+            // where("thickness", "==", thickness)
         );
 
         const querySnapshot = await getDocs(q);
+        console.log("querySnapshot empty:", querySnapshot.empty);
 
         if (!querySnapshot.empty) {
-            // If query returns a result, get the first document
             const docSnapshot = querySnapshot.docs[0];
             const stockSummaryDetails = { id: docSnapshot.id, ...docSnapshot.data() };
             return stockSummaryDetails;
         } else {
-            console.log("No stockSummaryDetails found for timberType:", timberType);
-            console.log("No stockSummaryDetails found for timberType:", areaLength);
-            console.log("No stockSummaryDetails found for timberType:", areaWidth);
+            console.log("No stockSummaryDetails found for the given parameters.");
             return null;
         }
     } catch (error) {
@@ -105,3 +129,4 @@ export const getCategoryIdBytimberType = async (timberType, areaLength, areaWidt
         throw error;
     }
 };
+

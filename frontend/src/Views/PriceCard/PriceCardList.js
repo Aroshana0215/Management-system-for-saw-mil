@@ -26,6 +26,7 @@ const PriceCardList = () => {
   const [generalQuery, setGeneralQuery] = useState("");
 
   const columns = [
+    { field: "categoryID", headerName: "Id", width: 130 },
     { field: "timberType", headerName: "Timber Type", width: 130 },
     { field: "timberNature", headerName: "Timber Nature", width: 140 },
     {
