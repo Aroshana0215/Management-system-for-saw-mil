@@ -1,26 +1,52 @@
-import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, runTransaction} from "firebase/firestore";
 
 
 const db = getFirestore();
 
 // Insert new Inventory Details
-export const NewInventory = async(InventoryData) => {
+export const NewInventory = async (inventoryData) => {
+    console.log("New Inventory entered into the system", inventoryData);
+  
+    const counterDocRef = doc(db, "counters", "inventoryCounter");
+  
     try {
-        const docRef = await addDoc(collection(db, "Inventory"), InventoryData);
-        const InventoryDetailsSnapshot = await getDoc(docRef);
-
-        if (InventoryDetailsSnapshot.exists()) {
-            const newInventory = { id: InventoryDetailsSnapshot.id, ...InventoryDetailsSnapshot.data() };
-            return newInventory;
-        } else {
-            console.log("load Details not found");
-            return null;
+      // Run a transaction to ensure atomicity
+      const inventoryID = await runTransaction(db, async (transaction) => {
+        const counterDoc = await transaction.get(counterDocRef);
+  
+        if (!counterDoc.exists()) {
+          throw new Error("Counter document does not exist!");
         }
+  
+        const currentID = counterDoc.data().currentID || 0;
+        const newID = currentID + 1;
+        const newInventoryID = `INV-${newID}`;
+  
+        // Update the counter document with the new ID
+        transaction.update(counterDocRef, { currentID: newID });
+  
+        return newInventoryID;
+      });
+  
+      // Add the new inventory record with the generated inventoryID
+      const inventoryDataWithID = { ...inventoryData, inventoryId: inventoryID };
+      const docRef = await addDoc(collection(db, "Inventory"), inventoryDataWithID);
+      const inventoryDetailsSnapshot = await getDoc(docRef);
+  
+      if (inventoryDetailsSnapshot.exists()) {
+        const newInventory = { id: inventoryDetailsSnapshot.id, ...inventoryDetailsSnapshot.data() };
+        console.log("New Inventory Details entered into the system with ID: ", newInventory.id);
+        return newInventory;
+      } else {
+        console.log("Inventory Details not found");
+        return null;
+      }
     } catch (error) {
-        console.error("Error getting load Details: ", error.message);
-        throw error;
+      console.error("Error getting Inventory Details: ", error.message);
+      throw error;
     }
-};
+  };
+
 
 export const getAllInventoryDetails = async () => {
     try {

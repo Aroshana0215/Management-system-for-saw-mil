@@ -7,31 +7,54 @@ import {
   updateDoc,
   doc,
   serverTimestamp,
+  runTransaction,
 } from "firebase/firestore";
 
 const db = getFirestore();
 
 // Insert new Load Details
 export const NewLoad = async (loadData) => {
+  console.log("New Load Details entered into the system", loadData);
+
+  const counterDocRef = doc(db, "counters", "loadCounter");
+
   try {
-    const dataWithTimestamp = {
+    // Run a transaction to ensure atomicity
+    const loadID = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterDocRef);
+
+      if (!counterDoc.exists()) {
+        throw new Error("Counter document does not exist!");
+      }
+
+      const currentID = counterDoc.data().currentID || 0;
+      const newID = currentID + 1;
+      const newLoadID = `LOAD-${newID}`;
+
+      // Update the counter document with the new ID
+      transaction.update(counterDocRef, { currentID: newID });
+
+      return newLoadID;
+    });
+
+    // Add the new load record with the generated LoadID and timestamp
+    const loadDataWithIDAndTimestamp = {
       ...loadData,
+      loadID: loadID,
       createdDate: serverTimestamp(),
     };
     const docRef = await addDoc(
       collection(db, "relatedPermitDetails"),
-      dataWithTimestamp
+      loadDataWithIDAndTimestamp
     );
-    console.log(
-      "New Load Details entered into the system with ID: ",
-      docRef.id
-    );
+    console.log("New Load Details entered into the system with ID: ", docRef.id);
     return docRef.id;
   } catch (error) {
     console.error("Error Entering New Load Details: ", error.message);
     throw error;
   }
 };
+
 
 export const getAllLoadDetails = async () => {
   try {

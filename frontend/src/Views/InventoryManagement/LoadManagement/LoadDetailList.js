@@ -12,7 +12,7 @@ const LoadDetailList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
+    { field: "loadID", headerName: "ID", width: 90 },
     { field: "sellerName", headerName: "Seller Name", width: 150 },
     { field: "permitNumber", headerName: "Permit Number", width: 150 },
     { field: "region", headerName: "Region", width: 120 },

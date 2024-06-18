@@ -93,7 +93,7 @@ const StockList = () => {
               variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
-              to={"/load/add"}
+              to={"/stock/add"}
             >
               New Stock
             </Button>
