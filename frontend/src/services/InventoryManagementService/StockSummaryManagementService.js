@@ -64,10 +64,35 @@ export const getAllSummaryDetails = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "inventorySummary"));
     const InventoryDetailList = [];
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach((doc) => {      
       InventoryDetailList.push({ id: doc.id, ...doc.data() });
     });
     return InventoryDetailList;
+  } catch (error) {
+    console.error(
+      "Error fetching Inventory Summary Detail List: ",
+      error.message
+    );
+    throw error;
+  }
+};
+
+export const getAllActiveStockDetails = async () => {
+  try {
+    const q = query(
+      collection(db, "inventorySummary"),
+      where("status", "==", "A")
+    );
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+    const InventoryDetailList = [];
+    querySnapshot.forEach((doc) => {      
+      InventoryDetailList.push({ id: doc.id, ...doc.data() });
+    });
+    return InventoryDetailList;
+  }else{
+    console.error("Noc ative stocks available: ");
+  }
   } catch (error) {
     console.error(
       "Error fetching Inventory Summary Detail List: ",

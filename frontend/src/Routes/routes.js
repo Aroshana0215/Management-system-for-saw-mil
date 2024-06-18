@@ -24,6 +24,7 @@ import CreateNewStock from "../Views/InventoryManagement/StockManagement/CreateS
 import ViewStockDetail from "../Views/InventoryManagement/StockManagement/ViewStockDetail";
 import BillDetailList from "../Views/BillAndOrderManagement/BillDetailList";
 import StockSummaryList from "../Views/InventoryManagement/StockManagement/StockSummaryList";
+import ActiveStockList from "../Views/InventoryManagement/StockManagement/ActiveStockList";
 import GetWantsWood from "../Views/BillAndOrderManagement/GetWantsWoodAmount";
 import ShowRemainWood from "../Views/BillAndOrderManagement/ShowRemainWood";
 import CreateNewBill from "../Views/BillAndOrderManagement/CreateNewBill";
@@ -97,6 +98,10 @@ const privateRouter = createBrowserRouter([
       {
         path: "/stockSummary",
         element: <StockSummaryList />,
+      },
+      {
+        path: "/activeStock",
+        element: <ActiveStockList />,
       },
       {
         path: "/bill/wants/wood",

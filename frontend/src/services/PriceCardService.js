@@ -29,7 +29,7 @@ export const createCategory = async (categoryData) => {
     });
 
     // Add the new category record with the generated categoryID
-    const categoryDataWithID = { ...categoryData, categoryID: categoryID };
+    const categoryDataWithID = { ...categoryData, categoryId: categoryID };
     const docRef = await addDoc(collection(db, "priceCard"), categoryDataWithID);
     console.log("New Category entered into the system with ID: ", docRef.id);
     return docRef.id;
@@ -58,6 +58,7 @@ export const getAllCategories = async () => {
 
 // Update category
 export const updateCategory = async (categoryId, categoryData ) => {
+    console.log("categoryData:",categoryData)
     try {
         const priceCardRef = doc(db, "priceCard", categoryId);
         await updateDoc(priceCardRef, categoryData);
@@ -68,24 +69,43 @@ export const updateCategory = async (categoryId, categoryData ) => {
     }
 };
 
-// Get One category by ID
-export const getCategoryById =  async (categoryId) => {
+export const getCategoryById = async (categoryId) => {
+    console.log("Searching for category with unique attribute:", categoryId);
+    
     try {
-        const priceCardRef = doc(db, "priceCard", categoryId);
-        const priceCardSnapshot = await getDoc(priceCardRef);
+        // Create a query against the collection
+        const q = query(
+            collection(db, "priceCard"),
+            where("categoryId", "==", categoryId),
+        );
 
-        if (priceCardSnapshot.exists()) {
-            const priceCard = { id: priceCardSnapshot.id, ...priceCardSnapshot.data() };
+        // Execute the query
+        const querySnapshot = await getDocs(q);
+
+        // Log the number of documents found
+        console.log("Number of documents found:", querySnapshot.size);
+
+        // Check if any documents match the query
+        if (!querySnapshot.empty) {
+            // Log the document data for debugging
+            querySnapshot.forEach(doc => {
+                console.log("Document data:", doc.data());
+            });
+
+            // Assuming uniqueAttribute is unique, return the first matching document
+            const docSnapshot = querySnapshot.docs[0];
+            const priceCard = { id: docSnapshot.id, ...docSnapshot.data() };
             return priceCard;
         } else {
             console.log("Category not found");
             return null;
         }
     } catch (error) {
-        console.error("Error getting Category: ", error.message);
-        throw error;
+        console.error("Error retrieving category:", error.message);
+        throw new Error("Error retrieving category: " + error.message);
     }
 };
+
 
 // Delete category
 export const deleteCategory = createAsyncThunk("category/delete", async (categoryId) => {
@@ -102,24 +122,23 @@ export const deleteCategory = createAsyncThunk("category/delete", async (categor
 
 
 
-export const getCategoryIdBytimberType  = async (id) => {
+export const getCategoryIdBytimberType  = async (timberType) => {
 
     try {
         const q = query(
             collection(db, "priceCard"),
-            where("categoryID", "==", id),
-            // where("status", "==", "A"),
-            // where("areaWidth", "==", areaWidth),
-            // where("thickness", "==", thickness)
+            where("timberType", "==", timberType),
         );
 
         const querySnapshot = await getDocs(q);
         console.log("querySnapshot empty:", querySnapshot.empty);
 
         if (!querySnapshot.empty) {
-            const docSnapshot = querySnapshot.docs[0];
-            const stockSummaryDetails = { id: docSnapshot.id, ...docSnapshot.data() };
-            return stockSummaryDetails;
+            const priceCardList = [];
+            querySnapshot.forEach((doc) => {
+                priceCardList.push({ id: doc.id, ...doc.data() });
+            });
+            return priceCardList;
         } else {
             console.log("No stockSummaryDetails found for the given parameters.");
             return null;

@@ -41,6 +41,7 @@ const UpdateCategory = () => {
   const [isLoadDataEditable, setIsLoadDataEditable] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [loadData, setLoadData] = useState({
+    loadID: { editable: false, bpMD: 4 },
     sellerName: { editable: false, bpMD: 4 },
     permitNumber: { editable: false, bpMD: 4 },
     region: { editable: false, bpMD: 4 },

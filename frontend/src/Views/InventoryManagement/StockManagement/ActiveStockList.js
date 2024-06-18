@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getAllSummaryDetails } from "../../../services/InventoryManagementService/StockSummaryManagementService"; 
-import { getCategoryById } from "../../../services/PriceCardService";
+import { getAllActiveStockDetails } from "../../../services/InventoryManagementService/StockSummaryManagementService"; 
+import { getCategoryById, getAllCategories, getCategoryIdBytimberType } from "../../../services/PriceCardService";
 import { getInventoryDetailsById } from "../../../services/InventoryManagementService/StockManagementService";
 import { getbillDetailsById } from "../../../services/BillAndOrderService/BilllManagemntService"; 
 import { Grid, Stack, Typography, Button,  TextField, MenuItem,InputAdornment } from "@mui/material";
@@ -11,39 +11,60 @@ import { Link } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 
-const StockSummaryList = () => {
-  const [categories, setCategories] = useState([]);
+const ActiveStockList = () => {
+  const [summaryData, setSummaryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timberTypeQuery, setTimberTypeQuery] = useState("");
-  const [timberNatuerQuery, setTimberNatuerQuery] = useState("");
+  const [dimensionsQuery, setDimensionsQuery] = useState("");
+  const [categoryIdQuery, setCategoryIdQuery] = useState("");
   const [generalQuery, setGeneralQuery] = useState("");
   const [filteredCategories, setFilteredCategories] = useState([]);
-
+  const [filteredCategoryId, setFilteredCategoryId] = useState([]);
 
   const columns = [
     { field: "categoryId", headerName: "Category ID", width: 150 },
+    { field: "timberType", headerName: "Type", width: 120 },
+    { field: "timberNature", headerName: "Nature", width: 150 },
+    {
+      field: "dimensions",
+      headerName: "Dimensions",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.areaLength} x ${row.areaWidth}`;
+      },
+    },
+    {
+      field: "lengthRange",
+      headerName: "Length",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.minlength} - ${row.maxlength}`;
+      },
+    },
     { field: "totalPieces", headerName: "Total Pieces", width: 120 },
-    { field: "changedAmount", headerName: "Changed Amount", width: 150 },
-    { field: "previousAmount", headerName: "Previous Amount", width: 160 },
-    { field: "status", headerName: "Status", width: 120 },
-    { field: "billId_fk", headerName: "Bill ID", width: 120 },
-    { field: "stk_id_fk", headerName: "Stock ID", width: 120 },
-    { field: "status", headerName: "Status", width: 120 },
     { field: "createdBy", headerName: "Created By", width: 120 },
-    { field: "modifiedBy", headerName: "Modified By", width: 130 },
   ];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let summaryData = await getAllSummaryDetails();
+        let summaryData = await getAllActiveStockDetails();
+        console.log("summaryData:",summaryData);
 
         if (Array.isArray(summaryData) && summaryData.length > 0) {
           for (let index = 0; index < summaryData.length; index++) {
             if (summaryData[index].categoryId_fk) {
+              console.log("summaryData[index].categoryId_fk:",summaryData[index].categoryId_fk);
               const categoryData = await getCategoryById(summaryData[index].categoryId_fk);
+              console.log("categoryData:",categoryData);
               summaryData[index].categoryId = categoryData?.categoryId || '';
+              summaryData[index].areaLength = categoryData?.areaLength || '';
+              summaryData[index].areaWidth = categoryData?.areaWidth || '';
+              summaryData[index].minlength = categoryData?.minlength || '';
+              summaryData[index].maxlength = categoryData?.maxlength || '';
+              summaryData[index].timberNature = categoryData?.timberNature || '';
+              summaryData[index].timberType = categoryData?.timberType || '';
             }
             if (summaryData[index].billId_fk) {
               const billData = await getbillDetailsById(summaryData[index].billId_fk);
@@ -56,10 +77,8 @@ const StockSummaryList = () => {
           }
         }
 
-        console.log("Fetched data:", summaryData); // Log fetched data to inspect its format
-
         if (Array.isArray(summaryData)) {
-          setCategories(summaryData);
+          setSummaryData(summaryData);
           setLoading(false);
         } else {
           throw new Error("Invalid data format received from API");
@@ -73,7 +92,7 @@ const StockSummaryList = () => {
     fetchData();
   }, []);
   const handleSearch = () => {
-    let filteredData = categories;
+    let filteredData = summaryData;
 
     if (timberTypeQuery) {
       const lowercasedTimberTypeQuery = timberTypeQuery.toLowerCase();
@@ -82,10 +101,22 @@ const StockSummaryList = () => {
       );
     }
 
-    if (timberNatuerQuery) {
-      const lowercasedTimberNatuerQuery = timberNatuerQuery.toLowerCase();
+    if (categoryIdQuery) {
+      const lowercasedCategoryIdQuery = categoryIdQuery.toLowerCase();
       filteredData = filteredData.filter((category) =>
-        category.timberNature.toLowerCase().includes(lowercasedTimberNatuerQuery)
+        category.categoryID.toLowerCase().includes(lowercasedCategoryIdQuery)
+      );
+    }
+    console.log("dimensionsQuery:", dimensionsQuery);
+    if (dimensionsQuery) {
+      const lowercasedDimensionsQuery = dimensionsQuery.toLowerCase();
+      console.log("lowercasedDimensionsQuery:", lowercasedDimensionsQuery);
+
+      const [queryLength, queryWidth] = lowercasedDimensionsQuery.split('x').map(part => part.trim());
+
+      filteredData = filteredData.filter((category) =>
+      category.areaLength.toString().toLowerCase().includes(queryLength) &&
+      category.areaWidth.toString().toLowerCase().includes(queryWidth)
       );
     }
 
@@ -100,6 +131,26 @@ const StockSummaryList = () => {
 
     setFilteredCategories(filteredData);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if(timberTypeQuery){
+          console.log("In categoryIdQuery:", categoryIdQuery);
+          let filteredCategoryData = await getCategoryIdBytimberType(timberTypeQuery);
+          setFilteredCategoryId(filteredCategoryData);
+        }else{
+          let filteredCategoryData = await getAllCategories();
+          if(filteredCategoryData){
+            setFilteredCategoryId(filteredCategoryData);
+          }
+        }
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+    fetchData();
+  }, [timberTypeQuery, categoryIdQuery, filteredCategories]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -171,12 +222,13 @@ const StockSummaryList = () => {
               <MenuItem value="Maara">Maara</MenuItem>
               <MenuItem value="LunuMidella">LunuMidella</MenuItem>
             </TextField>
+
             <TextField
               select
               size="small"
-              value={timberNatuerQuery}
-              onChange={(e) => setTimberNatuerQuery(e.target.value)}
-              label="Timber Nature"
+              value={dimensionsQuery}
+              onChange={(e) => setDimensionsQuery(e.target.value)}
+              label="Dimensions"
               sx={{
                 minWidth: "180px",
               }}
@@ -184,9 +236,38 @@ const StockSummaryList = () => {
               <MenuItem value="">
                 <em>None</em>
               </MenuItem>
-              <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
-              <MenuItem value="Planks">Planks</MenuItem>
-              <MenuItem value="Dust">Dust</MenuItem>
+              <MenuItem value="2 x 2">2 x 2</MenuItem>
+              <MenuItem value="2 x 4">2 x 4</MenuItem>
+              <MenuItem value="2 x 5">2 x 5</MenuItem>
+              <MenuItem value="2 x 6">2 x 6</MenuItem>
+              <MenuItem value="3 x 2">3 x 2</MenuItem>
+              <MenuItem value="3 x 4">3 x 4</MenuItem>
+              
+              <MenuItem value="0.3 x 5">0.3 x 5</MenuItem>
+              <MenuItem value="0.6 x 5">0.6 x 5</MenuItem>
+              <MenuItem value="0.9 x 5">0.9 x 5</MenuItem>
+
+              <MenuItem value="0 x 0">0 x 0</MenuItem>
+            </TextField>
+
+            <TextField
+              select
+              size="small"
+              value={categoryIdQuery}
+              onChange={(e) => setCategoryIdQuery(e.target.value)}
+              label="Category Id"
+              sx={{
+                minWidth: "180px",
+              }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {filteredCategoryId && filteredCategoryId.map((category) => (
+                <MenuItem key={category.id} value={category.categoryId}>
+                  {category.categoryId}
+                </MenuItem>
+              ))}
             </TextField>
             <TextField
               size="small"
@@ -210,7 +291,7 @@ const StockSummaryList = () => {
             sx={{
               bgcolor: "background.default",
             }}
-            rows={categories}
+            rows={filteredCategories.length === 0 ? summaryData : filteredCategories}
             columns={columns}
             initialState={{
               pagination: {
@@ -228,4 +309,4 @@ const StockSummaryList = () => {
   );
 };
 
-export default StockSummaryList;
+export default ActiveStockList;

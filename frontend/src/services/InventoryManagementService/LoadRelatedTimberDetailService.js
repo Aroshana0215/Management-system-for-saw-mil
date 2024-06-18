@@ -7,9 +7,12 @@ const db = getFirestore();
 // Insert new Load Related Timber Details
 export const NewLdRelatedTimber = async(timberData) => {
     try {
-        const docRef = await addDoc(collection(db, "relatedTimberDetails"), timberData);
-        console.log("New Load Related Timber Details entered into the system with ID: ", docRef.id);
-        return docRef.id;
+        const docRefs = await Promise.all(timberData.map(async (data) => {
+            const docRef = await addDoc(collection(db, "relatedTimberDetails"), data);
+            console.log("New Load Related Timber Details entered into the system with ID: ", docRef.id);
+            return docRef.id;
+        }));
+        return docRefs;
     } catch (error) {
         console.error("Error Entering New Load Related Timber: ", error.message);
         throw error;

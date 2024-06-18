@@ -135,12 +135,12 @@ export default function MainSideBar() {
                 }}
               />
             </ListItemButton>
-            <ListItemButton component={Link} to={"/stock"}>
+            <ListItemButton component={Link} to={"/activeStock"}>
               <ListItemIcon></ListItemIcon>
               <ListItemText
                 primary="Stock"
                 primaryTypographyProps={{
-                  color: isSelected("/stock") ? primaryColor : secondaryColor,
+                  color: isSelected("/activeStock") ? primaryColor : secondaryColor,
                 }}
               />
             </ListItemButton>
@@ -209,22 +209,56 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
-        <ListItemButton selected={isSelected("/Report")}>
+
+
+
+        <ListItemButton
+          onClick={handleFinanceClick}
+          selected={isSelected("/income") || isSelected("/exp")}
+        >
           <ListItemIcon
             sx={{
-              color: isSelected("/Report") ? primaryColor : secondaryColor,
+              color:
+                isSelected("/income") || isSelected("/exp")
+                  ? primaryColor
+                  : secondaryColor,
             }}
           >
-            <AssessmentOutlinedIcon />
+            <AccountBalanceOutlinedIcon />
           </ListItemIcon>
           <ListItemText
             sx={{ marginLeft: "-18px" }}
             primaryTypographyProps={{
-              color: isSelected("/Report") ? primaryColor : secondaryColor,
+              color:
+                isSelected("/stockSummary") || isSelected("/exp")
+                  ? primaryColor
+                  : secondaryColor,
             }}
             primary="Report and Summary"
           />
         </ListItemButton>
+        <Collapse in={openFinance} timeout="auto" unmountOnExit>
+          <List dense disablePadding>
+            <ListItemButton component={Link} to={"/stockSummary"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="stock summary"
+                primaryTypographyProps={{
+                  color: isSelected("/stockSummary") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton component={Link} to={"/exp"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Expenses"
+                primaryTypographyProps={{
+                  color: isSelected("/exp") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+          </List>
+        </Collapse>
       </List>
     </Box>
   );

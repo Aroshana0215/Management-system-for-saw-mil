@@ -22,6 +22,22 @@ const UpdateCategory = () => {
       try {
         const data = await getCategoryById(categoryId);
         console.log("data:",data);
+        if(data.id)
+          {
+            if ( data.timberNature === "Planks") {
+              setIsplank(true);
+              setIsTimberDust(false);
+              setisLumber(false);
+            } else if ( data.timberNature === "Dust") {
+              setIsplank(false);
+              setIsTimberDust(true);
+              setisLumber(false);
+            }else{
+              setIsplank(false);
+              setIsTimberDust(false);
+              setisLumber(true);
+            }
+        }
         setPayload(data);
       } catch (error) {
         console.error("Error fetching category data:", error.message);
@@ -41,7 +57,7 @@ const UpdateCategory = () => {
   const [isplank, setIsplank] = useState(false);
 const [isTimberDust, setIsTimberDust] = useState(false);
 const [isLumber, setisLumber] = useState(false);
-
+console.log("isTimberDust:",isTimberDust);
   const [formData] = useState({
     timberType: { bpMD: 6 },
     areaLength: { bpMD: 3 },
@@ -61,10 +77,10 @@ const [isLumber, setisLumber] = useState(false);
     maxlength: "",
     description: "",
     unitPrice: "",
-    status: "A",
-    createdBy: user.displayName,
-    createdDate: formattedDate,
+    status: "",
     modifiedBy: "",
+    createdDate: "",
+    createdBy: "",
     modifiedDate: "",
   });
 
@@ -73,25 +89,9 @@ const [isLumber, setisLumber] = useState(false);
     setPayload((prevPayload) => ({
       ...prevPayload,
       [name]: value,
+      modifiedBy: user.displayName,
+      modifiedDate: formattedDate,
     }));
-
-    
-    if(name === "timberNature")
-      {
-        if ( value === "Planks") {
-          setIsplank(true);
-          setIsTimberDust(false);
-          setisLumber(false);
-        } else if ( value === "Dust") {
-          setIsplank(false);
-          setIsTimberDust(true);
-          setisLumber(false);
-        }else{
-          setIsplank(false);
-          setIsTimberDust(false);
-          setisLumber(true);
-        }
-    }
   };
 
   const handleSubmit = async (event) => {

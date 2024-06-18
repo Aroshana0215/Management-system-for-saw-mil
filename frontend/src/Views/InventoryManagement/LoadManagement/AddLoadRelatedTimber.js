@@ -68,7 +68,6 @@ const AddLoadRelatedTimber = () => {
       permitid_fk: loadId,
     },
   ]);
-
   // eslint-disable-next-line no-unused-vars
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -89,13 +88,10 @@ const AddLoadRelatedTimber = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const TimberId = await NewLdRelatedTimber(formData);
-      console.log("New category ID:", TimberId);
-      // Redirect to "/load" after successful submission
-      window.location.href = "/load";
+      const TimberId = await NewLdRelatedTimber(payloadBulk, );
+      window.location.href = `/load/timber/view/${loadId}`;
     } catch (error) {
       console.error("Error creating category:", error.message);
-      // Handle error
     }
   };
   const handleInputChange = (index, event) => {
@@ -128,6 +124,7 @@ const AddLoadRelatedTimber = () => {
 
   return (
     <>
+  <form onSubmit={handleSubmit}>
       <Grid
         container
         sx={{
@@ -172,6 +169,7 @@ const AddLoadRelatedTimber = () => {
                 value={row.timberNo}
                 onChange={(event) => handleInputChange(index, event)}
                 fullWidth
+                required
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} p={1}>
@@ -182,6 +180,7 @@ const AddLoadRelatedTimber = () => {
                 value={row.treeType}
                 onChange={(event) => handleInputChange(index, event)}
                 fullWidth
+                required
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} p={1}>
@@ -192,6 +191,7 @@ const AddLoadRelatedTimber = () => {
                 value={row.perimeter}
                 onChange={(event) => handleInputChange(index, event)}
                 fullWidth
+                required
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} p={1}>
@@ -202,6 +202,7 @@ const AddLoadRelatedTimber = () => {
                 value={row.length}
                 onChange={(event) => handleInputChange(index, event)}
                 fullWidth
+                required
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} p={1}>
@@ -212,16 +213,7 @@ const AddLoadRelatedTimber = () => {
                 value={row.cubicAmount}
                 onChange={(event) => handleInputChange(index, event)}
                 fullWidth
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3} p={1}>
-              <TextField
-                size="small"
-                label="Other Details"
-                name="otherDetails"
-                value={row.otherDetails}
-                onChange={(event) => handleInputChange(index, event)}
-                fullWidth
+                required
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3} p={1}>
@@ -230,6 +222,17 @@ const AddLoadRelatedTimber = () => {
                 label="Unit Price"
                 name="unitPrice"
                 value={row.unitPrice}
+                onChange={(event) => handleInputChange(index, event)}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3} p={1}>
+              <TextField
+                size="small"
+                label="Other Details"
+                name="otherDetails"
+                value={row.otherDetails}
                 onChange={(event) => handleInputChange(index, event)}
                 fullWidth
               />
@@ -258,6 +261,7 @@ const AddLoadRelatedTimber = () => {
           </Button>
         </Grid>
       </Grid>
+      </form>
     </>
   );
 };
