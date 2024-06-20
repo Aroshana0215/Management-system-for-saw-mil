@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Container, Grid, Typography, TextField, Button } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { newBill, getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService"; 
 import { useParams } from "react-router-dom";
 import {
@@ -16,13 +17,15 @@ import {
 } from "../../services/AccountManagementService/AccountSummaryManagmentService";
 
 const CreateNewBill = () => {
+  const { user } = useSelector((state) => state.auth);
   const { orderData } = useParams();
   const decodedwoodData = JSON.parse(decodeURIComponent(orderData));
+  console.log("decodedwoodData:",decodedwoodData);
   const currentDate = new Date();
   const currentDateTime = currentDate.toISOString();
 
   const [formData, setFormData] = useState({
-    dateAndTime: "",
+
     cusName: "",
     cusAddress: "",
     cusNIC: "",
@@ -33,14 +36,8 @@ const CreateNewBill = () => {
     PromizeDate: "",
     description: "",
     billStatus: "",
-    totalIncome: "",
-    incomeAsPercentage: "",
     unloadedDate: "",
-    status: "",
-    createdBy: "",
-    createdDate: "",
-    modifiedBy: "",
-    modifiedDate: "",
+
   });
 
   const handleChange = (e) => {
@@ -48,6 +45,10 @@ const CreateNewBill = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
+      dateAndTime: currentDateTime,
+      status: "A",
+      createdBy: user.displayName,
+      createdDate: currentDateTime,
     }));
   };
 
@@ -160,7 +161,7 @@ const CreateNewBill = () => {
         }
       }
 
-      window.location.href = `/bill/view/${billId}`;
+      // window.location.href = `/bill/view/${billId}`;
     } catch (error) {
       console.error("Error creating category:", error.message);
     }

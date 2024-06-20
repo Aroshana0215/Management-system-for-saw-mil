@@ -23,6 +23,7 @@ const [formData, setFormData] = useState({
   sectionNumber: { bpMD: 3 },
   amountOfPieces: { bpMD: 3 },
   MachineNo: { bpMD: 3 },
+  length: { bpMD: 3 },
 });
 
 
@@ -33,6 +34,7 @@ const [formData, setFormData] = useState({
       sectionNumber : "",
       amountOfPieces : "",
       MachineNo : "",
+      length: "",
       status: "A",
       createdBy: user.displayName,
       createdDate: formattedDate,
@@ -61,9 +63,11 @@ const [formData, setFormData] = useState({
       for (const item of payloadBulk) {
         console.log("item:",item);
         const stockData = await NewInventory(item);
+        console.log("stockData:",stockData)
         if (stockData != null){
           
-         const resultData  = await getActiveStockSummaryDetails(stockData.categoryId_fk);
+         const resultData  = await getActiveStockSummaryDetails(stockData.categoryId_fk, stockData.length);
+         console.log("resultData:",resultData)
           if(resultData == null){
             console.log("in");
             const stockSumData = {
@@ -72,6 +76,7 @@ const [formData, setFormData] = useState({
               previousAmount: "0",
               categoryId_fk: stockData.categoryId_fk,
               stk_id_fk: stockData.timberId_fk,
+              length : stockData.length,
               status: "A",
               billId_fk:"",
               createdBy:"",
@@ -87,6 +92,7 @@ const [formData, setFormData] = useState({
               previousAmount: resultData.previousAmount,
               categoryId_fk: resultData.categoryId_fk,
               stk_id_fk: resultData.stk_id_fk,
+              length : resultData.length,
               status: "D",
               billId_fk:"",
               createdBy:"",
@@ -102,6 +108,7 @@ const [formData, setFormData] = useState({
               previousAmount: resultData.totalPieces,
               categoryId_fk: resultData.categoryId_fk,
               stk_id_fk:  resultData.stk_id_fk,
+              length : resultData.length,
               status: "A",
               billId_fk:"",
               createdBy:"",
@@ -241,6 +248,17 @@ const [formData, setFormData] = useState({
                   label="Machin Number"
                   name="MachineNo"
                   value={row.MachineNo}
+                  onChange={(event) => handleInputChange(index, event)}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3} p={1}>
+                <TextField
+                  size="small"
+                  label="Timber Length"
+                  name="length"
+                  value={row.length}
                   onChange={(event) => handleInputChange(index, event)}
                   fullWidth
                   required

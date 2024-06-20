@@ -13,7 +13,6 @@ const db = getFirestore();
 
 // Insert new billDetails for price Card List
 export const newBill = async (billDetailsData) => {
-  console.log("New billDetails entered into the system", billDetailsData);
   
   const counterDocRef = doc(db, "counters", "billCounter");
 

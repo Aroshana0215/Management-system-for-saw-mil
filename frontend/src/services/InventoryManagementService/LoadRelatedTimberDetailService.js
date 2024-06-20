@@ -48,14 +48,22 @@ export const updateLdRelatedTimber = async (timberId, timberData ) => {
 // Get One Load Details ID
 export const getLdRelatedTimberById =  async (timberId) => {
     try {
-        const TimberDetailsRef = doc(db, "relatedTimberDetails", timberId);
-        const TimberDetailsSnapshot = await getDoc(TimberDetailsRef);
+        console.log("timberId",timberId);
 
-        if (TimberDetailsSnapshot.exists()) {
-            const timberDetails = { id: TimberDetailsSnapshot.id, ...TimberDetailsSnapshot.data() };
-            return timberDetails;
+        const q = query(
+            collection(db, "relatedTimberDetails"),
+            where("timberNo", "==", timberId),
+        );
+
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+
+            // Assuming uniqueAttribute is unique, return the first matching document
+            const docSnapshot = querySnapshot.docs[0];
+            const timberDetail = { id: docSnapshot.id, ...docSnapshot.data() };
+            return timberDetail;
         } else {
-            console.log("Load Related Timber Details Details not found");
+            console.log("TimberDetail not found");
             return null;
         }
     } catch (error) {

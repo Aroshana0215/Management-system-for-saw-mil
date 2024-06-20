@@ -13,7 +13,9 @@ const StockList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const columns = [
+    { field: "inventoryId", headerName: "ID", width: 150 },
     { field: "categoryId_fk", headerName: "Category ID FK", width: 150 },
+    { field: "length", headerName: "Timber Length", width: 150 },
     { field: "sectionNumber", headerName: "Section No", width: 120 },
     { field: "timberId_fk", headerName: "Timber ID FK", width: 150 },
     { field: "amountOfPieces", headerName: "Amount of Pieces", width: 160 },
@@ -31,18 +33,6 @@ const StockList = () => {
         <Link to={`/stock/view/${row.id}`}>
           <Button variant="contained" size="small">
             View
-          </Button>
-        </Link>
-      ),
-    },
-    {
-      field: "summary",
-      headerName: "Summary",
-      width: 120,
-      renderCell: (params) => (
-        <Link to="/stockSummary">
-          <Button variant="contained" size="small">
-            Summary
           </Button>
         </Link>
       ),

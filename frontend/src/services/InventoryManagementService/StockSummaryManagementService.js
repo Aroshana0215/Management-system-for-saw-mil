@@ -22,11 +22,14 @@ export const createStockSummary = async (stockData) => {
   }
 };
 
-export const getActiveStockSummaryDetails = async (categoryId) => {
+export const getActiveStockSummaryDetails = async (categoryId, length) => {
   try {
+
+    console.log("length:",length)
     const q = query(
       collection(db, "inventorySummary"),
       where("categoryId_fk", "==", categoryId),
+      where("length", "==", length),
       where("status", "==", "A")
     );
 

@@ -70,7 +70,6 @@ export const updateCategory = async (categoryId, categoryData ) => {
 };
 
 export const getCategoryById = async (categoryId) => {
-    console.log("Searching for category with unique attribute:", categoryId);
     
     try {
         // Create a query against the collection
@@ -82,15 +81,9 @@ export const getCategoryById = async (categoryId) => {
         // Execute the query
         const querySnapshot = await getDocs(q);
 
-        // Log the number of documents found
-        console.log("Number of documents found:", querySnapshot.size);
 
         // Check if any documents match the query
         if (!querySnapshot.empty) {
-            // Log the document data for debugging
-            querySnapshot.forEach(doc => {
-                console.log("Document data:", doc.data());
-            });
 
             // Assuming uniqueAttribute is unique, return the first matching document
             const docSnapshot = querySnapshot.docs[0];
