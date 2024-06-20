@@ -21,7 +21,9 @@ const ViewStockDetail = () => {
         setCategoryData(data);
         const cData = await getCategoryById(data.categoryId_fk);
         setcData(cData);
+        console.log("data.timberId_fk",data.timberId_fk);
         const timberData = await getLdRelatedTimberById(data.timberId_fk);
+        console.log("timberData",timberData);
         setTimberData(timberData);
       } catch (error) {
         console.error("Error fetching data:", error.message);
@@ -147,14 +149,6 @@ const ViewStockDetail = () => {
               </Typography>
               <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
                 {cData.maxlength}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ color: "text.secondary" }}>
-                Thickness
-              </Typography>
-              <Typography variant="h4" fontWeight={"bold"} color={"primary"}>
-                {cData.thickness}
               </Typography>
             </Box>
             <Box>

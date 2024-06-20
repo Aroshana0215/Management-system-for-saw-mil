@@ -13,19 +13,13 @@ const BillDetailList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const columns = [
-    { field: "billID", headerName: "ID", width: 90 },
-    { field: "cusName", headerName: "Customer Name", width: 150 },
-    { field: "cusAddress", headerName: "Customer Address", width: 180 },
-    { field: "cusNIC", headerName: "Customer NIC", width: 150 },
-    { field: "cusPhoneNumber", headerName: "Phone No", width: 120 },
-    { field: "totalAmount", headerName: "Total", width: 120 },
-    { field: "advance", headerName: "Advance", width: 120 },
-    { field: "remainningAmount", headerName: "Remaining Amount", width: 160 },
-    { field: "description", headerName: "Description", width: 150 },
-    { field: "billStatus", headerName: "Bill Status", width: 130 },
-    { field: "status", headerName: "Status", width: 120 },
-    { field: "createdBy", headerName: "Created By", width: 120 },
-    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    { field: "billID", headerName: "ID", width: 140 },
+    { field: "cusName", headerName: "Customer Name", width: 140 },
+    { field: "cusAddress", headerName: "Customer Address", width: 240 },
+    { field: "totalAmount", headerName: "Total", width: 140 },
+    { field: "advance", headerName: "Advance", width: 140 },
+    { field: "remainningAmount", headerName: "Remaining Amount", width: 140 },
+    { field: "billStatus", headerName: "Bill Status", width: 140 },
     {
       field: "actions",
       headerName: "Actions",
@@ -74,7 +68,7 @@ const BillDetailList = () => {
         <Grid item xs={12} p={2}>
           <Stack
             direction="row"
-            justifyContent="flex-start"
+            justifyContent="space-between"
             alignItems="center"
           >
             <Typography variant="h6" fontWeight="bold" color="primary">

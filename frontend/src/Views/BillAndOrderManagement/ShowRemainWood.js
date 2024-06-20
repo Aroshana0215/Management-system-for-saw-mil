@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Container, Grid, Typography, TextField, Button } from "@mui/material";
 import { getActiveStockSummaryDetails, } from "../../services/InventoryManagementService/StockSummaryManagementService"; // Import getCategoryById and updateCategory functions
-import {getCategoryIdBytimberType } from "../../services/PriceCardService";
+import {getCategoryById } from "../../services/PriceCardService";
 import {createOrder } from "../../services/BillAndOrderService/OrderManagmentService";
 
 const ShowRemainWood = () => {
@@ -29,26 +29,22 @@ const ShowRemainWood = () => {
       try {
         const decodedwoodData = JSON.parse(decodeURIComponent(woodData));
         console.log("woodData:", woodData);
-    
-        // const ctegoryData = await getCategoryIdBytimberType(decodedwoodData.timberType, decodedwoodData.areaLength, decodedwoodData.areaWidth, decodedwoodData.thickness);
-        const ctegoryData = await getCategoryIdBytimberType("CAT-1");
-        console.log("ctegoryData:", ctegoryData);
-        if (ctegoryData.id != null) {
-          const data = await getActiveStockSummaryDetails(ctegoryData.id);
-          console.log(data);
+  
+        const ctegoryData = await getCategoryById(decodedwoodData.categoryId);
+        if (ctegoryData) {
+          const data = await getActiveStockSummaryDetails(ctegoryData.categoryId, decodedwoodData.length);
           if (data) {
             setTimberType(ctegoryData.timberType || "");
             setLength(ctegoryData.areaLength || "");
             setWidth(ctegoryData.areaWidth || "");
-            setThickness(ctegoryData.thickness || "");
             setTotalPieces(data.totalPieces || "");
             setUnitPrice(ctegoryData.unitPrice || "");
             setChangedAmount(data.changedAmount || "");
             setCategoryId_fk(data.categoryId_fk || "");
             setPreviousAmount(data.previousAmount || "");
             setstk_id_fk(data.stk_id_fk || "");
-            setSummaryId(data.id || "");
             setRequirePices(decodedwoodData.amount || "");
+            setSummaryId(data.id || "")
 
 
             var totalPieces = parseInt(data.totalPieces);

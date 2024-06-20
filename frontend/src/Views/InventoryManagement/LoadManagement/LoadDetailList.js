@@ -15,11 +15,9 @@ const LoadDetailList = () => {
     { field: "loadID", headerName: "ID", width: 90 },
     { field: "sellerName", headerName: "Seller Name", width: 150 },
     { field: "permitNumber", headerName: "Permit Number", width: 150 },
-    { field: "region", headerName: "Region", width: 120 },
     { field: "lorryNumber", headerName: "Lorry Number", width: 150 },
     { field: "driver", headerName: "Driver", width: 120 },
     { field: "otherDetails", headerName: "Other Details", width: 150 },
-    { field: "status", headerName: "Status", width: 120 },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
     {

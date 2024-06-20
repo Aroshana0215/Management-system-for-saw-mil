@@ -12,18 +12,14 @@ import {
 const GetWantsWood = () => {
   // eslint-disable-next-line no-unused-vars
   const [formData, setFormData] = useState({
-    timberType: { bpMD: 6 },
-    areaLength: { bpMD: 6 },
-    areaWidth: { bpMD: 6 },
-    thickness: { bpMD: 6 },
-    amount: { bpMD: 6 },
+    categoryId: { bpMD: 4 },
+    length: { bpMD: 4 },
+    amount: { bpMD: 4 },
   });
   const [payload, setPayload] = useState({
-    timberType: "",
-    areaLength: "",
-    areaWidth: "",
-    thickness: "",
-    amount: "",
+    categoryId: "",
+    length: "",
+    amount:"",
   });
 
   const handleChange = (e) => {
@@ -37,12 +33,10 @@ const GetWantsWood = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      // const data = await getCategoryIdBytimberType(formData.timberType, formData.areaLength, formData.areaWidth, formData.thickness);
-      // console.log(data);
-      // if(data != null){
+
       const formDataString = encodeURIComponent(JSON.stringify(payload));
       window.location.href = `/bill/process/wood/${formDataString}`;
-      // }
+
     } catch (error) {
       console.error("Error creating category:", error.message);
       alert("Error getting Category: " + error.message);

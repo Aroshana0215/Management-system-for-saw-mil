@@ -24,6 +24,14 @@ const ActiveStockList = () => {
 
   const columns = [
     { field: "categoryId", headerName: "Category ID", width: 150 },
+    {
+      field: "lengthRange",
+      headerName: "Length Range",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.minlength} - ${row.maxlength}`;
+      },
+    },
     { field: "timberType", headerName: "Type", width: 120 },
     { field: "timberNature", headerName: "Nature", width: 150 },
     {
@@ -34,15 +42,21 @@ const ActiveStockList = () => {
         return `${row.areaLength} x ${row.areaWidth}`;
       },
     },
+    { field: "length", headerName: "Length", width: 150 },
     {
-      field: "lengthRange",
-      headerName: "Length",
-      width: 130,
-      renderCell: ({ row }) => {
-        return `${row.minlength} - ${row.maxlength}`;
+      field: "totalPieces",
+      headerName: "Total Pieces",
+      width: 120,
+      renderCell: ({ value }) => {
+        return (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+          <Typography variant="body2" style={{ fontWeight: 'bold' }}>
+            {value}
+          </Typography>
+        </div>
+        );
       },
     },
-    { field: "totalPieces", headerName: "Total Pieces", width: 120 },
     { field: "createdBy", headerName: "Created By", width: 120 },
   ];
 

@@ -51,10 +51,21 @@ const ViewBillDetails = () => {
   const [isLoadDataEditable, setIsLoadDataEditable] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [loadData, setLoadData] = useState({
-    dateAndTime: { editable: false, bpMD: 4 },
-    cusName: { editable: false, bpMD: 4 },
-    cusAddress: { editable: false, bpMD: 4 },
-    cusNIC: { editable: false, bpMD: 4 },
+    dateAndTime: { editable: false, bpMD: 3 },
+    cusName: { editable: false, bpMD: 3 },
+    cusNIC: { editable: false, bpMD: 3 },
+    cusPhoneNumber: { editable: false, bpMD: 3 },
+    cusPhoneNumber: { editable: false, bpMD: 3 },
+    totalAmount: { editable: false, bpMD: 3 },
+    advance: { editable: false, bpMD: 3 },
+    remainningAmount: { editable: false, bpMD: 3 },
+    PromizeDate: { editable: false, bpMD: 3 },
+    billStatus: { editable: false, bpMD: 3 },
+    status: { editable: false, bpMD: 3 },
+    createdBy: { editable: false, bpMD: 3 },
+    modifiedBy: { editable: false, bpMD: 3 },
+    cusAddress: { editable: false, bpMD: 6 },
+    description: { editable: false, bpMD: 6 },
   });
   const columns = [
     {
@@ -86,6 +97,8 @@ const ViewBillDetails = () => {
         const data = await getbillDetailsById(billId);
         setCategoryData(data);
         const loadData = await getorderIdByBillId(billId);
+        console.log("billId:",billId)
+        console.log("loadData:",loadData);
         if (Array.isArray(loadData)) {
           setCategories(loadData);
         } else {

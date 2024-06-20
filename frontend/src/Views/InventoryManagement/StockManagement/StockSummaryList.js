@@ -23,6 +23,7 @@ const StockSummaryList = () => {
 
   const columns = [
     { field: "categoryId", headerName: "Category ID", width: 150 },
+    { field: "length", headerName: "length", width: 150 },
     { field: "totalPieces", headerName: "Total Pieces", width: 120 },
     { field: "changedAmount", headerName: "Changed Amount", width: 150 },
     { field: "previousAmount", headerName: "Previous Amount", width: 160 },
