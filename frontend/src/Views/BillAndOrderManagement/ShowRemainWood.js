@@ -1,216 +1,272 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { Container, Grid, Typography, TextField, Button } from "@mui/material";
-import { getActiveStockSummaryDetails, } from "../../services/InventoryManagementService/StockSummaryManagementService"; // Import getCategoryById and updateCategory functions
-import {getCategoryById } from "../../services/PriceCardService";
-import {createOrder } from "../../services/BillAndOrderService/OrderManagmentService";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Grid,
+  Typography,
+  Button,
+  Stack,
+  FormControl,
+  FormLabel,
+  OutlinedInput,
+} from "@mui/material";
+import { getActiveStockSummaryDetails } from "../../services/InventoryManagementService/StockSummaryManagementService";
+import { getCategoryById } from "../../services/PriceCardService";
 
 const ShowRemainWood = () => {
-  const { woodData } = useParams();
-  console.log("woodData intial :", woodData);
-  const [totalPieces, setTotalPieces] = useState("");
-  const [timberType, setTimberType] = useState("");
-  const [length, setLength] = useState("");
-  const [width, setWidth] = useState("");
-  const [thickness, setThickness] = useState("");
-  const [unitPrice, setUnitPrice] = useState("");
-  const [requirePices, setRequirePices] = useState("");
-  const [toBeCut, setToBeCut] = useState("");
-  const [billPrice, setBillPrice] = useState("");
-  const [changedAmount, setChangedAmount] = useState("");
-  const [categoryId_fk, setCategoryId_fk] = useState("");
-  const [previousAmount, setPreviousAmount] = useState("");
-  const [stk_id_fk, setstk_id_fk] = useState("");
-  const [summaryId, setSummaryId] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { payloadBulk } = location.state;
+  const [woodData, setWoodData] = useState([]);
 
-  // Fetch category woodData based on categoryId when component mounts
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const decodedwoodData = JSON.parse(decodeURIComponent(woodData));
-        console.log("woodData:", woodData);
-  
-        const ctegoryData = await getCategoryById(decodedwoodData.categoryId);
-        if (ctegoryData) {
-          const data = await getActiveStockSummaryDetails(ctegoryData.categoryId, decodedwoodData.length);
-          if (data) {
-            setTimberType(ctegoryData.timberType || "");
-            setLength(ctegoryData.areaLength || "");
-            setWidth(ctegoryData.areaWidth || "");
-            setTotalPieces(data.totalPieces || "");
-            setUnitPrice(ctegoryData.unitPrice || "");
-            setChangedAmount(data.changedAmount || "");
-            setCategoryId_fk(data.categoryId_fk || "");
-            setPreviousAmount(data.previousAmount || "");
-            setstk_id_fk(data.stk_id_fk || "");
-            setRequirePices(decodedwoodData.amount || "");
-            setSummaryId(data.id || "")
-
-
-            var totalPieces = parseInt(data.totalPieces);
-            var amount = parseInt(decodedwoodData.amount);
-            
-            if (totalPieces > amount) {
-              setToBeCut(0);
-            } else {
-              setToBeCut(amount - totalPieces);
+      const woodDetails = await Promise.all(
+        payloadBulk.map(async (payload) => {
+          const categoryData = await getCategoryById(payload.categoryId);
+          if (categoryData) {
+            const data = await getActiveStockSummaryDetails(
+              categoryData.categoryId,
+              payload.length
+            );
+            if (data) {
+              const toBeCut =
+                data.totalPieces > payload.amount
+                  ? 0
+                  : payload.amount - data.totalPieces;
+              return {
+                ...payload,
+                timberType: categoryData.timberType,
+                length: categoryData.areaLength,
+                width: categoryData.areaWidth,
+                totalPieces: data.totalPieces,
+                unitPrice: categoryData.unitPrice,
+                changedAmount: data.changedAmount,
+                categoryId_fk: data.categoryId_fk,
+                previousAmount: data.previousAmount,
+                stk_id_fk: data.stk_id_fk,
+                toBeCut,
+                summaryId: data.id,
+              };
             }
-
           }
-        }
-      } catch (error) {
-        console.error("Error fetching category data:", error.message);
-        // Handle error
-      }
+          return null;
+        })
+      );
+      setWoodData(woodDetails.filter((detail) => detail !== null));
     };
 
     fetchData();
-  }, [woodData]);
+  }, [payloadBulk]);
 
-  const handleSubmit = async (event) => {
+  const handleBillPriceChange = (index, event) => {
+    const { value } = event.target;
+    setWoodData((prevWoodData) => {
+      const updatedWoodData = [...prevWoodData];
+      updatedWoodData[index].billPrice = value;
+      return updatedWoodData;
+    });
+  };
+
+  const handleSubmit = (event) => {
     event.preventDefault();
-    try {
-      const orderData = {
-        bill_id_fk:  "" ,
-        discountPrice: billPrice || "" , 
-        categoryId_fk: categoryId_fk || "",
-        availablePiecesAmount: totalPieces || "",
-        remainPiecesAmount : toBeCut || "",
-        neededPiecesAmount : requirePices || "",
-        status: "A",
-        billId_fk:"",
-        createdBy:"",
-        createdDate:"",
-        modifiedBy:"",
-        modifiedDate:"",
-      };
-
-      const orderId = await createOrder(orderData);
-
-      if(orderId != null){
-
-      const formData = {
-        totalPieces: totalPieces || "" ,
-        changedAmount: changedAmount || "" , 
-        previousAmount: previousAmount || "",
-        categoryId_fk: categoryId_fk || "",
-        stk_id_fk: stk_id_fk || "",
-        summaryId: summaryId || "",
-        requirePices : requirePices || "",
-        orderId : orderId || "",
-      };
-
-      const formDataString = encodeURIComponent(JSON.stringify(formData));
-      window.location.href = `/bill/add/${formDataString}`;
-
-    }
-
-    } catch (error) {
-      console.error("Error updating category:", error.message);
-      // Handle error
-    }
+    navigate("/bill/add", { state: { woodData } });
   };
 
   return (
-    <Container>
+    <>
       <Grid
         container
         direction="row"
         justifyContent="center"
         alignItems="stretch"
-        spacing={2}
-        p={2}
       >
         <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
-            Update Category
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Timber Type"
-              variant="outlined"
-              value={timberType}
-              onChange={(e) => setTimberType(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Area Length"
-              variant="outlined"
-              value={length}
-              onChange={(e) => setLength(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Area Width"
-              variant="outlined"
-              value={width}
-              onChange={(e) => setWidth(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Thickness"
-              variant="outlined"
-              value={thickness}
-              onChange={(e) => setThickness(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Total pices"
-              variant="outlined"
-              value={totalPieces}
-              onChange={(e) => setTotalPieces(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-             <TextField
-              fullWidth
-              label="Require pices"
-              variant="outlined"
-              value={requirePices}
-              onChange={(e) => setRequirePices(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-              <TextField
-              fullWidth
-              label="To be cut"
-              variant="outlined"
-              value={toBeCut}
-              onChange={(e) => setToBeCut(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Unit Price"
-              variant="outlined"
-              value={unitPrice}
-              onChange={(e) => setUnitPrice(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-              <TextField
-              fullWidth
-              label="Bill Price"
-              onChange={(e) => setBillPrice(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2 }}
-            >
-              Update
-            </Button>
-          </form>
+          <Grid
+            container
+            padding={2}
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 2,
+            }}
+          >
+            <Grid item xs={12} padding={1}>
+              <Stack
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={2}
+              >
+                <Typography variant="h6" color="primary" align="center">
+                  Update Category
+                </Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12}>
+              <form onSubmit={handleSubmit}>
+                {woodData.map((wood, index) => (
+                  <Grid container key={index}>
+                    <Grid item xs={12} padding={1}>
+                      <Typography variant="h6">Entry {index + 1}</Typography>
+                    </Grid>
+                    <Grid item xs={12} md={4} padding={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>Timber Type</FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name="timberType"
+                          value={wood.timberType}
+                          disabled
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4} padding={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>Area Length</FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name="length"
+                          value={wood.length}
+                          disabled
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4} padding={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>Area Width</FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name="width"
+                          value={wood.width}
+                          disabled
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4} padding={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>Total Pieces</FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name="totalPieces"
+                          value={wood.totalPieces}
+                          disabled
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4} padding={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>Unit Price</FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name="unitPrice"
+                          value={wood.unitPrice}
+                          disabled
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4} padding={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>Amount</FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name="amount"
+                          value={wood.amount}
+                          disabled
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4} padding={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>To Be Cut</FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name="toBeCut"
+                          value={wood.toBeCut}
+                          disabled
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4} padding={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>Bill Price</FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name="billPrice"
+                          value={wood.billPrice}
+                          onChange={(event) =>
+                            handleBillPriceChange(index, event)
+                          }
+                        />
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                ))}
+                <Grid item xs={12} p={1}>
+                  <Button type="submit" variant="contained" color="primary">
+                    Submit
+                  </Button>
+                </Grid>
+              </form>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
-    </Container>
+    </>
   );
 };
 
