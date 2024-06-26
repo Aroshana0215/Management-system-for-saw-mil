@@ -112,7 +112,11 @@ const privateRouter = createBrowserRouter([
         element: <ShowRemainWood />,
       },
       {
-        path: "/bill/add/:orderData",
+        path: "/bill/show-remain-wood",
+        element: <ShowRemainWood />,
+      },
+      {
+        path: "/bill/add",
         element: <CreateNewBill />,
       },
       {
@@ -171,7 +175,6 @@ const privateRouter = createBrowserRouter([
         path: "*",
         element: <Navigate to="/" replace />,
       },
-      
     ],
   },
 ]);

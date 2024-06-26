@@ -1,9 +1,20 @@
 import React, { useState } from "react";
-import { Container, Grid, Typography, TextField, Button } from "@mui/material";
-import { Link } from "react-router-dom";
+import {
+  Grid,
+  Typography,
+  Button,
+  Stack,
+  FormControl,
+  FormLabel,
+  OutlinedInput,
+} from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { newBill, getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService"; 
-import { useParams } from "react-router-dom";
+import { DataGrid } from "@mui/x-data-grid";
+import {
+  newBill,
+  getbillDetailsById,
+} from "../../services/BillAndOrderService/BilllManagemntService";
 import {
   createStockSummary,
   updateStockSummaryDetails,
@@ -17,15 +28,14 @@ import {
 } from "../../services/AccountManagementService/AccountSummaryManagmentService";
 
 const CreateNewBill = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { woodData } = location.state;
   const { user } = useSelector((state) => state.auth);
-  const { orderData } = useParams();
-  const decodedwoodData = JSON.parse(decodeURIComponent(orderData));
-  console.log("decodedwoodData:",decodedwoodData);
   const currentDate = new Date();
   const currentDateTime = currentDate.toISOString();
 
   const [formData, setFormData] = useState({
-
     cusName: "",
     cusAddress: "",
     cusNIC: "",
@@ -37,7 +47,6 @@ const CreateNewBill = () => {
     description: "",
     billStatus: "",
     unloadedDate: "",
-
   });
 
   const handleChange = (e) => {
@@ -58,52 +67,28 @@ const CreateNewBill = () => {
       const billId = await newBill(formData);
 
       if (billId != null) {
-        const stockUpdateData = {
-          totalPieces: decodedwoodData.totalPieces,
-          changedAmount: decodedwoodData.changedAmount,
-          previousAmount: decodedwoodData.previousAmount,
-          categoryId_fk: decodedwoodData.categoryId_fk,
-          stk_id_fk: decodedwoodData.stk_id_fk,
-          status: "D",
-          billId_fk: "",
-          createdBy: "",
-          createdDate: "",
-          modifiedBy: "",
-          modifiedDate: "",
-        };
-        await updateStockSummaryDetails(
-          decodedwoodData.summaryId,
-          stockUpdateData
-        );
+        for (const wood of woodData) {
+          const stockUpdateData = {
+            totalPieces: wood.totalPieces,
+            changedAmount: wood.changedAmount,
+            previousAmount: wood.previousAmount,
+            categoryId_fk: wood.categoryId_fk,
+            stk_id_fk: wood.stk_id_fk,
+            status: "D",
+            billId_fk: "",
+            createdBy: "",
+            createdDate: "",
+            modifiedBy: "",
+            modifiedDate: "",
+          };
+          await updateStockSummaryDetails(wood.summaryId, stockUpdateData);
 
-        const stockSumData = {
-          totalPieces:
-            Number(decodedwoodData.totalPieces) -
-            Number(decodedwoodData.requirePices),
-          changedAmount: decodedwoodData.requirePices,
-          previousAmount: decodedwoodData.totalPieces,
-          categoryId_fk: decodedwoodData.categoryId_fk,
-          stk_id_fk: "",
-          status: "A",
-          billId_fk: billId,
-          createdBy: "",
-          createdDate: "",
-          modifiedBy: "",
-          modifiedDate: "",
-        };
-        const newstockSummaryData = await createStockSummary(stockSumData);
-
-        console.log("Category updated successfully");
-
-        if (newstockSummaryData != null) {
-          const data = await getbillDetailsById(billId);
-
-          const saveOrderData = {
-            discountPrice: data.discountPrice || "",
-            categoryId_fk: data.categoryId_fk || "",
-            availablePiecesAmount: data.availablePiecesAmount || "",
-            remainPiecesAmount: data.remainPiecesAmount || "",
-            neededPiecesAmount: data.neededPiecesAmount || "",
+          const stockSumData = {
+            totalPieces: Number(wood.totalPieces) - Number(wood.requirePices),
+            changedAmount: wood.requirePices,
+            previousAmount: wood.totalPieces,
+            categoryId_fk: wood.categoryId_fk,
+            stk_id_fk: "",
             status: "A",
             billId_fk: billId,
             createdBy: "",
@@ -111,8 +96,29 @@ const CreateNewBill = () => {
             modifiedBy: "",
             modifiedDate: "",
           };
+          const newstockSummaryData = await createStockSummary(stockSumData);
 
-          await createOrder(saveOrderData);
+          console.log("Category updated successfully");
+
+          if (newstockSummaryData != null) {
+            const data = await getbillDetailsById(billId);
+
+            const saveOrderData = {
+              discountPrice: data.discountPrice || "",
+              categoryId_fk: data.categoryId_fk || "",
+              availablePiecesAmount: data.availablePiecesAmount || "",
+              remainPiecesAmount: data.remainPiecesAmount || "",
+              neededPiecesAmount: data.neededPiecesAmount || "",
+              status: "A",
+              billId_fk: billId,
+              createdBy: "",
+              createdDate: "",
+              modifiedBy: "",
+              modifiedDate: "",
+            };
+
+            await createOrder(saveOrderData);
+          }
         }
 
         const saveIncomeData = {
@@ -160,67 +166,110 @@ const CreateNewBill = () => {
           }
         }
       }
-
-      // window.location.href = `/bill/view/${billId}`;
+      navigate(`/bill/view/${billId}`);
     } catch (error) {
       console.error("Error creating category:", error.message);
     }
   };
 
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    { field: "timberType", headerName: "Timber Type", width: 150 },
+    { field: "length", headerName: "Length", width: 150 },
+    { field: "width", headerName: "Width", width: 150 },
+    { field: "totalPieces", headerName: "Total Pieces", width: 150 },
+    { field: "unitPrice", headerName: "Unit Price", width: 150 },
+    { field: "amount", headerName: "Amount", width: 150 },
+    { field: "toBeCut", headerName: "To Be Cut", width: 150 },
+    { field: "billPrice", headerName: "Bill Price", width: 150 },
+  ];
+
+  const rows = woodData.map((wood, index) => ({
+    id: index + 1,
+    ...wood,
+  }));
+
   return (
-    <Container>
+    <>
       <Grid
         container
         direction="row"
         justifyContent="center"
         alignItems="stretch"
-        spacing={2}
-        p={2}
       >
         <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
-            Create a new bill
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <form onSubmit={handleSubmit}>
-            {Object.entries(formData).map(([key, value]) => (
-              <TextField
-                key={key}
-                fullWidth
-                label={
-                  key.charAt(0).toUpperCase() +
-                  key.slice(1).replace(/([A-Z])/g, " $1")
-                }
-                variant="outlined"
-                name={key}
-                value={value}
-                onChange={handleChange}
-                sx={{ mt: 2 }}
-              />
-            ))}
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2 }}
-            >
-              Create Load
-            </Button>
-          </form>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography
-            component={Link}
-            to={"/load"}
-            variant="body2"
-            sx={{ textAlign: "center", textDecoration: "none" }}
+          <Grid
+            container
+            padding={2}
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 2,
+            }}
           >
-            Go to Price Page
-          </Typography>
+            <Grid item xs={12} padding={1}>
+              <Stack
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={2}
+              >
+                <Typography variant="h6" color="primary" align="center">
+                  Create a new bill
+                </Typography>
+              </Stack>
+            </Grid>
+            <Grid item xs={12}>
+              <form onSubmit={handleSubmit}>
+                <Grid container>
+                  <Grid item xs={12} p={1}>
+                    <Typography variant="h6">Customer Data</Typography>
+                  </Grid>
+                  {Object.entries(formData).map(([key, value]) => (
+                    <Grid key={key} item xs={12} md={4} p={1}>
+                      <FormControl
+                        fullWidth
+                        sx={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormLabel>
+                          {key.charAt(0).toUpperCase() +
+                            key.slice(1).replace(/([A-Z])/g, " $1")}
+                        </FormLabel>
+                        <OutlinedInput
+                          size="small"
+                          name={key}
+                          value={value}
+                          onChange={handleChange}
+                        />
+                      </FormControl>
+                    </Grid>
+                  ))}
+                  <Grid item xs={12} p={1}>
+                    <Typography variant="h6">Wood Data</Typography>
+                  </Grid>
+                  <Grid item xs={12} p={1}>
+                    <DataGrid
+                      rows={rows}
+                      columns={columns}
+                      pageSize={5}
+                      rowsPerPageOptions={[5]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} p={1}>
+                    <Button type="submit" variant="contained" color="primary">
+                      Create Bill
+                    </Button>
+                  </Grid>
+                </Grid>
+              </form>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
-    </Container>
+    </>
   );
 };
 
