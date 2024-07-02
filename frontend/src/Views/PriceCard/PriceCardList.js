@@ -121,6 +121,9 @@ const PriceCardList = () => {
 
     setFilteredCategories(filteredData);
   };
+  useEffect(() => {
+    handleSearch();
+  }, [generalQuery, timberTypeQuery, timberNatuerQuery]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -139,7 +142,7 @@ const PriceCardList = () => {
   return (
     <>
       <Grid container>
-        <Grid item xs={12} p={2}>
+        <Grid item xs={12} p={1}>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -159,7 +162,7 @@ const PriceCardList = () => {
             </Button>
           </Stack>
         </Grid>
-        <Grid item xs={12} p={2}>
+        <Grid item xs={12} p={1}>
           <Stack
             p={2}
             direction="row"
@@ -168,47 +171,50 @@ const PriceCardList = () => {
             sx={{
               bgcolor: "background.default",
               borderRadius: 1,
+              border: "1px solid rgba(0, 0, 0, 0.12)",
             }}
           >
-            <TextField
-              select
-              size="small"
-              value={timberTypeQuery}
-              onChange={(e) => setTimberTypeQuery(e.target.value)}
-              label="Timber Type"
-              sx={{
-                minWidth: "180px",
-              }}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value="Sapu">Sapu</MenuItem>
-              <MenuItem value="Grandis">Grandis</MenuItem>
-              <MenuItem value="Thekka">Thekka</MenuItem>
-              <MenuItem value="Micro">Micro</MenuItem>
-              <MenuItem value="Amba">Amba</MenuItem>
-              <MenuItem value="Kos">Kos</MenuItem>
-              <MenuItem value="Maara">Maara</MenuItem>
-              <MenuItem value="LunuMidella">LunuMidella</MenuItem>
-            </TextField>
-            <TextField
-              select
-              size="small"
-              value={timberNatuerQuery}
-              onChange={(e) => setTimberNatuerQuery(e.target.value)}
-              label="Timber Nature"
-              sx={{
-                minWidth: "180px",
-              }}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
-              <MenuItem value="Planks">Planks</MenuItem>
-              <MenuItem value="Dust">Dust</MenuItem>
-            </TextField>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                select
+                size="small"
+                value={timberTypeQuery}
+                onChange={(e) => setTimberTypeQuery(e.target.value)}
+                label="Timber Type"
+                sx={{
+                  minWidth: "180px",
+                }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                <MenuItem value="Sapu">Sapu</MenuItem>
+                <MenuItem value="Grandis">Grandis</MenuItem>
+                <MenuItem value="Thekka">Thekka</MenuItem>
+                <MenuItem value="Micro">Micro</MenuItem>
+                <MenuItem value="Amba">Amba</MenuItem>
+                <MenuItem value="Kos">Kos</MenuItem>
+                <MenuItem value="Maara">Maara</MenuItem>
+                <MenuItem value="LunuMidella">LunuMidella</MenuItem>
+              </TextField>
+              <TextField
+                select
+                size="small"
+                value={timberNatuerQuery}
+                onChange={(e) => setTimberNatuerQuery(e.target.value)}
+                label="Timber Nature"
+                sx={{
+                  minWidth: "180px",
+                }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
+                <MenuItem value="Planks">Planks</MenuItem>
+                <MenuItem value="Dust">Dust</MenuItem>
+              </TextField>
+            </Stack>
             <TextField
               size="small"
               InputProps={{
@@ -227,7 +233,7 @@ const PriceCardList = () => {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} p={2}>
+        <Grid item xs={12} p={1}>
           <DataGrid
             sx={{
               bgcolor: "background.default",
