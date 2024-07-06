@@ -64,9 +64,11 @@ const CreateNewBill = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
+      console.log("formData:",formData);
       const billId = await newBill(formData);
 
       if (billId != null) {
+        console.log("woodData:",woodData);
         for (const wood of woodData) {
           const stockUpdateData = {
             totalPieces: wood.totalPieces,
@@ -84,10 +86,11 @@ const CreateNewBill = () => {
           await updateStockSummaryDetails(wood.summaryId, stockUpdateData);
 
           const stockSumData = {
-            totalPieces: Number(wood.totalPieces) - Number(wood.requirePices),
-            changedAmount: wood.requirePices,
+            totalPieces: Number(wood.totalPieces) - Number(wood.amount),
+            changedAmount: wood.amount,
             previousAmount: wood.totalPieces,
             categoryId_fk: wood.categoryId_fk,
+            length : wood.length,
             stk_id_fk: "",
             status: "A",
             billId_fk: billId,
@@ -98,10 +101,11 @@ const CreateNewBill = () => {
           };
           const newstockSummaryData = await createStockSummary(stockSumData);
 
-          console.log("Category updated successfully");
+          console.log("newstockSummaryData:",newstockSummaryData);
 
           if (newstockSummaryData != null) {
             const data = await getbillDetailsById(billId);
+            console.log("getbillDetailsById:",data);
 
             const saveOrderData = {
               discountPrice: data.discountPrice || "",
@@ -116,7 +120,7 @@ const CreateNewBill = () => {
               modifiedBy: "",
               modifiedDate: "",
             };
-
+            console.log("saveOrderData:",saveOrderData);
             await createOrder(saveOrderData);
           }
         }

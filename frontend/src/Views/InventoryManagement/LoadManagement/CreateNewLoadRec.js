@@ -7,13 +7,13 @@ import {
   FormControl,
   Stack,
   FormLabel,
+  TextField,
 } from "@mui/material";
 import { NewLoad } from "../../../services/InventoryManagementService/LoadDetailsService";
 import { useSelector } from "react-redux";
 
 const CreateNewLoadRec = () => {
   const { user } = useSelector((state) => state.auth);
-  // eslint-disable-next-line no-unused-vars
   const [formData, setFormData] = useState({
     sellerName: { bpMD: 6 },
     permitNumber: { bpMD: 6 },
@@ -55,6 +55,43 @@ const CreateNewLoadRec = () => {
     }
   };
 
+  const renderFormField = (key, item) => {
+    const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1");
+    return (
+      <Grid item key={key} xs={12} md={item.bpMD} padding={1}>
+        <FormControl
+          fullWidth
+          sx={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <FormLabel>{label}</FormLabel>
+          {key === "unloadedDate" ? (
+            <TextField
+              size="small"
+              type="date"
+              name={key}
+              value={payload[key]}
+              onChange={handleChange}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          ) : (
+            <OutlinedInput
+              size="small"
+              name={key}
+              value={payload[key]}
+              onChange={handleChange}
+            />
+          )}
+        </FormControl>
+      </Grid>
+    );
+  };
+
   return (
     <>
       <Grid
@@ -86,30 +123,7 @@ const CreateNewLoadRec = () => {
                 </Typography>
               </Stack>
             </Grid>
-            {Object.entries(formData).map(([key, item]) => (
-              <Grid item key={key} xs={12} md={item.bpMD} padding={1}>
-                <FormControl
-                  fullWidth
-                  sx={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <FormLabel>
-                    {key.charAt(0).toUpperCase() +
-                      key.slice(1).replace(/([A-Z])/g, " $1")}
-                  </FormLabel>
-                  <OutlinedInput
-                    size="small"
-                    name={key}
-                    value={payload[key]}
-                    onChange={handleChange}
-                  />
-                  {/* <FormHelperText/> */}
-                </FormControl>
-              </Grid>
-            ))}
+            {Object.entries(formData).map(([key, item]) => renderFormField(key, item))}
             <Grid
               item
               xs={12}
@@ -122,7 +136,7 @@ const CreateNewLoadRec = () => {
               }}
             >
               <Button type="submit" variant="contained">
-                Create Load
+                Create
               </Button>
             </Grid>
           </Grid>

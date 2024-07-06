@@ -19,11 +19,11 @@ let formattedDate = `${year}-${month}-${day}`;
 
 const [formData, setFormData] = useState({
   categoryId_fk: { bpMD: 3 },
+  length: { bpMD: 3 },
   timberId_fk: { bpMD: 3 },
   sectionNumber: { bpMD: 3 },
   amountOfPieces: { bpMD: 3 },
   MachineNo: { bpMD: 3 },
-  length: { bpMD: 3 },
 });
 
 
@@ -212,6 +212,17 @@ const [formData, setFormData] = useState({
               <Grid item xs={12} sm={6} md={3} p={1}>
                 <TextField
                   size="small"
+                  label="Timber Length"
+                  name="length"
+                  value={row.length}
+                  onChange={(event) => handleInputChange(index, event)}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3} p={1}>
+                <TextField
+                  size="small"
                   label="Timber Number"
                   name="timberId_fk"
                   value={row.timberId_fk}
@@ -248,17 +259,6 @@ const [formData, setFormData] = useState({
                   label="Machin Number"
                   name="MachineNo"
                   value={row.MachineNo}
-                  onChange={(event) => handleInputChange(index, event)}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3} p={1}>
-                <TextField
-                  size="small"
-                  label="Timber Length"
-                  name="length"
-                  value={row.length}
                   onChange={(event) => handleInputChange(index, event)}
                   fullWidth
                   required

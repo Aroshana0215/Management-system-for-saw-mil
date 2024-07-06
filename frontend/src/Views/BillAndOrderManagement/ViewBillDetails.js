@@ -19,6 +19,8 @@ import { getorderIdByBillId } from "../../services/BillAndOrderService/OrderMana
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import { Link } from "react-router-dom";
 
 const ViewBillDetails = () => {
   const { billId } = useParams();
@@ -228,6 +230,15 @@ const ViewBillDetails = () => {
                 <Typography variant="h6" color="primary" align="center">
                   Order details
                 </Typography>
+                <Button
+                  startIcon={<AddCircleOutlineOutlinedIcon />}
+                  component={Link}
+                  variant="outlined"
+                  justifyContent="flex-end"
+                  to={`/bill/wants/wood`}
+                >
+                  Add Timber
+                </Button>
               </Stack>
             </Grid>
             <Grid item xs={12} padding={1}>
