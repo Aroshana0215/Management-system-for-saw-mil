@@ -25,12 +25,11 @@ export const createStockSummary = async (stockData) => {
 };
 
 export const getActiveStockSummaryDetails = async (categoryId, length) => {
+  const formattedCategoryId = categoryId.trim();
   try {
-
-    console.log("length:",length)
     const q = query(
       collection(db, "inventorySummary"),
-      where("categoryId_fk", "==", categoryId),
+      where("categoryId_fk", "==", formattedCategoryId),
       where("length", "==", length),
       where("status", "==", "A")
     );
@@ -43,7 +42,7 @@ export const getActiveStockSummaryDetails = async (categoryId, length) => {
       const stockSummaryDetails = { id: docSnapshot.id, ...docSnapshot.data() };
       return stockSummaryDetails;
     } else {
-      console.log("No stockSummaryDetails found for categoryId:", categoryId);
+      console.log("No stockSummaryDetails found for categoryId:", formattedCategoryId);
       return null;
     }
   } catch (error) {

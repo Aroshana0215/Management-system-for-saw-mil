@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService";
 import { getorderIdByBillId } from "../../services/BillAndOrderService/OrderManagmentService";
+import { getCategoryById } from "../../services/PriceCardService";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -25,6 +26,7 @@ import { Link } from "react-router-dom";
 const ViewBillDetails = () => {
   const { billId } = useParams();
   const [categories, setCategories] = useState([]);
+  console.log("categories:",categories);
   // eslint-disable-next-line no-unused-vars
   const [totalTimberValue, setTotalTimberValue] = useState(0);
   // eslint-disable-next-line no-unused-vars
@@ -70,27 +72,34 @@ const ViewBillDetails = () => {
     description: { editable: false, bpMD: 6 },
   });
   const columns = [
+    { field: "categoryId_fk", headerName: "Category ID", width: 120 },
+    { field: "timberType", headerName: "Timber Type", width: 120 },
+    { field: "timberNature", headerName: "Nature", width: 150 },
+    {
+      field: "dimensions",
+      headerName: "Dimensions",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.areaLength} x ${row.areaWidth}`;
+      },
+    },
     {
       field: "availablePiecesAmount",
-      headerName: "Available Pieces Amount",
-      width: 180,
+      headerName: "Available Amount",
+      width: 120,
     },
     {
       field: "neededPiecesAmount",
-      headerName: "Needed Pieces Amount",
-      width: 180,
+      headerName: "Needed Amount",
+      width: 120,
     },
     {
-      field: "remainPiecesAmount",
-      headerName: "Remain Pieces Amount",
-      width: 180,
+      field: "toBeCut",
+      headerName: "To Be Cut",
+      width: 120,
     },
-    { field: "discountPrice", headerName: "Discount Price", width: 150 },
-    { field: "bill_id_fk", headerName: "Bill ID FK", width: 120 },
-    { field: "catergoryId_fk", headerName: "Category ID FK", width: 150 },
-    { field: "status", headerName: "Status", width: 120 },
-    { field: "createdBy", headerName: "Created By", width: 120 },
-    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    { field: "unitPrice", headerName: "Unit Price", width: 120 },
+    { field: "discountPrice", headerName: "Discount Price", width: 120 },
   ];
 
   useEffect(() => {
@@ -99,13 +108,7 @@ const ViewBillDetails = () => {
         const data = await getbillDetailsById(billId);
         setCategoryData(data);
         const loadData = await getorderIdByBillId(billId);
-        console.log("billId:",billId)
-        console.log("loadData:",loadData);
-        if (Array.isArray(loadData)) {
-          setCategories(loadData);
-        } else {
-          throw new Error("Invalid data format received from API");
-        }
+        processLoadData(loadData);
       } catch (error) {
         console.error("Error fetching category data:", error.message);
         // Handle error
@@ -125,6 +128,28 @@ const ViewBillDetails = () => {
       [name]: value,
     }));
   };
+
+
+  async function processLoadData(loadData) {
+    if (Array.isArray(loadData)) {
+      const updatedCategories = await Promise.all(
+        loadData.map(async item => {
+          const categoryDetails = await getCategoryById(item.categoryId_fk);
+          return {
+            ...item, // Destructure the original item
+            "timberType" : categoryDetails.timberType,
+            "timberNature" : categoryDetails.timberNature,
+            "areaLength" : categoryDetails.areaLength,
+            "areaWidth" : categoryDetails.areaWidth,
+            "unitPrice"  : categoryDetails.unitPrice,
+          };
+        })
+      );
+      setCategories(updatedCategories);
+    } else {
+      throw new Error("Invalid data format received from API");
+    }
+  }
 
   return (
     <>

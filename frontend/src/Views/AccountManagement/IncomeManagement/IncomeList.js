@@ -27,7 +27,7 @@ const IncomeList = () => {
         return `${row.amount}.00`;
       },
     },
-    { field: "billID", headerName: "Bill Details", width: 150 },
+    { field: "billID", headerName: "Bill ID", width: 150 },
     { field: "status", headerName: "Status", width: 120 },
     { field: "des", headerName: "Description", width: 180 },
     { field: "createdBy", headerName: "Created By", width: 120 },
@@ -53,7 +53,7 @@ const IncomeList = () => {
         const data = await getAllincome();
         console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
-          const data = await getbillDetailsById(data);
+          // const data = await getbillDetailsById(data);
           setCategories(data);
           setLoading(false);
         } else {

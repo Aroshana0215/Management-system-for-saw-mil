@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { getAllLoadDetails } from '../../../services/InventoryManagementService/LoadDetailsService'; // Import the API function
-import { Stack, Typography, Grid, Button, TextField, MenuItem ,InputAdornment } from "@mui/material";
+import { getAllLoadDetails } from '../../../services/InventoryManagementService/LoadDetailsService';
+import { Stack, Typography, Grid, Button, TextField, InputAdornment } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Link } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import SearchIcon from "@mui/icons-material/Search";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { format } from 'date-fns';
 
 const LoadDetailList = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timberTypeQuery, setTimberTypeQuery] = useState("");
-  const [timberNatuerQuery, setTimberNatuerQuery] = useState("");
+  const [unLoadedDateQuery, setUnLoadedDateQuery] = useState(null);
   const [generalQuery, setGeneralQuery] = useState("");
   const [filteredCategories, setFilteredCategories] = useState([]);
-  
 
   const columns = [
     { field: "loadID", headerName: "ID", width: 90 },
@@ -31,15 +33,13 @@ const LoadDetailList = () => {
       field: "actions",
       headerName: "Actions",
       width: 120,
-      renderCell: ({ row }) => {
-        return (
-          <Link to={`/load/timber/view/${row.id}`}>
-            <Button variant="contained" size="small">
-              View
-            </Button>
-          </Link>
-        );
-      },
+      renderCell: ({ row }) => (
+        <Link to={`/load/timber/view/${row.id}`}>
+          <Button variant="contained" size="small">
+            View
+          </Button>
+        </Link>
+      ),
     },
   ];
 
@@ -47,9 +47,9 @@ const LoadDetailList = () => {
     const fetchData = async () => {
       try {
         const data = await getAllLoadDetails();
-        console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
           setCategories(data);
+          setFilteredCategories(data);
           setLoading(false);
         } else {
           throw new Error("Invalid data format received from API");
@@ -63,28 +63,20 @@ const LoadDetailList = () => {
     fetchData();
   }, []);
 
-
   const handleSearch = () => {
     let filteredData = categories;
 
-    if (timberTypeQuery) {
-      const lowercasedTimberTypeQuery = timberTypeQuery.toLowerCase();
-      filteredData = filteredData.filter((category) =>
-        category.timberType.toLowerCase().includes(lowercasedTimberTypeQuery)
-      );
-    }
-
-    if (timberNatuerQuery) {
-      const lowercasedTimberNatuerQuery = timberNatuerQuery.toLowerCase();
-      filteredData = filteredData.filter((category) =>
-        category.timberNature.toLowerCase().includes(lowercasedTimberNatuerQuery)
+    if (unLoadedDateQuery) {
+      const formattedDate = format(unLoadedDateQuery, 'yyyy-MM-dd');
+      filteredData = filteredData.filter(category =>
+        category.unloadedDate.includes(formattedDate)
       );
     }
 
     if (generalQuery) {
       const lowercasedGeneralQuery = generalQuery.toLowerCase();
-      filteredData = filteredData.filter((category) =>
-        Object.values(category).some((value) =>
+      filteredData = filteredData.filter(category =>
+        Object.values(category).some(value =>
           String(value).toLowerCase().includes(lowercasedGeneralQuery)
         )
       );
@@ -93,13 +85,19 @@ const LoadDetailList = () => {
     setFilteredCategories(filteredData);
   };
 
+  useEffect(() => {
+    handleSearch();
+  }, [generalQuery, unLoadedDateQuery]);
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       handleSearch();
     }
   };
 
-
+  const clearDate = () => {
+    setUnLoadedDateQuery(null);
+  };
 
   if (loading) {
     return <Loading />;
@@ -142,45 +140,19 @@ const LoadDetailList = () => {
               borderRadius: 1,
             }}
           >
-            <TextField
-              select
-              size="small"
-              value={timberTypeQuery}
-              onChange={(e) => setTimberTypeQuery(e.target.value)}
-              label="Timber Type"
-              sx={{
-                minWidth: "180px",
-              }}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value="Sapu">Sapu</MenuItem>
-              <MenuItem value="Grandis">Grandis</MenuItem>
-              <MenuItem value="Thekka">Thekka</MenuItem>
-              <MenuItem value="Micro">Micro</MenuItem>
-              <MenuItem value="Amba">Amba</MenuItem>
-              <MenuItem value="Kos">Kos</MenuItem>
-              <MenuItem value="Maara">Maara</MenuItem>
-              <MenuItem value="LunuMidella">LunuMidella</MenuItem>
-            </TextField>
-            <TextField
-              select
-              size="small"
-              value={timberNatuerQuery}
-              onChange={(e) => setTimberNatuerQuery(e.target.value)}
-              label="Timber Nature"
-              sx={{
-                minWidth: "180px",
-              }}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
-              <MenuItem value="Planks">Planks</MenuItem>
-              <MenuItem value="Dust">Dust</MenuItem>
-            </TextField>
+            <Stack direction="row" spacing={2}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="UnLoaded date"
+                  value={unLoadedDateQuery}
+                  onChange={(date) => setUnLoadedDateQuery(date)}
+                  renderInput={(params) => <TextField {...params} size="small" />}
+                />
+              </LocalizationProvider>
+              <Button variant="outlined" onClick={clearDate}>
+                Clear
+              </Button>
+            </Stack>
             <TextField
               size="small"
               InputProps={{
@@ -203,7 +175,7 @@ const LoadDetailList = () => {
             sx={{
               bgcolor: "background.default",
             }}
-            rows={categories}
+            rows={filteredCategories}
             columns={columns}
             initialState={{
               pagination: {

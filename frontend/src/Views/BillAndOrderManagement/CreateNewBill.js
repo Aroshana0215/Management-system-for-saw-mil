@@ -65,23 +65,14 @@ const CreateNewBill = () => {
     event.preventDefault();
     try {
       console.log("formData:",formData);
-      const billId = await newBill(formData);
+      const bill = await newBill(formData);
 
-      if (billId != null) {
+      if (bill != null) {
+        console.log("bill:",bill);
         console.log("woodData:",woodData);
         for (const wood of woodData) {
           const stockUpdateData = {
-            totalPieces: wood.totalPieces,
-            changedAmount: wood.changedAmount,
-            previousAmount: wood.previousAmount,
-            categoryId_fk: wood.categoryId_fk,
-            stk_id_fk: wood.stk_id_fk,
             status: "D",
-            billId_fk: "",
-            createdBy: "",
-            createdDate: "",
-            modifiedBy: "",
-            modifiedDate: "",
           };
           await updateStockSummaryDetails(wood.summaryId, stockUpdateData);
 
@@ -90,10 +81,10 @@ const CreateNewBill = () => {
             changedAmount: wood.amount,
             previousAmount: wood.totalPieces,
             categoryId_fk: wood.categoryId_fk,
-            length : wood.length,
+            length : wood.requestLength,
             stk_id_fk: "",
             status: "A",
-            billId_fk: billId,
+            billId_fk: bill.id,
             createdBy: "",
             createdDate: "",
             modifiedBy: "",
@@ -104,17 +95,14 @@ const CreateNewBill = () => {
           console.log("newstockSummaryData:",newstockSummaryData);
 
           if (newstockSummaryData != null) {
-            const data = await getbillDetailsById(billId);
-            console.log("getbillDetailsById:",data);
-
             const saveOrderData = {
-              discountPrice: data.discountPrice || "",
-              categoryId_fk: data.categoryId_fk || "",
-              availablePiecesAmount: data.availablePiecesAmount || "",
-              remainPiecesAmount: data.remainPiecesAmount || "",
-              neededPiecesAmount: data.neededPiecesAmount || "",
+              discountPrice: wood.billPrice || "",
+              categoryId_fk: wood.categoryId_fk || "",
+              availablePiecesAmount: wood.totalPieces || "",
+              neededPiecesAmount: wood.amount || "",
+              tobeCut: wood.toBeCut || "",
               status: "A",
-              billId_fk: billId,
+              billId_fk: bill.id,
               createdBy: "",
               createdDate: "",
               modifiedBy: "",
@@ -130,12 +118,10 @@ const CreateNewBill = () => {
           type: "Bill",
           des: "Nothing",
           amount: formData.totalAmount,
-          BilId: billId || "",
+          BilId: bill.billID || "",
           status: "A",
-          createdBy: "",
-          createdDate: "",
-          modifiedBy: "",
-          modifiedDate: "",
+          createdBy: user.displayName,
+          createdDate: currentDateTime,
         };
 
         const incomeId = await newIncome(saveIncomeData);
@@ -170,7 +156,7 @@ const CreateNewBill = () => {
           }
         }
       }
-      navigate(`/bill/view/${billId}`);
+      navigate(`/bill/view/${bill.id}`);
     } catch (error) {
       console.error("Error creating category:", error.message);
     }

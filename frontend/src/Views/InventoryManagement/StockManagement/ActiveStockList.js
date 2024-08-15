@@ -16,11 +16,13 @@ const ActiveStockList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timberTypeQuery, setTimberTypeQuery] = useState("");
+  const [timberNatuerQuery, setTimberNatuerQuery] = useState("");
   const [dimensionsQuery, setDimensionsQuery] = useState("");
   const [categoryIdQuery, setCategoryIdQuery] = useState("");
   const [generalQuery, setGeneralQuery] = useState("");
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [filteredCategoryId, setFilteredCategoryId] = useState([]);
+  const [dimensionOptions, setDimensionOptions] = useState([]);
 
   const columns = [
     { field: "categoryId", headerName: "Category ID", width: 150 },
@@ -105,6 +107,31 @@ const ActiveStockList = () => {
 
     fetchData();
   }, []);
+
+
+  const updateDimensionOptions = (nature) => {
+    if (nature === "Planks") {
+      setDimensionOptions([
+        "0.3 x 5",
+        "0.6 x 5",
+        "0.9 x 5",
+        "0 x 0"
+      ]);
+    } else if (nature === "Lumber&beam") {
+      setDimensionOptions([
+        "2 x 2",
+        "2 x 4",
+        "2 x 5",
+        "2 x 6",
+        "3 x 2",
+        "3 x 4"
+      ]);
+    } else {
+      setDimensionOptions([]);
+    }
+  };
+
+
   const handleSearch = () => {
     let filteredData = summaryData;
 
@@ -115,13 +142,17 @@ const ActiveStockList = () => {
       );
     }
 
-    if (categoryIdQuery) {
-      const lowercasedCategoryIdQuery = categoryIdQuery.toLowerCase();
+
+    if (timberNatuerQuery) {
+      const lowercasedTimberNatuerQuery = timberNatuerQuery.toLowerCase();
+      console.log("timberNatuerQuery:", timberNatuerQuery);
+      updateDimensionOptions(timberNatuerQuery);
       filteredData = filteredData.filter((category) =>
-        category.categoryID.toLowerCase().includes(lowercasedCategoryIdQuery)
+        category.timberNature.toLowerCase().includes(lowercasedTimberNatuerQuery)
       );
     }
-    console.log("dimensionsQuery:", dimensionsQuery);
+
+
     if (dimensionsQuery) {
       const lowercasedDimensionsQuery = dimensionsQuery.toLowerCase();
       console.log("lowercasedDimensionsQuery:", lowercasedDimensionsQuery);
@@ -164,7 +195,12 @@ const ActiveStockList = () => {
       }
     };
     fetchData();
-  }, [timberTypeQuery, categoryIdQuery, filteredCategories]);
+  }, [timberTypeQuery, filteredCategories]);
+
+  useEffect(() => {
+    handleSearch();
+  }, [generalQuery, timberTypeQuery, timberNatuerQuery, dimensionsQuery]);
+
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -214,6 +250,7 @@ const ActiveStockList = () => {
               borderRadius: 1,
             }}
           >
+                        <Stack direction="row" spacing={2}>
             <TextField
               select
               size="small"
@@ -236,6 +273,27 @@ const ActiveStockList = () => {
               <MenuItem value="Maara">Maara</MenuItem>
               <MenuItem value="LunuMidella">LunuMidella</MenuItem>
             </TextField>
+
+            <TextField
+                select
+                size="small"
+                value={timberNatuerQuery}
+                onChange={(e) => {
+                  setTimberNatuerQuery(e.target.value);
+                  updateDimensionOptions(e.target.value);
+                }}
+                label="Timber Nature"
+                sx={{
+                  minWidth: "180px",
+                }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
+                <MenuItem value="Planks">Planks</MenuItem>
+                <MenuItem value="Dust">Dust</MenuItem>
+              </TextField>
 
             <TextField
               select
@@ -263,26 +321,7 @@ const ActiveStockList = () => {
 
               <MenuItem value="0 x 0">0 x 0</MenuItem>
             </TextField>
-
-            <TextField
-              select
-              size="small"
-              value={categoryIdQuery}
-              onChange={(e) => setCategoryIdQuery(e.target.value)}
-              label="Category Id"
-              sx={{
-                minWidth: "180px",
-              }}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {filteredCategoryId && filteredCategoryId.map((category) => (
-                <MenuItem key={category.id} value={category.categoryId}>
-                  {category.categoryId}
-                </MenuItem>
-              ))}
-            </TextField>
+            </Stack>
             <TextField
               size="small"
               InputProps={{
@@ -296,7 +335,7 @@ const ActiveStockList = () => {
               variant="outlined"
               value={generalQuery}
               onChange={(e) => setGeneralQuery(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onKeyDown={handleKeyDown}
             />
           </Stack>
         </Grid>

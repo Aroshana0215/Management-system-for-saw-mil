@@ -61,8 +61,13 @@ const [formData, setFormData] = useState({
     try {
 
       for (const item of payloadBulk) {
-        console.log("item:",item);
-        const stockData = await NewInventory(item);
+        const newItemData = {
+          ...item,
+          status: "A",
+          createdBy: user.displayName,
+          createdDate: formattedDate,
+        }
+        const stockData = await NewInventory(newItemData);
         console.log("stockData:",stockData)
         if (stockData != null){
           
@@ -75,7 +80,7 @@ const [formData, setFormData] = useState({
               changedAmount: stockData.amountOfPieces,
               previousAmount: "0",
               categoryId_fk: stockData.categoryId_fk,
-              stk_id_fk: stockData.timberId_fk,
+              stk_id_fk: stockData.inventoryId,
               length : stockData.length,
               status: "A",
               billId_fk:"",
@@ -87,18 +92,7 @@ const [formData, setFormData] = useState({
             const stockSummarykData = await createStockSummary(stockSumData);
           }else{
             const stockUpdateData = {
-              totalPieces: resultData.totalPieces,
-              changedAmount: resultData.changedAmount,
-              previousAmount: resultData.previousAmount,
-              categoryId_fk: resultData.categoryId_fk,
-              stk_id_fk: resultData.stk_id_fk,
-              length : resultData.length,
               status: "D",
-              billId_fk:"",
-              createdBy:"",
-              createdDate:"",
-              modifiedBy:"",
-              modifiedDate:"",
             };
             const updatedkData = await updateStockSummaryDetails(resultData.id, stockUpdateData);
   
