@@ -8,6 +8,8 @@ import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const DailyDetailList = () => {
   const [details, setDetails] = useState([]);
@@ -15,9 +17,9 @@ const DailyDetailList = () => {
   const [error, setError] = useState(null);
   const [filteredDetails, setFilteredDetails] = useState([]);
   const [generalQuery, setGeneralQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
     {
       field: "dateTime",
       headerName: "Date",
@@ -32,19 +34,10 @@ const DailyDetailList = () => {
       field: "advancePerDay",
       headerName: "Advance (RS:)",
       width: 150,
-      renderCell: ({ row }) => {
-        return `${row.advancePerDay}.00`;
-      },
+      renderCell: ({ row }) => `${row.advancePerDay}.00`,
     },
-    { field: "empID", headerName: "EID", width: 100 },
-    { field: "status", headerName: "Status", width: 100 },
+    { field: "eid_name", headerName: "Employee Name", width: 100 },
     { field: "createdBy", headerName: "Created By", width: 120 },
-    {
-      field: "createdDate",
-      headerName: "Created Date",
-      width: 150,
-      renderCell: ({ row }) => formatDate(row.createdDate),
-    },
     {
       field: "actions",
       headerName: "Actions",
@@ -63,7 +56,6 @@ const DailyDetailList = () => {
     const fetchData = async () => {
       try {
         const data = await getAllemployeeDailyDetails();
-        console.log("Fetched data:", data);
         if (Array.isArray(data)) {
           setDetails(data);
           setFilteredDetails(data);
@@ -92,17 +84,35 @@ const DailyDetailList = () => {
       );
     }
 
+    if (selectedDate) {
+      filteredData = filteredData.filter((detail) => {
+        const detailDate = formatDate(detail.dateTime);
+        const selectedDateFormatted = selectedDate.toISOString().slice(0, 10);
+        return detailDate === selectedDateFormatted;
+      });
+    }
+
     setFilteredDetails(filteredData);
   };
 
   useEffect(() => {
     handleSearch();
-  }, [generalQuery]);
+  }, [generalQuery, selectedDate]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       handleSearch();
     }
+  };
+
+  const clearDateFilter = () => {
+    setSelectedDate(null);
+  };
+
+  const formatDate = (timestamp) => {
+    if (!timestamp || !timestamp.seconds) return "";
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toISOString().slice(0, 10);
   };
 
   if (loading) {
@@ -112,12 +122,6 @@ const DailyDetailList = () => {
   if (error) {
     return <ErrorAlert error={error} />;
   }
-
-  const formatDate = (timestamp) => {
-    if (!timestamp || !timestamp.seconds) return "";
-    const date = new Date(timestamp.seconds * 1000);
-    return date.toISOString().slice(0, 10);
-  };
 
   return (
     <>
@@ -155,6 +159,24 @@ const DailyDetailList = () => {
               border: "1px solid rgba(0, 0, 0, 0.12)",
             }}
           >
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Filter by Date"
+                value={selectedDate}
+                onChange={(newValue) => setSelectedDate(newValue)}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    size="small" 
+                    sx={{ minWidth: "180px", height: "40px" }} 
+                  />
+                )}
+              />
+            </LocalizationProvider>
+            <Button variant="outlined" onClick={clearDateFilter}>
+              Clear
+            </Button>
+
             <TextField
               size="small"
               InputProps={{

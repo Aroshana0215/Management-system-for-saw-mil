@@ -14,7 +14,7 @@ const EPaymentList = () => {
   const [error, setError] = useState(null);
   const { eid } = useParams();
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
+    { field: "paySheetID", headerName: "ID", width: 90 },
     {
       field: "fromDate",
       headerName: "From Date",
@@ -31,7 +31,8 @@ const EPaymentList = () => {
     { field: "totalOt", headerName: "Total Ot", width: 120 },
     { field: "reduceAmount", headerName: "Reduce Amount", width: 150 },
     { field: "paymentStatus", headerName: "Payment Status", width: 150 },
-    { field: "eid_fk", headerName: "eid_fk", width: 120 },
+    // { field: "eid", headerName: "EID", width: 120 },
+    { field: "employeeName", headerName: "Employee Name", width: 120 },
     { field: "totalPayment", headerName: "Total Payment", width: 150 },
     { field: "totalAdvance", headerName: "Total Advance", width: 150 },
     { field: "status", headerName: "Status", width: 120 },
@@ -71,7 +72,7 @@ const EPaymentList = () => {
 
   const formatDateOfBirth = (dateObject) => {
     const date = new Date(dateObject.seconds * 1000);
-    return date.toISOString().slice(0, 19).replace("T", " ");
+    return date.toISOString().slice(0, 10);
   };
 
   return (

@@ -14,6 +14,7 @@ import { createCategory } from "../../services/PriceCardService"; // Import the 
 
 const CreateCategory = () => {
   const { user } = useSelector((state) => state.auth);
+  console.log("user:",user);
 let currentDate = new Date();
 let year = currentDate.getFullYear();
 let month = ('0' + (currentDate.getMonth() + 1)).slice(-2); // Months are zero-based
@@ -78,6 +79,7 @@ const [isLumber, setisLumber] = useState(false);
     const handleSubmit = async (event) => {
       event.preventDefault();
       try {
+        console.log("payload:",payload);
         const loadId = await createCategory(payload);
         window.location.href = `/price`;
       } catch (error) {

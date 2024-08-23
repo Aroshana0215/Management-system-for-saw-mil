@@ -26,12 +26,15 @@ const CreatePayment = () => {
   const [workDetail, setWorkDetail] = useState([]);
   const [empData, setEmpData] = useState({
     name: "",
+    empID: "",
     nic: "",
     address:"",
     otValuePerHour:"",
     salaryPerDay:"",
     currentLendAmount:"",
   });
+
+  console.log("empData",empData);
 
   const { eid } = useParams(); // Get categoryId from URL params
 
@@ -40,6 +43,7 @@ const CreatePayment = () => {
     const currentDate = new Date();
     const formatedFromDate = new Date(fromDate);
     const formatedToDate = new Date(toDate);
+
     const formData = {
       totalPayment,
       totalAdvance,
@@ -49,7 +53,9 @@ const CreatePayment = () => {
       toDate: formatedToDate,
       currentDate: currentDate.toISOString(),
       // dateRangeLendAmount : ,
-      eid_fk: eid,
+      eid_fk: empData.id,
+      eid: empData.empID,
+      employeeName: empData.name,
       paymentStatus,
       reduceAmount,
       actualPayment,
@@ -61,6 +67,7 @@ const CreatePayment = () => {
     };
 
     try {
+      console.log("formData:",formData);
       const paysheetId = await newPaySheet(formData);
       if (paysheetId != null) {
         if (empData.currentLendAmount > 0.0) {
@@ -76,7 +83,7 @@ const CreatePayment = () => {
       }
       console.log("New category ID:", paysheetId);
 
-      // window.location.href = `/employee/payment/${eid}`;
+      window.location.href = `/employee/payment/${eid}`;
     } catch (error) {
       console.error("Error creating pay sheet details:", error.message);
       // Handle error

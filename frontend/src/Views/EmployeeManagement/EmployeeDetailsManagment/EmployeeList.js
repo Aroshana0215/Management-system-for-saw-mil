@@ -19,12 +19,12 @@ const EmployeeList = () => {
     { field: "empID", headerName: "ID", width: 90 },
     { field: "name", headerName: "Name", width: 150 },
     { field: "phoneNo", headerName: "Phone No", width: 120 },
-    {
-      field: "dateOfBirth",
-      headerName: "DOB",
-      width: 120,
-      renderCell: ({ row }) => formatDate(row.dateOfBirth),
-    },
+    // {
+    //   field: "dateOfBirth",
+    //   headerName: "DOB",
+    //   width: 120,
+    //   renderCell: ({ row }) => formatDate(row.dateOfBirth),
+    // },
     {
       field: "currentLendAmount",
       headerName: "Lend (RS:)",
