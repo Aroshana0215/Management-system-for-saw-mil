@@ -24,13 +24,21 @@ export default function MainSideBar() {
   const primaryColor = Theme.palette.primary.main;
   const secondaryColor = "text.secondary";
   const [openInventory, setOpenInventory] = React.useState(true);
+  const [openEmployee, setOpenEmployee] = React.useState(true);
   const [openFinance, setOpenFinance] = React.useState(true);
+  const [openReport, setOpenReport] = React.useState(true);
 
   const handleInventoryClick = () => {
     setOpenInventory(!openInventory);
   };
   const handleFinanceClick = () => {
     setOpenFinance(!openFinance);
+  };
+  const handleEmployeeClick = () => {
+    setOpenEmployee(!openEmployee);
+  };
+  const handleReportClick = () => {
+    setOpenReport(!openReport);
   };
   return (
     <Box
@@ -79,14 +87,18 @@ export default function MainSideBar() {
             primary="Bill and Order"
           />
         </ListItemButton>
+
+
         <ListItemButton
-          component={Link}
-          to={"/employee"}
-          selected={isSelected("/employee")}
+          onClick={handleEmployeeClick}
+          selected={isSelected("/employee") || isSelected("/employee/daily")}
         >
           <ListItemIcon
             sx={{
-              color: isSelected("/employee") ? primaryColor : secondaryColor,
+              color:
+                isSelected("/employee") || isSelected("/employee/daily")
+                  ? primaryColor
+                  : secondaryColor,
             }}
           >
             <BadgeIcon />
@@ -94,19 +106,45 @@ export default function MainSideBar() {
           <ListItemText
             sx={{ marginLeft: "-18px" }}
             primaryTypographyProps={{
-              color: isSelected("/employee") ? primaryColor : secondaryColor,
+              color:
+                isSelected("/employee") || isSelected("/employee/daily")
+                  ? primaryColor
+                  : secondaryColor,
             }}
-            primary="Employee"
+            primary="Emplyee"
           />
         </ListItemButton>
+        <Collapse in={openEmployee} timeout="auto" unmountOnExit>
+          <List dense disablePadding>
+            <ListItemButton component={Link} to={"/employee"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Employee Details"
+                primaryTypographyProps={{
+                  color: isSelected("/employee") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton component={Link} to={"/employee/daily"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Daily Records"
+                primaryTypographyProps={{
+                  color: isSelected("/employee/daily") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
         <ListItemButton
           onClick={handleInventoryClick}
-          selected={isSelected("/load") || isSelected("/stock")}
+          selected={isSelected("/load") || isSelected("/activeStock")}
         >
           <ListItemIcon
             sx={{
               color:
-                isSelected("/load") || isSelected("/stock")
+                isSelected("/load") || isSelected("/activeStock")
                   ? primaryColor
                   : secondaryColor,
             }}
@@ -117,7 +155,7 @@ export default function MainSideBar() {
             sx={{ marginLeft: "-18px" }}
             primaryTypographyProps={{
               color:
-                isSelected("/load") || isSelected("/stock")
+                isSelected("/load") || isSelected("/activeStock")
                   ? primaryColor
                   : secondaryColor,
             }}
@@ -146,6 +184,7 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
+
         <ListItemButton selected={isSelected("/Machine")}>
           <ListItemIcon
             sx={{
@@ -213,7 +252,7 @@ export default function MainSideBar() {
 
 
         <ListItemButton
-          onClick={handleFinanceClick}
+          onClick={handleReportClick}
           selected={isSelected("/income") || isSelected("/exp")}
         >
           <ListItemIcon
@@ -237,7 +276,7 @@ export default function MainSideBar() {
             primary="Report and Summary"
           />
         </ListItemButton>
-        <Collapse in={openFinance} timeout="auto" unmountOnExit>
+        <Collapse in={openReport} timeout="auto" unmountOnExit>
           <List dense disablePadding>
             <ListItemButton component={Link} to={"/stockSummary"}>
               <ListItemIcon></ListItemIcon>

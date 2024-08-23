@@ -11,7 +11,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { getCategoryById, updateCategory } from "../../services/PriceCardService"; // Import getCategoryById and updateCategory functions
+import { getById, updateCategory } from "../../services/PriceCardService"; // Import getCategoryById and updateCategory functions
 
 const UpdateCategory = () => {
   const { categoryId } = useParams(); // Get categoryId from URL params
@@ -20,7 +20,8 @@ const UpdateCategory = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getCategoryById(categoryId);
+        console.log("categoryId:",categoryId);
+        const data = await getById(categoryId);
         console.log("data:",data);
         if(data.id)
           {

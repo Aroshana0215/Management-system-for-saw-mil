@@ -1,37 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { getAllemployeeDetails } from '../../../services/EmployeeManagementService/EmployeeDetailService';
-import { Stack,Typography } from "@mui/material";
-import { Grid, Button } from "@mui/material";
+import { Stack, Typography, InputAdornment } from "@mui/material";
+import { Grid, Button, TextField } from "@mui/material";
 import { Link } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 
 const EmployeeList = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [generalQuery, setGeneralQuery] = useState("");
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
+    { field: "empID", headerName: "ID", width: 90 },
     { field: "name", headerName: "Name", width: 150 },
-    { field: "address", headerName: "Address", width: 180 },
-    { field: "nic", headerName: "NIC", width: 120 },
+    { field: "phoneNo", headerName: "Phone No", width: 120 },
+    // {
+    //   field: "dateOfBirth",
+    //   headerName: "DOB",
+    //   width: 120,
+    //   renderCell: ({ row }) => formatDate(row.dateOfBirth),
+    // },
     {
-      field: "dateOfBirth",
-      headerName: "BOD",
-      width: 120,
-      renderCell: ({ row }) => formatDateOfBirth(row.dateOfBirth),
+      field: "currentLendAmount",
+      headerName: "Lend (RS:)",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.currentLendAmount}.00`;
+      },
     },
-    { field: "currentLendAmount", headerName: "Lend Amount", width: 140 },
-    { field: "otValuePerHour", headerName: "OT Value", width: 120 },
-    { field: "salaryPerDay", headerName: "Salary", width: 120 },
     {
-      field: "joinDate",
-      headerName: "Join Date",
-      width: 150,
-      renderCell: ({ row }) => formatDateOfBirth(row.joinDate),
+      field: "otValuePerHour",
+      headerName: "OT (RS:)",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.otValuePerHour}.00`;
+      },
     },
-    { field: "status", headerName: "Status", width: 120 },
+    {
+      field: "salaryPerDay",
+      headerName: "Salary (RS:)",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.salaryPerDay}.00`;
+      },
+    },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
     {
@@ -63,6 +80,7 @@ const EmployeeList = () => {
         console.log("Fetched data:", data);
         if (Array.isArray(data)) {
           setCategories(data);
+          setFilteredCategories(data);
           setLoading(false);
         } else {
           throw new Error("Invalid data format received from API");
@@ -76,6 +94,31 @@ const EmployeeList = () => {
     fetchData();
   }, []);
 
+  const handleSearch = () => {
+    let filteredData = categories;
+
+    if (generalQuery) {
+      const lowercasedGeneralQuery = generalQuery.toLowerCase();
+      filteredData = filteredData.filter((category) =>
+        Object.values(category).some((value) =>
+          String(value).toLowerCase().includes(lowercasedGeneralQuery)
+        )
+      );
+    }
+
+    setFilteredCategories(filteredData);
+  };
+
+  useEffect(() => {
+    handleSearch();
+  }, [generalQuery]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -84,9 +127,9 @@ const EmployeeList = () => {
     return <ErrorAlert error={error} />;
   }
 
-  const formatDateOfBirth = (dateObject) => {
+  const formatDate = (dateObject) => {
     const date = new Date(dateObject.seconds * 1000);
-    return date.toISOString().slice(0, 19).replace("T", " ");
+    return date.toISOString().slice(0, 10); // Extracting only the date part
   };
 
   return (
@@ -95,20 +138,60 @@ const EmployeeList = () => {
         <Grid item xs={12} p={2}>
           <Stack
             direction="row"
-            justifyContent="flex-start"
+            justifyContent="space-between"
             alignItems="center"
           >
             <Typography variant="h6" fontWeight="bold" color="primary">
               Employee Details
             </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddCircleOutlineOutlinedIcon />}
+              component={Link}
+              to={"/employee/add"}
+              sx={{ padding: "5px 15px", height: "45px" }}
+            >
+              New
+            </Button>
           </Stack>
         </Grid>
+
+        <Grid item xs={12} p={1}>
+          <Stack
+            p={2}
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{
+              bgcolor: "background.default",
+              borderRadius: 1,
+              border: "1px solid rgba(0, 0, 0, 0.12)",
+            }}
+          >
+            <TextField
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Search All Fields"
+              variant="outlined"
+              value={generalQuery}
+              onChange={(e) => setGeneralQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </Stack>
+        </Grid>
+
         <Grid item xs={12} p={2}>
           <DataGrid
             sx={{
               bgcolor: "background.default",
             }}
-            rows={categories}
+            rows={filteredCategories}
             columns={columns}
             initialState={{
               pagination: {

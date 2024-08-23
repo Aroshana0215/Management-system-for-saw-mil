@@ -6,6 +6,8 @@ import {
   getDoc,
   updateDoc,
   doc,
+  setDoc,
+  runTransaction,
   query,
   where,
   limit,
@@ -16,7 +18,20 @@ const db = getFirestore();
 
 export const newPaySheet = async (employeePaySheetData) => {
   console.log("employeePaySheetData:", employeePaySheetData.eid_fk);
+
+  const counterDocRef = doc(db, "counters", "paySheetCounter");
+
   try {
+    // Check if the counter document exists
+    const counterDocSnapshot = await getDoc(counterDocRef);
+
+    if (!counterDocSnapshot.exists()) {
+      // If the counter document does not exist, create it with currentID: 0
+      await setDoc(counterDocRef, { currentID: 0 });
+      console.log("PaySheet counter document created with initial currentID: 0");
+    }
+
+    // Check if there's an active paysheet for the employee
     const querySnapshot = await getDocs(
       query(
         collection(db, "employeePaySheet"),
@@ -26,27 +41,23 @@ export const newPaySheet = async (employeePaySheetData) => {
     );
 
     if (!querySnapshot.empty && querySnapshot.docs.length > 0) {
-      console.log("in");
+      console.log("Active paysheet found, checking dates");
 
-      const querySnapshot = await getDocs(
+      const latestPaySheetSnapshot = await getDocs(
         query(
           collection(db, "employeePaySheet"),
           where("eid_fk", "==", employeePaySheetData.eid_fk),
           where("status", "==", "A"),
-          orderBy("createdDate", "desc"), // Then order by createdDate descending
-          limit(1) // Limit the result to 1 document
+          orderBy("createdDate", "desc"),
+          limit(1)
         )
       );
 
-      console.log("querySnapshot:", querySnapshot.docs[0].data());
-
-      if (!querySnapshot.empty) {
-        console.log("in2");
-        const firstDoc = querySnapshot.docs[0].data();
+      if (!latestPaySheetSnapshot.empty) {
+        const firstDoc = latestPaySheetSnapshot.docs[0].data();
         let filteredDate = "";
 
         if (firstDoc.toDate != null) {
-          console.log("in");
           const date = new Date(firstDoc.toDate.seconds * 1000);
           const options = {
             weekday: "short",
@@ -60,18 +71,35 @@ export const newPaySheet = async (employeePaySheetData) => {
           };
           filteredDate = date.toLocaleString("en-US", options);
         }
-        const fromDate = new Date(employeePaySheetData.fromDate);
-        const toDate = new Date(employeePaySheetData.toDate);
-        const parsedFilteredDate = new Date(filteredDate);
-        if (toDate <= parsedFilteredDate || fromDate <= parsedFilteredDate) {
-          throw new Error("Cannot enter Pay sheet record for paid date.");
-        }
+
+        // const fromDate = new Date(employeePaySheetData.fromDate);
+        // const toDate = new Date(employeePaySheetData.toDate);
+        // const parsedFilteredDate = new Date(filteredDate);
+        // if (toDate <= parsedFilteredDate || fromDate <= parsedFilteredDate) {
+        //   throw new Error("Cannot enter Pay sheet record for paid date.");
+        // }
       }
     }
 
+    // Run a transaction to ensure atomicity and generate the paySheet ID
+    const paySheetID = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterDocRef);
+
+      const currentID = counterDoc.data().currentID || 0;
+      const newID = currentID + 1;
+      const newPaySheetID = `PAY${newID}`;
+
+      // Update the counter document with the new ID
+      transaction.update(counterDocRef, { currentID: newID });
+
+      return newPaySheetID;
+    });
+
+    // Add the new paysheet record with the generated paySheetID
+    const employeePaySheetDataWithID = { ...employeePaySheetData, paySheetID };
     const docRef = await addDoc(
       collection(db, "employeePaySheet"),
-      employeePaySheetData
+      employeePaySheetDataWithID
     );
     console.log(
       "New employeePaySheet entered into the system with ID: ",
@@ -82,7 +110,7 @@ export const newPaySheet = async (employeePaySheetData) => {
     console.error("Error Entering New employeePaySheet: ", error.message);
     throw error;
   }
-};
+}
 
 export const getPaysheetDetailsByEmployee = async (eid) => {
   try {

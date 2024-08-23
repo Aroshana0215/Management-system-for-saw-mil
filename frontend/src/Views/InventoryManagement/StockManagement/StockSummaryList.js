@@ -30,7 +30,6 @@ const StockSummaryList = () => {
     { field: "status", headerName: "Status", width: 120 },
     { field: "billId_fk", headerName: "Bill ID", width: 120 },
     { field: "stk_id_fk", headerName: "Stock ID", width: 120 },
-    { field: "status", headerName: "Status", width: 120 },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
   ];

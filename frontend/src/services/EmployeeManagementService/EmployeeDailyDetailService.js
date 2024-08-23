@@ -13,6 +13,7 @@ import {
 const db = getFirestore();
 
 export const newDailyDetail = async (employeeDailyDetailsData) => {
+  console.log("employeeDailyDetailsData:",employeeDailyDetailsData);
   try {
     // Check if a record with the same dateTime, eid_fk, and status=A exists
     const querySnapshot = await getDocs(

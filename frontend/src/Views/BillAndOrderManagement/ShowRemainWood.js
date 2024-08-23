@@ -18,16 +18,21 @@ const ShowRemainWood = () => {
   const { payloadBulk } = location.state;
   const [woodData, setWoodData] = useState([]);
 
+  console.log("payloadBulk:",payloadBulk);
+  console.log("woodData:",woodData);
+
   useEffect(() => {
     const fetchData = async () => {
       const woodDetails = await Promise.all(
         payloadBulk.map(async (payload) => {
           const categoryData = await getCategoryById(payload.categoryId);
+          console.log(" categoryData :",categoryData);
           if (categoryData) {
             const data = await getActiveStockSummaryDetails(
               categoryData.categoryId,
               payload.length
             );
+            console.log("data:",data);
             if (data) {
               const toBeCut =
                 data.totalPieces > payload.amount
@@ -46,6 +51,7 @@ const ShowRemainWood = () => {
                 stk_id_fk: data.stk_id_fk,
                 toBeCut,
                 summaryId: data.id,
+                requestLength:payload.length,
               };
             }
           }
