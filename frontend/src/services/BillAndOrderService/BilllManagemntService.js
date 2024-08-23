@@ -39,7 +39,13 @@ export const newBill = async (billDetailsData) => {
     const billDetailsDataWithID = { ...billDetailsData, billID: billID };
     const docRef = await addDoc(collection(db, "billDetails"), billDetailsDataWithID);
     console.log("New billDetails entered into the system with ID: ", docRef.id);
-    return docRef.id;
+    // Retrieve the saved document
+    const savedDoc = await getDoc(docRef);
+    if (savedDoc.exists()) {
+      return { id: docRef.id, ...savedDoc.data() };
+    } else {
+      throw new Error("Saved document does not exist!");
+    }
   } catch (error) {
     console.error("Error Entering New billDetails: ", error.message);
     throw error;

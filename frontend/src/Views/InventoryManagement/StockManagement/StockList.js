@@ -20,8 +20,6 @@ const StockList = () => {
     { field: "timberId_fk", headerName: "Timber ID FK", width: 150 },
     { field: "amountOfPieces", headerName: "Amount of Pieces", width: 160 },
     { field: "MachineNo", headerName: "Machine No", width: 120 },
-    { field: "driver", headerName: "Driver", width: 120 },
-    { field: "otherDetails", headerName: "Other Details", width: 140 },
     { field: "status", headerName: "Status", width: 120 },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },

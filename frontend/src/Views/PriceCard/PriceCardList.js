@@ -23,7 +23,9 @@ const PriceCardList = () => {
   const [error, setError] = useState(null);
   const [timberTypeQuery, setTimberTypeQuery] = useState("");
   const [timberNatuerQuery, setTimberNatuerQuery] = useState("");
+  const [dimensionsQuery, setDimensionsQuery] = useState("");
   const [generalQuery, setGeneralQuery] = useState("");
+  const [dimensionOptions, setDimensionOptions] = useState([]);
 
   const columns = [
     { field: "categoryId", headerName: "Id", width: 130 },
@@ -93,6 +95,28 @@ const PriceCardList = () => {
     fetchData();
   }, []);
 
+  const updateDimensionOptions = (nature) => {
+    if (nature === "Planks") {
+      setDimensionOptions([
+        "0.3 x 5",
+        "0.6 x 5",
+        "0.9 x 5",
+        "0 x 0"
+      ]);
+    } else if (nature === "Lumber&beam") {
+      setDimensionOptions([
+        "2 x 2",
+        "2 x 4",
+        "2 x 5",
+        "2 x 6",
+        "3 x 2",
+        "3 x 4"
+      ]);
+    } else {
+      setDimensionOptions([]);
+    }
+  };
+
   const handleSearch = () => {
     let filteredData = categories;
 
@@ -105,8 +129,22 @@ const PriceCardList = () => {
 
     if (timberNatuerQuery) {
       const lowercasedTimberNatuerQuery = timberNatuerQuery.toLowerCase();
+      console.log("timberNatuerQuery:", timberNatuerQuery);
+      updateDimensionOptions(timberNatuerQuery);
       filteredData = filteredData.filter((category) =>
         category.timberNature.toLowerCase().includes(lowercasedTimberNatuerQuery)
+      );
+    }
+
+    if (dimensionsQuery) {
+      const lowercasedDimensionsQuery = dimensionsQuery.toLowerCase();
+      console.log("lowercasedDimensionsQuery:", lowercasedDimensionsQuery);
+
+      const [queryLength, queryWidth] = lowercasedDimensionsQuery.split('x').map(part => part.trim());
+
+      filteredData = filteredData.filter((category) =>
+        category.areaLength.toString().toLowerCase().includes(queryLength) &&
+        category.areaWidth.toString().toLowerCase().includes(queryWidth)
       );
     }
 
@@ -121,9 +159,10 @@ const PriceCardList = () => {
 
     setFilteredCategories(filteredData);
   };
+
   useEffect(() => {
     handleSearch();
-  }, [generalQuery, timberTypeQuery, timberNatuerQuery]);
+  }, [generalQuery, timberTypeQuery, timberNatuerQuery, dimensionsQuery]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -197,11 +236,15 @@ const PriceCardList = () => {
                 <MenuItem value="Maara">Maara</MenuItem>
                 <MenuItem value="LunuMidella">LunuMidella</MenuItem>
               </TextField>
+
               <TextField
                 select
                 size="small"
                 value={timberNatuerQuery}
-                onChange={(e) => setTimberNatuerQuery(e.target.value)}
+                onChange={(e) => {
+                  setTimberNatuerQuery(e.target.value);
+                  updateDimensionOptions(e.target.value);
+                }}
                 label="Timber Nature"
                 sx={{
                   minWidth: "180px",
@@ -214,6 +257,27 @@ const PriceCardList = () => {
                 <MenuItem value="Planks">Planks</MenuItem>
                 <MenuItem value="Dust">Dust</MenuItem>
               </TextField>
+
+              <TextField
+                select
+                size="small"
+                value={dimensionsQuery}
+                onChange={(e) => setDimensionsQuery(e.target.value)}
+                label="Dimensions"
+                sx={{
+                  minWidth: "180px",
+                }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {dimensionOptions.map(option => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </TextField>
+              
             </Stack>
             <TextField
               size="small"
@@ -228,7 +292,7 @@ const PriceCardList = () => {
               variant="outlined"
               value={generalQuery}
               onChange={(e) => setGeneralQuery(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onKeyDown={handleKeyDown}
             />
           </Stack>
         </Grid>
