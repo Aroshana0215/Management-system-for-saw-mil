@@ -12,7 +12,6 @@ import ReceiptIcon from "@mui/icons-material/ReceiptOutlined";
 import BadgeIcon from "@mui/icons-material/BadgeOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
-import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 
 export default function MainSideBar() {

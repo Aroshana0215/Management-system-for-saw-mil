@@ -8,8 +8,8 @@ import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 const DailyDetailList = () => {
   const [details, setDetails] = useState([]);
@@ -159,20 +159,18 @@ const DailyDetailList = () => {
               border: "1px solid rgba(0, 0, 0, 0.12)",
             }}
           >
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Filter by Date"
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-                renderInput={(params) => (
-                  <TextField 
-                    {...params} 
-                    size="small" 
-                    sx={{ minWidth: "180px", height: "40px" }} 
-                  />
-                )}
-              />
-            </LocalizationProvider>
+            <DatePicker
+              label="Filter by Date"
+              value={selectedDate}
+              onChange={(newValue) => setSelectedDate(newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  sx={{ minWidth: "180px", height: "40px" }}
+                />
+              )}
+            />
             <Button variant="outlined" onClick={clearDateFilter}>
               Clear
             </Button>

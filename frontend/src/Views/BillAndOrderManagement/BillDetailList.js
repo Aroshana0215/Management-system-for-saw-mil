@@ -4,8 +4,8 @@ import { Stack, Typography, InputAdornment } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Grid, Button, MenuItem, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import Loading from "../../Components/Progress/Loading";
 import ErrorAlert from "../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
@@ -49,17 +49,17 @@ const BillDetailList = () => {
       renderCell: ({ value }) => {
         let color;
         switch (value) {
-          case 'ORDER':
-            color = 'red';
+          case "ORDER":
+            color = "red";
             break;
-          case 'COMPLETE':
-            color = 'green';
+          case "COMPLETE":
+            color = "green";
             break;
           default:
-            color = 'inherit';
+            color = "inherit";
         }
         return <span style={{ color }}>{value}</span>;
-      }
+      },
     },
     { field: "createdDate", headerName: "Created Date", width: 140 },
     { field: "time", headerName: "Time", width: 140 },
@@ -85,7 +85,7 @@ const BillDetailList = () => {
 
   const formatTime = (dateObject) => {
     const date = new Date(dateObject);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Extracting only the time part
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); // Extracting only the time part
   };
 
   useEffect(() => {
@@ -94,10 +94,10 @@ const BillDetailList = () => {
         const data = await getAllbillDetails();
         console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
-          const formattedData = data.map(item => ({
+          const formattedData = data.map((item) => ({
             ...item,
             createdDate: formatDate(item.createdDate),
-            time: formatTime(item.createdDate)
+            time: formatTime(item.createdDate),
           }));
           setCategories(formattedData);
           setFilteredCategories(formattedData);
@@ -135,7 +135,9 @@ const BillDetailList = () => {
 
     if (createdDate) {
       filteredData = filteredData.filter((category) => {
-        const categoryDate = new Date(category.createdDate).toLocaleDateString();
+        const categoryDate = new Date(
+          category.createdDate
+        ).toLocaleDateString();
         const selectedDate = createdDate.toLocaleDateString();
         return categoryDate === selectedDate;
       });
@@ -223,21 +225,14 @@ const BillDetailList = () => {
                 <MenuItem value="CANCEL">CANCEL</MenuItem>
               </TextField>
 
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  label="Created Date"
-                  value={createdDate}
-                  onChange={(newValue) => setCreatedDate(newValue)}
-                  renderInput={(params) => (
-                    <TextField 
-                      {...params} 
-                      size="small" 
-                      sx={{ minWidth: "180px", height: "40px" }} 
-                    />
-                  )}
-                />
-              </LocalizationProvider>
-               <Button variant="outlined" onClick={clearDateFilter}>
+              <DatePicker
+                label="Created Date"
+                size="small"
+                value={createdDate}
+                onChange={(newValue) => setCreatedDate(newValue)}
+                renderInput={(params) => <TextField {...params} size="small" />}
+              />
+              <Button variant="outlined" onClick={clearDateFilter}>
                 Clear
               </Button>
             </Stack>

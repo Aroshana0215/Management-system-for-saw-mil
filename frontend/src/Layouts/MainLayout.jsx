@@ -3,7 +3,6 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import HeaderMain from "../Components/Headers/HeaderMain";
 import MainSideBar from "../Components/SideBars/MainSideBar";
-import Theme from "../Theme/Theme";
 
 const MainLayout = () => {
   return (

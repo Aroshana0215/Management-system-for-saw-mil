@@ -4,10 +4,9 @@ import {
   addDoc,
   getDocs,
   getDoc,
-  setDoc,
   updateDoc,
   doc,
-  runTransaction
+  runTransaction,
 } from "firebase/firestore";
 
 const db = getFirestore();
