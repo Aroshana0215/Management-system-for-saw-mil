@@ -159,6 +159,7 @@ const DailyDetailList = () => {
               border: "1px solid rgba(0, 0, 0, 0.12)",
             }}
           >
+            <Stack direction="row" spacing={2}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 label="Filter by Date"
@@ -176,7 +177,7 @@ const DailyDetailList = () => {
             <Button variant="outlined" onClick={clearDateFilter}>
               Clear
             </Button>
-
+            </Stack>
             <TextField
               size="small"
               InputProps={{

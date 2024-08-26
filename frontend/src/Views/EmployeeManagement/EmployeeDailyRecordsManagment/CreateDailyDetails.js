@@ -127,11 +127,11 @@ const CreateDailyDetails = () => {
         if (dailyDetailId) {
           const saveExpData = {
             date: combinedDateTime,
-            type: "EmployeEXP",
-            des: "EmployeEXP",
+            type: "Employee",
+            des: "Employee daily Advance",
             amount: detail.advancePerDay,
             status: "A",
-            // createdBy: user.displayName,
+            createdBy: user.displayName,
             createdDate: currentDate,
           };
 
@@ -270,16 +270,6 @@ const CreateDailyDetails = () => {
               Create
             </Button>
           </form>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography
-            component={Link}
-            to={"/price"}
-            variant="body2"
-            sx={{ textAlign: "center", textDecoration: "none" }}
-          >
-            Go to Price Page
-          </Typography>
         </Grid>
       </Grid>
     </Container>

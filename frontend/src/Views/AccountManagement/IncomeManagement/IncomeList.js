@@ -1,31 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { getAllincome } from '../../../services/AccountManagementService/IncomeManagmentService'; // Import the API function
-import { Stack, Typography } from "@mui/material";
-import { Grid, Button } from "@mui/material";
-
-import { Link } from "react-router-dom";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import { getAllincome } from '../../../services/AccountManagementService/IncomeManagmentService';
+import { Stack, Typography, Grid, Button, TextField, MenuItem, InputAdornment } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
-import { getbillDetailsById } from '../../../services/BillAndOrderService/BilllManagemntService';
+import { Link } from "react-router-dom";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import SearchIcon from "@mui/icons-material/Search";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { format } from 'date-fns';
 
 const IncomeList = () => {
   const [categories, setCategories] = useState([]);
-  console.log("categories:",categories)
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [incomeTypeQuery, setIncomeTypeQuery] = useState("");
+  const [generalQuery, setGeneralQuery] = useState("");
+  const [dateQuery, setDateQuery] = useState(null);
+
   const columns = [
-     { field: "incID", headerName: "ID", width: 90 },
-    // { field: 'date', headerName: 'Date', width: 150 },
+    { field: "incID", headerName: "ID", width: 90 },
+    {
+      field: "date",
+      headerName: "Date",
+      width: 150,
+      renderCell: ({ value }) => format(new Date(value), 'yyyy-MM-dd'),
+    },
     { field: "type", headerName: "Income Type", width: 150 },
     {
       field: "amount",
       headerName: "Amount (RS:)",
       width: 130,
-      renderCell: ({ row }) => {
-        return `${row.amount}.00`;
-      },
+      renderCell: ({ row }) => `${row.amount}.00`,
     },
     { field: "billID", headerName: "Bill ID", width: 150 },
     { field: "status", headerName: "Status", width: 120 },
@@ -37,11 +46,8 @@ const IncomeList = () => {
       headerName: "Actions",
       width: 120,
       renderCell: ({ row }) => (
-        // TODO : change the path
-        <Link to={`/load/timber/view/${row.id}`}>
-          <Button variant="contained" size="small">
-            View
-          </Button>
+        <Link to={`/income/view/${row.incID}`}>
+          <Button variant="contained" size="small">View</Button>
         </Link>
       ),
     },
@@ -51,10 +57,9 @@ const IncomeList = () => {
     const fetchData = async () => {
       try {
         const data = await getAllincome();
-        console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
-          // const data = await getbillDetailsById(data);
           setCategories(data);
+          setFilteredCategories(data);
           setLoading(false);
         } else {
           throw new Error("Invalid data format received from API");
@@ -68,6 +73,49 @@ const IncomeList = () => {
     fetchData();
   }, []);
 
+  const handleSearch = () => {
+    let filteredData = categories;
+
+    if (dateQuery) {
+      const formattedDate = format(dateQuery, 'yyyy-MM-dd');
+      filteredData = filteredData.filter(category =>
+        category.date.includes(formattedDate)
+      );
+    }
+
+    if (incomeTypeQuery) {
+      const lowercasedIncomeTypeQuery = incomeTypeQuery.toLowerCase();
+      filteredData = filteredData.filter(category =>
+        category.type.toLowerCase().includes(lowercasedIncomeTypeQuery)
+      );
+    }
+
+    if (generalQuery) {
+      const lowercasedGeneralQuery = generalQuery.toLowerCase();
+      filteredData = filteredData.filter(category =>
+        Object.values(category).some(value =>
+          String(value).toLowerCase().includes(lowercasedGeneralQuery)
+        )
+      );
+    }
+
+    setFilteredCategories(filteredData);
+  };
+
+  useEffect(() => {
+    handleSearch();
+  }, [incomeTypeQuery, generalQuery, dateQuery]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const clearDate = () => {
+    setDateQuery(null);
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -80,30 +128,85 @@ const IncomeList = () => {
     <>
       <Grid container>
         <Grid item xs={12} p={2}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="h6" fontWeight="bold" color="primary">
-              Income Details
-            </Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6" fontWeight="bold" color="primary">Income Details</Typography>
             <Button
               variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
-              to={"/income/add"}
+              to="/income/add"
             >
-              New Income
+              New
             </Button>
           </Stack>
         </Grid>
+
         <Grid item xs={12} p={2}>
-          <DataGrid
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            justifyContent="space-between"
             sx={{
               bgcolor: "background.default",
+              borderRadius: 1,
+              border: "1px solid rgba(0, 0, 0, 0.12)",
+              padding: "8px 16px",
             }}
-            rows={categories}
+          >
+            <Stack direction="row" spacing={2}>
+
+            <TextField
+              select
+              size="small"
+              value={incomeTypeQuery}
+              onChange={(e) => setIncomeTypeQuery(e.target.value)}
+              label="Income Type"
+              sx={{ minWidth: "180px" }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value="bill">Bill</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
+            </TextField>
+
+
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Income Date"
+                  value={dateQuery}
+                  onChange={(date) => setDateQuery(date)}
+                  renderInput={(params) => <TextField {...params} size="small" />}
+                />
+              </LocalizationProvider>
+              <Button variant="outlined" onClick={clearDate}>
+                Clear Date
+              </Button>
+            </Stack>
+
+            <TextField
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Search All Fields"
+              variant="outlined"
+              value={generalQuery}
+              onChange={(e) => setGeneralQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </Stack>
+        </Grid>
+
+        <Grid item xs={12} p={2}>
+          <DataGrid
+            sx={{ bgcolor: "background.default" }}
+            rows={filteredCategories}
             columns={columns}
             initialState={{
               pagination: {

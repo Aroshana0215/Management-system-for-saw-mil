@@ -184,7 +184,7 @@ const BillDetailList = () => {
               component={Link}
               to={"/bill/wants/wood"}
             >
-              ADD
+              New
             </Button>
           </Stack>
         </Grid>
