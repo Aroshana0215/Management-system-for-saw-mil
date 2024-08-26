@@ -13,8 +13,8 @@ import { useSelector } from "react-redux";
 import { createCategory } from "../../services/PriceCardService"; // Import the createCategory function
 
 const CreateCategory = () => {
-  const { user } = useSelector((state) => state.auth);
-  console.log("user:",user);
+const { user } = useSelector((state) => state.auth);
+
 let currentDate = new Date();
 let year = currentDate.getFullYear();
 let month = ('0' + (currentDate.getMonth() + 1)).slice(-2); // Months are zero-based
@@ -47,8 +47,6 @@ const [isLumber, setisLumber] = useState(false);
       status: "A",
       createdBy: user.displayName,
       createdDate: formattedDate,
-      modifiedBy: "",
-      modifiedDate:"",
     });
 
     const handleChange = (e) => {
