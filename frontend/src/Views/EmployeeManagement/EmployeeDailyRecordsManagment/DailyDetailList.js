@@ -17,19 +17,20 @@ const DailyDetailList = () => {
   const [error, setError] = useState(null);
   const [filteredDetails, setFilteredDetails] = useState([]);
   const [generalQuery, setGeneralQuery] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
 
   const columns = [
     {
       field: "dateTime",
       headerName: "Date",
       width: 150,
-      renderCell: ({ row }) => formatDate(row.dateTime),
+      renderCell: ({ row }) => formatDate(new Date(row.dateTime.seconds * 1000)),
     },
-    { field: "isPresent", headerName: "IsPresent", width: 120 },
+    { field: "isPresent", headerName: "Is Present", width: 120 },
     { field: "inTime", headerName: "In Time", width: 120 },
     { field: "outTime", headerName: "Out Time", width: 120 },
-    { field: "otHours", headerName: "Ot Hours", width: 120 },
+    { field: "otHours", headerName: "OT Hours", width: 120 },
     {
       field: "advancePerDay",
       headerName: "Advance (RS:)",
@@ -84,20 +85,28 @@ const DailyDetailList = () => {
       );
     }
 
-    if (selectedDate) {
+    if (fromDate && toDate) {
+      const fromDateFormatted = formatDate(fromDate);
+      const toDateFormatted = formatDate(toDate);
+
       filteredData = filteredData.filter((detail) => {
-        const detailDate = formatDate(detail.dateTime);
-        const selectedDateFormatted = selectedDate.toISOString().slice(0, 10);
-        return detailDate === selectedDateFormatted;
+        const detailDate = formatDate(new Date(detail.dateTime.seconds * 1000));
+        return detailDate >= fromDateFormatted && detailDate <= toDateFormatted;
       });
     }
 
     setFilteredDetails(filteredData);
   };
 
+  const formatDate = (date) => {
+    const offset = date.getTimezoneOffset() * 60000; // Apply the timezone offset
+    const localDate = new Date(date.getTime() - offset);
+    return localDate.toISOString().split("T")[0]; // Format to 'YYYY-MM-DD'
+  };
+
   useEffect(() => {
     handleSearch();
-  }, [generalQuery, selectedDate]);
+  }, [generalQuery, fromDate, toDate]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -105,14 +114,9 @@ const DailyDetailList = () => {
     }
   };
 
-  const clearDateFilter = () => {
-    setSelectedDate(null);
-  };
-
-  const formatDate = (timestamp) => {
-    if (!timestamp || !timestamp.seconds) return "";
-    const date = new Date(timestamp.seconds * 1000);
-    return date.toISOString().slice(0, 10);
+  const clearDateFilters = () => {
+    setFromDate(null);
+    setToDate(null);
   };
 
   if (loading) {
@@ -160,23 +164,33 @@ const DailyDetailList = () => {
             }}
           >
             <Stack direction="row" spacing={2}>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Filter by Date"
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-                renderInput={(params) => (
-                  <TextField 
-                    {...params} 
-                    size="small" 
-                    sx={{ minWidth: "180px", height: "40px" }} 
-                  />
-                )}
-              />
-            </LocalizationProvider>
-            <Button variant="outlined" onClick={clearDateFilter}>
-              Clear
-            </Button>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="From Date"
+                  value={fromDate}
+                  onChange={(date) => setFromDate(date)}
+                  renderInput={(params) => (
+                    <TextField 
+                      {...params} 
+                      size="small"
+                    />
+                  )}
+                />
+                <DatePicker
+                  label="To Date"
+                  value={toDate}
+                  onChange={(date) => setToDate(date)}
+                  renderInput={(params) => (
+                    <TextField 
+                      {...params} 
+                      size="small"
+                    />
+                  )}
+                />
+              </LocalizationProvider>
+              <Button variant="outlined" onClick={clearDateFilters}>
+                Clear
+              </Button>
             </Stack>
             <TextField
               size="small"
