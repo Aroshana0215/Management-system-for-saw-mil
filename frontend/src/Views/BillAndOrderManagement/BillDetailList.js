@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllbillDetails } from '../../services/BillAndOrderService/BilllManagemntService'; // Import the API function
+import { getAllbillDetails } from '../../services/BillAndOrderService/BilllManagemntService';
 import { Stack, Typography, InputAdornment } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Grid, Button, MenuItem, TextField } from "@mui/material";
@@ -11,6 +11,7 @@ import ErrorAlert from "../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
+import UpdateBill from './UpdateBill'; // Import the dialog component
 
 const BillDetailList = () => {
   const [categories, setCategories] = useState([]);
@@ -20,6 +21,8 @@ const BillDetailList = () => {
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [generalQuery, setGeneralQuery] = useState("");
   const [createdDate, setCreatedDate] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog visibility
+  const [selectedBillId, setSelectedBillId] = useState(null); // State to manage selected bill ID
 
   const columns = [
     { field: "billID", headerName: "ID", width: 140 },
@@ -29,19 +32,14 @@ const BillDetailList = () => {
       field: "totalAmount",
       headerName: "Total (RS:)",
       width: 130,
-      renderCell: ({ row }) => {
-        return `${row.totalAmount}.00`;
-      },
+      renderCell: ({ row }) => `${row.totalAmount}.00`,
     },
     {
       field: "advance",
       headerName: "Advance (RS:)",
       width: 130,
-      renderCell: ({ row }) => {
-        return `${row.advance}.00`;
-      },
+      renderCell: ({ row }) => `${row.advance}.00`,
     },
-    // { field: "remainningAmount", headerName: "Balance", width: 140 },
     {
       field: "billStatus",
       headerName: "Bill Status",
@@ -63,36 +61,53 @@ const BillDetailList = () => {
     },
     { field: "createdDate", headerName: "Created Date", width: 140 },
     { field: "time", headerName: "Time", width: 140 },
-
     {
       field: "actions",
       headerName: "Actions",
-      width: 120,
+      width: 200,
       renderCell: (params) => (
-        <Link to={`/bill/view/${params.row.id}`}>
-          <Button variant="contained" size="small">
-            View
-          </Button>
-        </Link>
+        <Stack direction="row" spacing={1}>
+          <Link to={`/bill/view/${params.row.id}`}>
+            <Button variant="contained" size="small">
+              View
+            </Button>
+          </Link>
+          {params.row.billStatus === "ORDER" && (
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => {
+                setSelectedBillId(params.row.id);
+                setDialogOpen(true);
+              }}
+            >
+              Update
+            </Button>
+          )}
+        </Stack>
       ),
     },
   ];
 
+  const handleComplete = (billID) => {
+    console.log(`Complete action triggered for bill ID: ${billID}`);
+  };
+
   const formatDate = (dateObject) => {
     const date = new Date(dateObject);
-    return date.toISOString().slice(0, 10); // Extracting only the date part
+    return date.toISOString().slice(0, 10);
   };
 
   const formatTime = (dateObject) => {
     const date = new Date(dateObject);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Extracting only the time part
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getAllbillDetails();
-        console.log("Fetched data:", data); // Log fetched data to inspect its format
+        console.log("Fetched data:", data);
         if (Array.isArray(data)) {
           const formattedData = data.map(item => ({
             ...item,
@@ -278,6 +293,15 @@ const BillDetailList = () => {
           />
         </Grid>
       </Grid>
+
+      {/* Dialog to update bill */}
+      {selectedBillId && (
+        <UpdateBill
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          id={selectedBillId}
+        />
+      )}
     </>
   );
 };

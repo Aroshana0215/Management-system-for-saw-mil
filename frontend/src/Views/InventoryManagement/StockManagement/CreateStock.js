@@ -84,10 +84,8 @@ const [formData, setFormData] = useState({
               length : stockData.length,
               status: "A",
               billId_fk:"",
-              createdBy:"",
-              createdDate:"",
-              modifiedBy:"",
-              modifiedDate:"",
+              createdBy: user.displayName,
+              createdDate: formattedDate,
             };
             const stockSummarykData = await createStockSummary(stockSumData);
           }else{

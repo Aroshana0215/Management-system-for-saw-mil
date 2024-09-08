@@ -29,6 +29,7 @@ import GetWantsWood from "../Views/BillAndOrderManagement/GetWantsWoodAmount";
 import ShowRemainWood from "../Views/BillAndOrderManagement/ShowRemainWood";
 import CreateNewBill from "../Views/BillAndOrderManagement/CreateNewBill";
 import ViewBillDetails from "../Views/BillAndOrderManagement/ViewBillDetails";
+import UpdateBill from "../Views/BillAndOrderManagement/UpdateBill";
 import StockHistory from "../Views/BillAndOrderManagement/StockHistory";
 import EmployeeList from "../Views/EmployeeManagement/EmployeeDetailsManagment/EmployeeList";
 import EPaymentList from "../Views/EmployeeManagement/EmployeeDetailsManagment/EmployeePaymentList";
@@ -122,6 +123,10 @@ const privateRouter = createBrowserRouter([
       {
         path: "/bill/view/:billId",
         element: <ViewBillDetails />,
+      },
+      {
+        path: "/bill/update/:billId",
+        element: <UpdateBill />,
       },
       {
         path: "/stock/history",

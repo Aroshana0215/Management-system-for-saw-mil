@@ -267,20 +267,6 @@ const ViewBillDetails = () => {
               </Stack>
             </Grid>
             <Grid item xs={12} padding={1}>
-              <TableContainer>
-                <Table size="small">
-                  <TableBody>
-                    <TableRow>
-                      <TableCell colSpan={7}>Total Value</TableCell>
-                      <TableCell>{totalTimberValue}</TableCell>
-                      <TableCell colSpan={5}></TableCell>
-                      <TableCell>{totalCubicValue}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Grid>
-            <Grid item xs={12} padding={1}>
               <DataGrid
                 rows={categories}
                 columns={columns}

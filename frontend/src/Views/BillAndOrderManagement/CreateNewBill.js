@@ -31,6 +31,7 @@ const CreateNewBill = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { woodData } = location.state;
+  console.log("woodData:",woodData)
   const { user } = useSelector((state) => state.auth);
   const currentDate = new Date();
   const currentDateTime = currentDate.toISOString();
