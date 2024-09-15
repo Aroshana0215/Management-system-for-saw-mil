@@ -59,6 +59,7 @@ const ActiveStockList = () => {
         );
       },
     },
+    { field: "toBeCutAmount", headerName: "To Be Cut", width: 150 },
     { field: "createdBy", headerName: "Created By", width: 120 },
   ];
 

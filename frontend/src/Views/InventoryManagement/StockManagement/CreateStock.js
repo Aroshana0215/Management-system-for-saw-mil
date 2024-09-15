@@ -72,7 +72,6 @@ const [formData, setFormData] = useState({
         if (stockData != null){
           
          const resultData  = await getActiveStockSummaryDetails(stockData.categoryId_fk, stockData.length);
-         console.log("resultData:",resultData)
           if(resultData == null){
             console.log("in");
             const stockSumData = {
@@ -82,6 +81,7 @@ const [formData, setFormData] = useState({
               categoryId_fk: stockData.categoryId_fk,
               stk_id_fk: stockData.inventoryId,
               length : stockData.length,
+              toBeCutAmount : 0,
               status: "A",
               billId_fk:"",
               createdBy: user.displayName,
@@ -93,7 +93,7 @@ const [formData, setFormData] = useState({
               status: "D",
             };
             const updatedkData = await updateStockSummaryDetails(resultData.id, stockUpdateData);
-  
+        
             const stockSumData = {
               totalPieces: Number(resultData.totalPieces) + Number(stockData.amountOfPieces),
               changedAmount: stockData.amountOfPieces,
@@ -101,12 +101,11 @@ const [formData, setFormData] = useState({
               categoryId_fk: resultData.categoryId_fk,
               stk_id_fk:  resultData.stk_id_fk,
               length : resultData.length,
+              toBeCutAmount : resultData.toBeCutAmount,
               status: "A",
               billId_fk:"",
-              createdBy:"",
-              createdDate:"",
-              modifiedBy:"",
-              modifiedDate:"",
+              createdBy: user.displayName,
+              createdDate: formattedDate,
             };
             const newstockSummaryData = await createStockSummary(stockSumData);
             
@@ -118,7 +117,7 @@ const [formData, setFormData] = useState({
       }
 
 
-      window.location.href = "/stock";
+      window.location.href = "/activeStock";
     } catch (error) {
       console.error("Error creating category:", error.message);
       // Handle error

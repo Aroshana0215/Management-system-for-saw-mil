@@ -36,7 +36,7 @@ const IncomeList = () => {
       width: 130,
       renderCell: ({ row }) => `${row.amount}.00`,
     },
-    { field: "billID", headerName: "Bill ID", width: 150 },
+    { field: "BilId", headerName: "Bill ID", width: 150 },
     { field: "status", headerName: "Status", width: 120 },
     { field: "des", headerName: "Description", width: 180 },
     { field: "createdBy", headerName: "Created By", width: 120 },

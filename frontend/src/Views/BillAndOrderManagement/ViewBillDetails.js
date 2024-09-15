@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Grid,
   Typography,
@@ -16,12 +16,15 @@ import {
 } from "@mui/material";
 import { getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService";
 import { getorderIdByBillId } from "../../services/BillAndOrderService/OrderManagmentService";
+import { updateorder } from "../../services/BillAndOrderService/OrderManagmentService";
+import { getActiveStockSummaryDetails, createStockSummary, updateStockSummaryDetails } from "../../services/InventoryManagementService/StockSummaryManagementService";
 import { getCategoryById } from "../../services/PriceCardService";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const ViewBillDetails = () => {
   const { billId } = useParams();
@@ -31,6 +34,18 @@ const ViewBillDetails = () => {
   const [totalTimberValue, setTotalTimberValue] = useState(0);
   // eslint-disable-next-line no-unused-vars
   const [totalCubicValue, setTotalCubicValue] = useState(0);
+
+  const [complete, setComplete] = useState(false);
+  const [categoryId, setCategoryId] = useState("");
+  const [woodLength, setWoodLength] = useState(0);
+  const [tobeCompleteAmount, setTobeCompleteAmount] = useState(0);
+  const [toBeCompleteOrder, setToBeCompleteOrder ]= useState(0);
+
+  const { user } = useSelector((state) => state.auth);
+  const currentDate = new Date();
+  const currentDateTime = currentDate.toISOString();
+  const navigate = useNavigate();
+
   const [categoryData, setCategoryData] = useState({
     dateAndTime: "",
     cusName: "",
@@ -83,6 +98,7 @@ const ViewBillDetails = () => {
         return `${row.areaLength} x ${row.areaWidth}`;
       },
     },
+    { field: "woodLength", headerName: "Length", width: 150 },
     {
       field: "availablePiecesAmount",
       headerName: "Available Amount",
@@ -94,12 +110,36 @@ const ViewBillDetails = () => {
       width: 120,
     },
     {
-      field: "toBeCut",
+      field: "tobeCut",
       headerName: "To Be Cut",
       width: 120,
     },
     { field: "unitPrice", headerName: "Unit Price", width: 120 },
     { field: "discountPrice", headerName: "Discount Price", width: 120 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 200,
+      renderCell: (params) => (
+        <Stack direction="row" spacing={1}>
+          {params.row.isComplete == false && (
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => {
+                setComplete(true);
+                setWoodLength(params.row.woodLength);
+                setCategoryId(params.row.categoryId_fk);
+                setTobeCompleteAmount(params.row.tobeCut);
+                setToBeCompleteOrder(params.row.id);
+              }}
+            >
+              Complete
+            </Button>
+          )}
+        </Stack>
+      ),
+    },
   ];
 
   useEffect(() => {
@@ -117,6 +157,82 @@ const ViewBillDetails = () => {
 
     fetchData();
   }, [billId]);
+
+
+  useEffect(() => {
+    const completeTimberStock = async () => {
+      try {
+        const activeData = await getActiveStockSummaryDetails(categoryId, woodLength);
+        console.log("(activeData.toBeCutAmount:",activeData.toBeCutAmount);
+  
+        if (activeData != null) {
+          // Check if total pieces in stock are sufficient
+          if (Number(activeData.totalPieces) - Number(tobeCompleteAmount) < 0) {
+            console.error("Insufficient stock to complete the wood order", categoryId);
+          } 
+          else {
+            // Check if to-be-cut amount is sufficient
+            if (Number(activeData.toBeCutAmount) - Number(tobeCompleteAmount) < 0) {
+              console.error("To-be-cut amount cannot go negative after processing", categoryId);
+            } 
+            else {
+              // Update the stock summary details to mark it as completed
+              const stockUpdateData = {
+                status: "D",  // D for completed
+                modifiedBy: user.displayName,
+                modifiedDate: currentDateTime
+              };
+              await updateStockSummaryDetails(activeData.id, stockUpdateData);
+
+
+              // Create new stock summary with updated details
+              const stockSumData = {
+                totalPieces: Number(activeData.totalPieces) - Number(tobeCompleteAmount),
+                changedAmount: tobeCompleteAmount,
+                previousAmount: activeData.totalPieces,
+                categoryId_fk: activeData.categoryId_fk,
+                length: activeData.length,
+                toBeCutAmount: Number(activeData.toBeCutAmount) - Number(tobeCompleteAmount),
+                stk_id_fk: "completedOrder",
+                status: "A",
+                billId_fk: "completedOrder",
+                createdBy: user.displayName,
+                createdDate: currentDateTime
+              };
+  
+              const newStockSummaryData = await createStockSummary(stockSumData);
+              console.log("Created summary:", newStockSummaryData);
+  
+              // If the new stock summary was created successfully, update the order
+              if (newStockSummaryData) {
+                const orderUpdateData = {
+                  tobeCut: 0,
+                  isComplete: true,
+                  modifiedBy: user.displayName,
+                  modifiedDate: currentDateTime
+                };
+                await updateorder(toBeCompleteOrder, orderUpdateData);
+                console.log("Order updated successfully");
+  
+                // Navigate to the bill view page
+                navigate(`/bill/view/${billId}`);
+              }
+            }
+          }
+        } else {
+          console.error("No active stock data for the given category:", categoryId);
+        }
+      } catch (error) {
+        console.error("Error fetching category data:", error.message);
+        // Handle error appropriately
+      }
+    };
+  
+    completeTimberStock();
+  }, [complete, tobeCompleteAmount, woodLength, categoryId]);
+  
+
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     //TODO: handle update load

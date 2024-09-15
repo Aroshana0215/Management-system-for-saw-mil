@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where, runTransaction } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where, orderBy, runTransaction } from "firebase/firestore";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const db = getFirestore();
@@ -40,21 +40,29 @@ export const createCategory = async (categoryData) => {
 };
 
 
-
-
 export const getAllCategories = async () => {
     try {
-        const querySnapshot = await getDocs(collection(db, "priceCard"));
-        const priceCardList = [];
-        querySnapshot.forEach((doc) => {
-            priceCardList.push({ id: doc.id, ...doc.data() });
-        });
-        return priceCardList;
+      // Ensure 'id' is a field in the Firestore documents to order by
+      const priceCardQuery = query(
+        collection(db, "priceCard"), // Collection reference
+        orderBy("categoryId", "asc") // Order by 'id' in ascending order
+      );
+      
+      const querySnapshot = await getDocs(priceCardQuery);
+      
+      const priceCardList = [];
+      querySnapshot.forEach((doc) => {
+        priceCardList.push({ id: doc.id, ...doc.data() });
+      });
+      
+      // Return the ordered list
+      return priceCardList;
     } catch (error) {
-        console.error("Error fetching price Card List: ", error.message);
-        throw error;
+      console.error("Error fetching price Card List: ", error.message);
+      throw error;
     }
-};
+  };
+
 
 // Update category
 export const updateCategory = async (categoryId, categoryData ) => {

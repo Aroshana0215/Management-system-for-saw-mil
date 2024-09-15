@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Typography,
@@ -7,6 +7,9 @@ import {
   FormControl,
   FormLabel,
   OutlinedInput,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -18,6 +21,7 @@ import {
 import {
   createStockSummary,
   updateStockSummaryDetails,
+  getStockSummaryById
 } from "../../services/InventoryManagementService/StockSummaryManagementService";
 import { createOrder } from "../../services/BillAndOrderService/OrderManagmentService";
 import { newIncome } from "../../services/AccountManagementService/IncomeManagmentService";
@@ -31,85 +35,131 @@ const CreateNewBill = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { woodData } = location.state;
-  console.log("woodData:",woodData)
+  console.log("woodData:",woodData);
   const { user } = useSelector((state) => state.auth);
   const currentDate = new Date();
   const currentDateTime = currentDate.toISOString();
+
+  // Calculate total amount and remaining amount from wood data
+  const calculateTotals = (advance) => {
+    const totalAmount = woodData.reduce(
+      (sum, wood) => sum + Number(wood.amount) * Number(wood.billPrice),
+      0
+    );
+    const remainningAmount = totalAmount - Number(advance || 0);
+    return { totalAmount, remainningAmount };
+  };
 
   const [formData, setFormData] = useState({
     cusName: "",
     cusAddress: "",
     cusNIC: "",
     cusPhoneNumber: "",
-    totalAmount: "",
-    advance: "",
-    remainningAmount: "",
+    totalAmount: 0,
+    advance: 0,
+    remainningAmount: 0,
     PromizeDate: "",
     description: "",
-    billStatus: "",
-    unloadedDate: "",
+    billStatus: "", // Default empty, to be updated with dropdown value
   });
+
+  // Update totalAmount and remainningAmount when woodData or advance changes
+  useEffect(() => {
+    const { totalAmount, remainningAmount } = calculateTotals(formData.advance);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmount,
+      remainningAmount,
+    }));
+  }, [woodData, formData.advance]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
-      dateAndTime: currentDateTime,
-      status: "A",
-      createdBy: user.displayName,
-      createdDate: currentDateTime,
     }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      console.log("formData:",formData);
-      const bill = await newBill(formData);
+      const formattedData = {
+        ...formData, // Spreading formData
+        dateAndTime: currentDateTime,
+        status: "A",
+        createdBy: user.displayName,
+        createdDate: currentDateTime
+      };
+      console.log("woodData:",woodData);
+      const bill = await newBill(formattedData);
 
       if (bill != null) {
-        console.log("bill:",bill);
-        console.log("woodData:",woodData);
         for (const wood of woodData) {
+
+      console.log("wood.tobeCut:",wood.toBeCut);
+      
+          const data = await getStockSummaryById(wood.summaryId);
+
+          console.log("data:",data);
+
+          if (data == null) {
+            console.error("No data for the given stock summaryId:", wood.summaryId);
+          }
+
           const stockUpdateData = {
             status: "D",
+            modifiedBy: user.displayName,
+            modifiedDate: currentDateTime
           };
-          await updateStockSummaryDetails(wood.summaryId, stockUpdateData);
+          await updateStockSummaryDetails(data.id, stockUpdateData);
 
+          let toBeCutAmount = 0;
+          let totalPieces = 0;
+          
+          if(wood.toBeCut > 0){
+            toBeCutAmount = Number(data.toBeCutAmount) + Number(wood.toBeCut)
+          }else{
+            totalPieces = Number(wood.totalPieces) - Number(wood.amount)
+          }
+        
           const stockSumData = {
-            totalPieces: Number(wood.totalPieces) - Number(wood.amount),
+            totalPieces: totalPieces,
             changedAmount: wood.amount,
             previousAmount: wood.totalPieces,
             categoryId_fk: wood.categoryId_fk,
-            length : wood.requestLength,
+            length: String(wood.requestLength),
+            toBeCutAmount : toBeCutAmount,
             stk_id_fk: "",
             status: "A",
             billId_fk: bill.id,
-            createdBy: "",
-            createdDate: "",
-            modifiedBy: "",
-            modifiedDate: "",
+            createdBy: user.displayName,
+            createdDate: currentDateTime
           };
           const newstockSummaryData = await createStockSummary(stockSumData);
 
-          console.log("newstockSummaryData:",newstockSummaryData);
+          let complete = false;
+
+          if( wood.toBeCut == 0){
+            complete = true;
+          }else{
+            complete = false;
+          }
 
           if (newstockSummaryData != null) {
             const saveOrderData = {
-              discountPrice: wood.billPrice || "",
-              categoryId_fk: wood.categoryId_fk || "",
-              availablePiecesAmount: wood.totalPieces || "",
-              neededPiecesAmount: wood.amount || "",
-              tobeCut: wood.toBeCut || "",
+              discountPrice: wood.billPrice || 0,
+              categoryId_fk: wood.categoryId_fk || 0,
+              availablePiecesAmount: wood.totalPieces || 0,
+              neededPiecesAmount: wood.amount || 0,
+              tobeCut: wood.toBeCut,
+              woodLength: wood.requestLength,
+              isComplete : complete,
               status: "A",
               billId_fk: bill.id,
-              createdBy: "",
-              createdDate: "",
-              modifiedBy: "",
-              modifiedDate: "",
+              createdBy: user.displayName,
+              createdDate: currentDateTime
             };
-            console.log("saveOrderData:",saveOrderData);
             await createOrder(saveOrderData);
           }
         }
@@ -130,11 +180,11 @@ const CreateNewBill = () => {
         if (incomeId != null) {
           const data = await getActiveAccountSummaryDetails();
 
-          console.log("data.totalAmount:", data.totalAmount);
-
           if (data != null) {
             const accountSummaryData = {
               status: "D",
+              modifiedBy: user.displayName,
+              modifiedDate: currentDateTime
             };
 
             await updateAccountSummary(data.id, accountSummaryData);
@@ -147,10 +197,8 @@ const CreateNewBill = () => {
               expId_fk: "",
               incId_fk: incomeId,
               status: "A",
-              createdBy: "",
-              createdDate: "",
-              modifiedBy: "",
-              modifiedDate: "",
+              createdBy: user.displayName,
+              createdDate: currentDateTime,
             };
 
             await newAccountSummary(newAccountSummaryData);
@@ -159,25 +207,33 @@ const CreateNewBill = () => {
       }
       navigate(`/bill/view/${bill.id}`);
     } catch (error) {
-      console.error("Error creating category:", error.message);
+      console.error("Error creating bill:", error.message);
     }
   };
 
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
-    { field: "timberType", headerName: "Timber Type", width: 150 },
-    { field: "length", headerName: "Length", width: 150 },
-    { field: "width", headerName: "Width", width: 150 },
+    {
+      field: "Timber Type",
+      headerName: "Timber Type",
+      width: 130,
+      renderCell: ({ row }) => {
+        return `${row.timberType} - ${row.length} x ${row.width}`;
+      },
+    },
+    { field: "requestLength", headerName: "Length", width: 150 },
     { field: "totalPieces", headerName: "Total Pieces", width: 150 },
     { field: "unitPrice", headerName: "Unit Price", width: 150 },
     { field: "amount", headerName: "Amount", width: 150 },
     { field: "toBeCut", headerName: "To Be Cut", width: 150 },
     { field: "billPrice", headerName: "Bill Price", width: 150 },
+    { field: "total", headerName: "Total", width: 150 },
   ];
 
   const rows = woodData.map((wood, index) => ({
     id: index + 1,
     ...wood,
+    total: Number(wood.amount) * Number(wood.billPrice),
   }));
 
   return (
@@ -229,12 +285,36 @@ const CreateNewBill = () => {
                           {key.charAt(0).toUpperCase() +
                             key.slice(1).replace(/([A-Z])/g, " $1")}
                         </FormLabel>
-                        <OutlinedInput
-                          size="small"
-                          name={key}
-                          value={value}
-                          onChange={handleChange}
-                        />
+                        {key === "billStatus" ? (
+                          <FormControl fullWidth sx={{ minWidth: 120 }}>
+                            <InputLabel>Bill Status</InputLabel>
+                            <Select
+                              name={key}
+                              value={value}
+                              onChange={handleChange}
+                              size="small"
+                              sx={{
+                                height: 40, // Adjust height to match OutlinedInput (same as other fields)
+                                width : 250,
+                              }}
+                            >
+                              <MenuItem value="ORDER">ORDER</MenuItem>
+                              <MenuItem value="COMPLETE">COMPLETE</MenuItem>
+                              <MenuItem value="PENDING">PENDING</MenuItem>
+                            </Select>
+                          </FormControl>
+                        ) : (
+                          <OutlinedInput
+                            size="small"
+                            name={key}
+                            value={value}
+                            onChange={handleChange}
+                            readOnly={key === "totalAmount" || key === "remainningAmount"} // Make fields read-only
+                            sx={{ height: 40 }} // Ensure height consistency for text input fields
+                          />
+                        )}
+
+
                       </FormControl>
                     </Grid>
                   ))}
@@ -250,9 +330,22 @@ const CreateNewBill = () => {
                     />
                   </Grid>
                   <Grid item xs={12} p={1}>
-                    <Button type="submit" variant="contained" color="primary">
-                      Create Bill
-                    </Button>
+                    <Stack direction="row" spacing={2} justifyContent="flex-end">
+                      <Button
+                        variant="contained"
+                        type="submit"
+                        color="primary"
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={() => navigate("/bill")}
+                      >
+                        Cancel
+                      </Button>
+                    </Stack>
                   </Grid>
                 </Grid>
               </form>

@@ -7,6 +7,7 @@ import {
   doc,
   query,
   where,
+  getDoc
 } from "firebase/firestore";
 
 const db = getFirestore();
@@ -25,12 +26,17 @@ export const createStockSummary = async (stockData) => {
 };
 
 export const getActiveStockSummaryDetails = async (categoryId, length) => {
+  console.log("categoryId:",categoryId);
+  console.log("length:",length);
   const formattedCategoryId = categoryId.trim();
+  const formattedLength = String(length); 
+
+  console.log("formattedCategoryId:",formattedCategoryId);
   try {
     const q = query(
       collection(db, "inventorySummary"),
       where("categoryId_fk", "==", formattedCategoryId),
-      where("length", "==", length),
+      where("length", "==", formattedLength),
       where("status", "==", "A")
     );
 
@@ -42,7 +48,7 @@ export const getActiveStockSummaryDetails = async (categoryId, length) => {
       const stockSummaryDetails = { id: docSnapshot.id, ...docSnapshot.data() };
       return stockSummaryDetails;
     } else {
-      console.log("No stockSummaryDetails found for categoryId:", formattedCategoryId);
+      console.log("No stockSummaryDetails found for categoryId:",formattedCategoryId);
       return null;
     }
   } catch (error) {
@@ -100,6 +106,28 @@ export const getAllActiveStockDetails = async () => {
       "Error fetching Inventory Summary Detail List: ",
       error.message
     );
+    throw error;
+  }
+};
+
+
+export const getStockSummaryById = async (stockId) => {
+  try {
+    // Reference to the document in the "inventorySummary" collection by its ID
+    const docRef = doc(db, "inventorySummary", stockId);
+    
+    // Retrieve the document data
+    const docSnapshot = await getDoc(docRef);
+    
+    if (docSnapshot.exists()) {
+      // If the document exists, return its data along with the document ID
+      return { id: docSnapshot.id, ...docSnapshot.data() };
+    } else {
+      console.log("No document found with the given ID:", stockId);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching Inventory Summary by ID: ", error.message);
     throw error;
   }
 };
