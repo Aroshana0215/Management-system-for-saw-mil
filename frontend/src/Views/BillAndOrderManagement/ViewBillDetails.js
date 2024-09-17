@@ -184,6 +184,10 @@ const ViewBillDetails = () => {
               };
               await updateStockSummaryDetails(activeData.id, stockUpdateData);
 
+              const catogoryDatat = await getCategoryById(activeData.categoryId_fk);
+              if(catogoryDatat == null){
+                console.error("Invalid category:", activeData.categoryId_fk);
+              }
 
               // Create new stock summary with updated details
               const stockSumData = {
@@ -191,6 +195,12 @@ const ViewBillDetails = () => {
                 changedAmount: tobeCompleteAmount,
                 previousAmount: activeData.totalPieces,
                 categoryId_fk: activeData.categoryId_fk,
+                maxlength : catogoryDatat.minlength,
+                minlength : catogoryDatat.minlength,
+                timberNature : catogoryDatat.timberNature,
+                timberType : catogoryDatat.timberType,
+                areaLength : catogoryDatat.areaLength,
+                areaWidth : catogoryDatat.areaWidth,
                 length: activeData.length,
                 toBeCutAmount: Number(activeData.toBeCutAmount) - Number(tobeCompleteAmount),
                 stk_id_fk: "completedOrder",

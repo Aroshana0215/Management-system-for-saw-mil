@@ -42,6 +42,9 @@ import IncomeList from "../Views/AccountManagement/IncomeManagement/IncomeList";
 import AddIncome from "../Views/AccountManagement/IncomeManagement/AddIncome";
 import ExpList from "../Views/AccountManagement/ExpenseManagemnt/ExpList";
 import AddExp from "../Views/AccountManagement/ExpenseManagemnt/AddExp";
+import TreeTypeList from "../Views/SettingManagment/TreeTypeManagment/TreeTypeList";
+import CreateTreeType from "../Views/SettingManagment/TreeTypeManagment/CreateTreeType";
+import UpdateTreeType from "../Views/SettingManagment/TreeTypeManagment/UpdateTreeType";
 
 const privateRouter = createBrowserRouter([
   {
@@ -175,6 +178,18 @@ const privateRouter = createBrowserRouter([
       {
         path: "/exp/add",
         element: <AddExp />,
+      },
+      {
+        path: "/setting/treeType",
+        element: <TreeTypeList />,
+      },
+      {
+        path: "/setting/treeType/add",
+        element: <CreateTreeType />,
+      },
+      {
+        path: "/setting/treeType/:treeTypeId",
+        element: <UpdateTreeType />,
       },
       {
         path: "*",

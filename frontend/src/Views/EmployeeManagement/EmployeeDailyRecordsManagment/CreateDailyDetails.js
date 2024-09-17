@@ -53,7 +53,7 @@ const CreateDailyDetails = () => {
     const totalWorkingHours = totalWorkingMinutes / 60; // Convert minutes to hours
 
     // Calculate OT hours
-    const standardWorkingMinutes = 8 * 60; // 8 hours in minutes
+    const standardWorkingMinutes = 9 * 60; // 8 hours in minutes
     const otMinutes = totalWorkingMinutes > standardWorkingMinutes ? totalWorkingMinutes - standardWorkingMinutes : 0;
 
     // Format hours and minutes

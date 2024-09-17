@@ -45,8 +45,14 @@ const CreatePayment = () => {
   const [workDetail, setWorkDetail] = useState([]);
 
   const [totalPayment, setTotalPayment] = useState("");
+  const [totalFullDaySal, setTotalFullDaySal] = useState("");
+  const [salaryPerHalfDay, setSalaryPerHalfDay] = useState("");
+  const [otPerHour, setOtPerHour] = useState("");
+  const [totalHalfDaySal, setTotalHalfDaySal] = useState("");
   const [totalAdvance, setTotalAdvance] = useState("");
+  const [salaryPerDay, setSalaryPerDay] = useState("");
   const [totalDay, setTotalDay] = useState("");
+  const [totalHalfDay, setTotalHalfDay] = useState("");
   const [totalOt, setTotalOt] = useState("");
   const [totalOtAmount, setTotalOtAmount] = useState("");
   const [reduceAmount, setReduceAmount] = useState("");
@@ -55,7 +61,7 @@ const CreatePayment = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [previous, setPrevious] = useState("");
-
+console.log("totalPayment:",totalPayment);
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().slice(0, 10);
 
@@ -75,15 +81,15 @@ const CreatePayment = () => {
 
   useEffect(() => {
     const calculateActualPayment = () => {
+      setTotalPayment((parseFloat(totalHalfDaySal) + parseFloat(totalFullDaySal) + parseFloat(totalOtAmount)).toFixed(2));
      let total = parseFloat(totalPayment) - parseFloat(reduceAmount || 0);
-     total = total - parseFloat(totalAdvance || 0);
+     total = parseFloat(total) - parseFloat(totalAdvance || 0);
+  
       setActualPayment(total.toFixed(2));
-
-      setTotalOtAmount(totalOt * empData.otValuePerHour);
     };
 
     calculateActualPayment();
-  }, [reduceAmount, totalPayment, totalOt]);
+  }, [reduceAmount, totalAdvance, totalOtAmount , totalFullDaySal , totalHalfDaySal, toDate]);
 
   const handleDateChange = async (date) => {
     setToDate(date);
@@ -107,23 +113,79 @@ const CreatePayment = () => {
   const calculateTotals = (data) => {
     let totOt = 0.0;
     let totDays = 0.0;
+    let totHalfDays = 0.0;
     let totAdvance = 0.0;
-
+  
+    console.log("data:", data);
+  
     data.forEach((workDetailItem) => {
       if (workDetailItem.isPresent) {
-        totOt += parseFloat(workDetailItem.otHours || 0);
-        totDays += 1;
+        console.log("otHours:", workDetailItem.otHours);
+  
+        // Calculate OT hours (converting string like 'HH.mm' to hours and minutes)
+        let [hours, minutes] = (workDetailItem.otHours || '0').split('.').map(Number);
+        hours = hours || 0;
+        minutes = minutes || 0;
+  
+        // Convert minutes to fraction of an hour
+        let totalHours = hours + (minutes / 60);
+  
+        // Add to totOt
+        totOt += totalHours;
+  
+        // Parse inTime and outTime from HH:mm format to minutes since midnight
+        const [inHours, inMinutes] = workDetailItem.inTime.split(':').map(Number);
+        const [outHours, outMinutes] = workDetailItem.outTime.split(':').map(Number);
+  
+        // Convert time to minutes from midnight for easy comparison
+        const inTimeMinutes = inHours * 60 + inMinutes;
+        const outTimeMinutes = outHours * 60 + outMinutes;
+  
+        // Calculate total work time in hours
+        const workedMinutes = outTimeMinutes - inTimeMinutes;
+        const workedHours = workedMinutes / 60;
+  
+        // Determine day fraction based on worked hours (if less than 9 hours, consider half day)
+        if (workedHours < 9) {
+          totHalfDays += 1;
+        } else {
+          totDays += 1;
+        }
+
+        
+  
+        // Add to total advance
         totAdvance += parseFloat(workDetailItem.advancePerDay || 0);
       }
     });
-
+  
+    // Update the state with totals
     setTotalAdvance(totAdvance.toFixed(2));
-    setTotalDay(totDays);
-    setTotalOt(totOt.toFixed(2));
+    setTotalHalfDay(totHalfDays.toFixed(2));
+    setTotalDay(totDays.toFixed(2));
+    setSalaryPerDay(parseFloat(empData.salaryPerDay).toFixed(2));
+  
+    console.log("empData.salaryPerDay:", empData.salaryPerDay);
+    console.log("totDays:", totDays);
+    console.log("empData.otValuePerHour:", empData.otValuePerHour);
+    console.log("totOt:", totOt);
+  
+    // Calculate total payment
+    const totalPay = parseFloat(empData.salaryPerDay) * totDays ;
+    setTotalFullDaySal(totalPay.toFixed(2));
 
-    const totalPay = parseFloat(empData.salaryPerDay) * totDays + parseFloat(empData.otValuePerHour) * totOt;
-    setTotalPayment(totalPay.toFixed(2));
+    const totalHafDayPay = parseFloat(empData.salaryPerDay)/2 * totHalfDays ;
+    setTotalHalfDaySal(totalHafDayPay.toFixed(2));
+    const HalfDayPay = parseFloat(empData.salaryPerDay)/2;
+    setSalaryPerHalfDay(HalfDayPay.toFixed(2));
+
+    setTotalOt(totOt.toFixed(2));
+    setOtPerHour(empData.otValuePerHour);
+    setTotalOtAmount((totOt.toFixed(2) * empData.otValuePerHour).toFixed(2));
+
   };
+  
+  
 
   const clearDateFilters = () => {
     setFromDate(null);
@@ -261,26 +323,8 @@ const CreatePayment = () => {
               borderRadius: 2,
             }}
           >
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Total Payment"
-                  type="number"
-                  value={totalPayment}
-                  InputProps={{ readOnly: true }}
-                  fullWidth
-                />
-              </Grid> 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Total OT amount"
-                  type="number"
-                  value={totalOtAmount}
-                  InputProps={{ readOnly: true }}
-                  fullWidth
-                />
-              </Grid>        
-              <Grid item xs={12} sm={6}>
+            <Grid container spacing={3}>
+            <Grid item xs={12} sm={4}>
                 <TextField
                   label="Total Days"
                   type="number"
@@ -289,7 +333,52 @@ const CreatePayment = () => {
                   fullWidth
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Salary Per Day"
+                  type="number"
+                  value={salaryPerDay}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Payment for days"
+                  type="number"
+                  value={totalFullDaySal}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </Grid> 
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Total Half Days"
+                  type="number"
+                  value={totalHalfDay}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+                </Grid>   
+                <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Salary Per Half Day"
+                  type="number"
+                  value={salaryPerHalfDay}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                /> 
+                </Grid>     
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Total HalfDay Salary"
+                  type="number"
+                  value={totalHalfDaySal}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   label="Total OT"
                   type="number"
@@ -298,11 +387,29 @@ const CreatePayment = () => {
                   fullWidth
                 />
               </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Ot per Hour"
+                  type="number"
+                  value={otPerHour}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Total Ot salary"
+                  type="number"
+                  value={totalOtAmount}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Actual Payment"
+                  label="Total Payment"
                   type="number"
-                  value={actualPayment}
+                  value={totalPayment}
                   InputProps={{ readOnly: true }}
                   fullWidth
                 />
@@ -321,6 +428,15 @@ const CreatePayment = () => {
                   label="Reduce Amount"
                   type="number"
                   value={reduceAmount}
+                  onChange={(e) => setReduceAmount(e.target.value)}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Actual Payment"
+                  type="number"
+                  value={actualPayment}
                   onChange={(e) => setReduceAmount(e.target.value)}
                   fullWidth
                 />

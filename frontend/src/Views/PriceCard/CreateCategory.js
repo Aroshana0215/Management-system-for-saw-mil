@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 import {
   Grid,
   Typography,
@@ -10,7 +10,8 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { createCategory } from "../../services/PriceCardService"; // Import the createCategory function
+import { createCategory, validateCategoryType, validateCategoryType2 } from "../../services/PriceCardService"; // Import the createCategory function
+import { getAllTreeType} from "../../services/SettingManagementService/TreeTypeService"; 
 
 const CreateCategory = () => {
 const { user } = useSelector((state) => state.auth);
@@ -24,6 +25,8 @@ let formattedDate = `${year}-${month}-${day}`;
 const [isplank, setIsplank] = useState(false);
 const [isTimberDust, setIsTimberDust] = useState(false);
 const [isLumber, setisLumber] = useState(false);
+
+const [treeTypes, setTreeTypes] = useState([]); // State to hold tree types
 
     const [formData, setFormData] = useState({
       timberType: { bpMD: 6 },
@@ -74,12 +77,70 @@ const [isLumber, setisLumber] = useState(false);
       }
     };
 
+    useEffect(() => {
+      // Fetch the tree types when the component mounts
+      const fetchTreeTypes = async () => {
+        try {
+          const response = await getAllTreeType(); // Call the service to fetch tree types
+          setTreeTypes(response); // Set the fetched tree types to state
+        } catch (error) {
+          console.error("Error fetching tree types:", error);
+        }
+      };
+  
+      fetchTreeTypes();
+    }, []);
+
     const handleSubmit = async (event) => {
       event.preventDefault();
       try {
-        console.log("payload:",payload);
-        const loadId = await createCategory(payload);
-        window.location.href = `/price`;
+
+        const categoryData = await validateCategoryType(payload);
+        if(categoryData != null){
+        if (Array.isArray(categoryData)) {
+
+          for (const category of categoryData) {
+
+            if(category.areaLength == payload.areaLength &&  category.areaWidth == payload.areaWidth){
+              throw new Error("Already exist record");
+
+            }
+            if(category.areaLength == payload.areaWidth &&  category.areaWidth == payload.areaLength){
+              throw new Error("Already exist record");
+            }
+          }
+
+        } else {
+          throw new Error("Invalid data format received from API");
+        }
+      }
+
+
+        const categoryData2 = await validateCategoryType2(payload);
+        if(categoryData2 != null){
+        if (Array.isArray(categoryData2)) {
+
+          for (const category of categoryData2) {
+
+            if(category.minlength >= payload.minlength <= category.maxlength ){
+              throw new Error("Already exist record");
+  
+          }
+
+          if(category.minlength >= payload.maxlength <= category.maxlength ){
+            throw new Error("Already exist record");
+
+        }
+          }
+
+        } else {
+          throw new Error("Invalid data format received from API");
+        }
+      }
+        
+          await createCategory(payload);
+          window.location.href = `/price`;
+        
       } catch (error) {
         console.error("Error creating category:", error.message);
       }
@@ -131,25 +192,22 @@ const [isLumber, setisLumber] = useState(false);
             </Stack>
           </Grid>
           <Grid item xs={12} md={6} padding={1}>
-            <FormControl fullWidth>
-              <Typography>Timber Type</Typography>
-              <Select
-                name="timberType"
-                value={payload.timberType}
-                onChange={handleChange}
-                required
-              >
-              <MenuItem value="Sapu">Sapu</MenuItem>
-              <MenuItem value="Grandis">Grandis</MenuItem>
-              <MenuItem value="Thekka">Thekka</MenuItem>
-              <MenuItem value="Micro">Micro</MenuItem>
-              <MenuItem value="Amba">Amba</MenuItem>
-              <MenuItem value="Kos">Kos</MenuItem>
-              <MenuItem value="Maara">Maara</MenuItem>
-              <MenuItem value="LunuMidella">LunuMidella</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
+              <FormControl fullWidth>
+                <Typography>Timber Type</Typography>
+                <Select
+                  name="timberType"
+                  value={payload.timberType}
+                  onChange={handleChange}
+                  required
+                >
+                  {treeTypes.map((type) => (
+                    <MenuItem key={type.id} value={type.typeName}>
+                      {type.typeName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
           <Grid item xs={12} md={6} padding={1}>
             <FormControl fullWidth>
               <Typography>Timber Nature</Typography>

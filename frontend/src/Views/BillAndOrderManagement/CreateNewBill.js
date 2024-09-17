@@ -30,6 +30,7 @@ import {
   updateAccountSummary,
   getActiveAccountSummaryDetails,
 } from "../../services/AccountManagementService/AccountSummaryManagmentService";
+import { getCategoryById } from "../../services/PriceCardService";
 
 const CreateNewBill = () => {
   const navigate = useNavigate();
@@ -122,19 +123,30 @@ const CreateNewBill = () => {
           }else{
             totalPieces = Number(wood.totalPieces) - Number(wood.amount)
           }
+
+          const catogoryDatat = await getCategoryById(data.categoryId_fk);
+          if(catogoryDatat == null){
+            console.error("Invalid category:", data.categoryId_fk);
+          }
         
           const stockSumData = {
             totalPieces: totalPieces,
             changedAmount: wood.amount,
             previousAmount: wood.totalPieces,
             categoryId_fk: wood.categoryId_fk,
+            maxlength : catogoryDatat.minlength,
+            minlength : catogoryDatat.minlength,
+            timberNature : catogoryDatat.timberNature,
+            timberType : catogoryDatat.timberType,
+            areaLength : catogoryDatat.areaLength,
+            areaWidth : catogoryDatat.areaWidth,
             length: String(wood.requestLength),
             toBeCutAmount : toBeCutAmount,
             stk_id_fk: "",
             status: "A",
             billId_fk: bill.id,
             createdBy: user.displayName,
-            createdDate: currentDateTime
+            createdDate: currentDateTime,
           };
           const newstockSummaryData = await createStockSummary(stockSumData);
 

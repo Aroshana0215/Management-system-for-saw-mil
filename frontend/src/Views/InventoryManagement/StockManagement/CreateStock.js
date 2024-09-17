@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Stack, Grid, Typography, TextField, Button,IconButton, Divider,  } from "@mui/material";
 import { Link } from "react-router-dom";
 import { NewInventory } from "../../../services/InventoryManagementService/StockManagementService"; 
+import { getCategoryById } from "../../../services/PriceCardService"; 
 import { useSelector } from "react-redux";
 import { createStockSummary, getActiveStockSummaryDetails, updateStockSummaryDetails } from "../../../services/InventoryManagementService/StockSummaryManagementService"; 
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
@@ -67,6 +68,10 @@ const [formData, setFormData] = useState({
           createdBy: user.displayName,
           createdDate: formattedDate,
         }
+        const catogoryDatat = await getCategoryById(newItemData.categoryId_fk);
+        if(catogoryDatat == null){
+          console.error("Invalid category:", newItemData.categoryId_fk);
+        }
         const stockData = await NewInventory(newItemData);
         console.log("stockData:",stockData)
         if (stockData != null){
@@ -78,12 +83,18 @@ const [formData, setFormData] = useState({
               totalPieces: stockData.amountOfPieces,
               changedAmount: stockData.amountOfPieces,
               previousAmount: "0",
-              categoryId_fk: stockData.categoryId_fk,
               stk_id_fk: stockData.inventoryId,
               length : stockData.length,
               toBeCutAmount : 0,
               status: "A",
               billId_fk:"",
+              categoryId_fk: stockData.categoryId_fk,
+              maxlength : catogoryDatat.minlength,
+              minlength : catogoryDatat.minlength,
+              timberNature : catogoryDatat.timberNature,
+              timberType : catogoryDatat.timberType,
+              areaLength : catogoryDatat.areaLength,
+              areaWidth : catogoryDatat.areaWidth,
               createdBy: user.displayName,
               createdDate: formattedDate,
             };
@@ -99,6 +110,12 @@ const [formData, setFormData] = useState({
               changedAmount: stockData.amountOfPieces,
               previousAmount: resultData.totalPieces,
               categoryId_fk: resultData.categoryId_fk,
+              maxlength : catogoryDatat.minlength,
+              minlength : catogoryDatat.minlength,
+              timberNature : catogoryDatat.timberNature,
+              timberType : catogoryDatat.timberType,
+              areaLength : catogoryDatat.areaLength,
+              areaWidth : catogoryDatat.areaWidth,
               stk_id_fk:  resultData.stk_id_fk,
               length : resultData.length,
               toBeCutAmount : resultData.toBeCutAmount,

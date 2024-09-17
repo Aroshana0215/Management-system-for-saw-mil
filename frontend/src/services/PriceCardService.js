@@ -174,3 +174,63 @@ export const getCategoryIdBytimberType  = async (timberType) => {
     }
 };
 
+
+
+export const validateCategoryType  = async (categoryData) => {
+
+    try {
+        const q = query(
+            collection(db, "priceCard"),
+            where("timberType", "==", categoryData.timberType),
+            where("timberNature", "==", categoryData.timberNature),
+            where("minlength", "==", categoryData.minlength),
+            where("maxlength", "==", categoryData.maxlength),
+
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const priceCardList = [];
+            querySnapshot.forEach((doc) => {
+                priceCardList.push({ id: doc.id, ...doc.data() });
+            });
+            return priceCardList;
+        } else {
+            console.log("No stockSummaryDetails found for the given parameters.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting stockSummaryDetails: ", error.message);
+        throw error;
+    }
+};
+
+export const validateCategoryType2  = async (categoryData) => {
+
+    try {
+        const q = query(
+            collection(db, "priceCard"),
+            where("timberType", "==", categoryData.timberType),
+            where("timberNature", "==", categoryData.timberNature),
+            where("areaLength", "==", categoryData.areaLength),
+            where("areaWidth", "==", categoryData.areaWidth),
+
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const priceCardList = [];
+            querySnapshot.forEach((doc) => {
+                priceCardList.push({ id: doc.id, ...doc.data() });
+            });
+            return priceCardList;
+        } else {
+            console.log("No stockSummaryDetails found for the given parameters.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting stockSummaryDetails: ", error.message);
+        throw error;
+    }
+};
+
