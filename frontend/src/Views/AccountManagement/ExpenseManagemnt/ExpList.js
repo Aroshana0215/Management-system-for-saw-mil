@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllexpense } from "../../../services/AccountManagementService/ExpenseManagmentService"; // Import the API function
+import { getAllActiveExpenseType } from "../../../services/SettingManagementService/ExpenseTypeService"; // Import the expense type API
 import { Stack, Typography, Grid, Button, TextField, MenuItem, InputAdornment } from "@mui/material";
 import { Link } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
@@ -20,6 +21,7 @@ const ExpList = () => {
   const [expenseTypeQuery, setExpenseTypeQuery] = useState("");
   const [generalQuery, setGeneralQuery] = useState("");
   const [dateQuery, setDateQuery] = useState(null); // Date query state
+  const [expenseTypes, setExpenseTypes] = useState([]); // State for expense types
 
   const columns = [
     { field: "expenseID", headerName: "ID", width: 90 },
@@ -54,7 +56,6 @@ const ExpList = () => {
     const fetchData = async () => {
       try {
         const data = await getAllexpense();
-        console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
           setCategories(data);
           setFilteredCategories(data);
@@ -69,6 +70,20 @@ const ExpList = () => {
     };
 
     fetchData();
+  }, []);
+
+  // Fetch the expense types
+  useEffect(() => {
+    const fetchExpenseTypes = async () => {
+      try {
+        const types = await getAllActiveExpenseType();
+        setExpenseTypes(types); // Assuming the response is an array of expense types
+      } catch (error) {
+        console.error("Error fetching expense types:", error);
+      }
+    };
+
+    fetchExpenseTypes();
   }, []);
 
   const handleSearch = () => {
@@ -171,11 +186,11 @@ const ExpList = () => {
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                <MenuItem value="Employee">Employee</MenuItem>
-                <MenuItem value="External">External</MenuItem>
-                <MenuItem value="Kitchen">Kitchen</MenuItem>
-                <MenuItem value="Water">Water</MenuItem>
-                <MenuItem value="Electricity">Electricity</MenuItem>
+                {expenseTypes.map((type) => (
+                  <MenuItem key={type.typeName} value={type.typeName}>
+                    {type.typeName}
+                  </MenuItem>
+                ))}
               </TextField>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker

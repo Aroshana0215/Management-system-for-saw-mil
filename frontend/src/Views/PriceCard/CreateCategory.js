@@ -11,7 +11,8 @@ import {
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { createCategory, validateCategoryType, validateCategoryType2 } from "../../services/PriceCardService"; // Import the createCategory function
-import { getAllTreeType} from "../../services/SettingManagementService/TreeTypeService"; 
+import { getAllActiveTreeType} from "../../services/SettingManagementService/TreeTypeService";  
+import { getAllActiveTimberNature} from "../../services/SettingManagementService/TimberNatureService";
 
 const CreateCategory = () => {
 const { user } = useSelector((state) => state.auth);
@@ -27,6 +28,7 @@ const [isTimberDust, setIsTimberDust] = useState(false);
 const [isLumber, setisLumber] = useState(false);
 
 const [treeTypes, setTreeTypes] = useState([]); // State to hold tree types
+const [timberNature, setTimberNature] = useState([]); // State to hold tree types
 
     const [formData, setFormData] = useState({
       timberType: { bpMD: 6 },
@@ -81,8 +83,12 @@ const [treeTypes, setTreeTypes] = useState([]); // State to hold tree types
       // Fetch the tree types when the component mounts
       const fetchTreeTypes = async () => {
         try {
-          const response = await getAllTreeType(); // Call the service to fetch tree types
+          const response = await getAllActiveTreeType(); // Call the service to fetch tree types
           setTreeTypes(response); // Set the fetched tree types to state
+
+          const response2 = await getAllActiveTimberNature(); // Call the service to fetch tree types
+          setTimberNature(response2); // Set the fetched tree types to state
+
         } catch (error) {
           console.error("Error fetching tree types:", error);
         }
@@ -217,10 +223,12 @@ const [treeTypes, setTreeTypes] = useState([]); // State to hold tree types
                 onChange={handleChange}
                 required
               >
-                <MenuItem value="Lumber&beam">Lumber & Beams</MenuItem>
-                <MenuItem value="Planks">Planks</MenuItem>
-                <MenuItem value="Dust">Timber Dust</MenuItem>
-              </Select>
+                  {timberNature.map((type) => (
+                    <MenuItem key={type.id} value={type.natureName}>
+                      {type.natureName}
+                    </MenuItem>
+                  ))}
+                </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} md={4} padding={1}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllincome } from '../../../services/AccountManagementService/IncomeManagmentService';
+import { getAllActiveIncomeType } from "../../../services/SettingManagementService/IncomeTypeService";
 import { Stack, Typography, Grid, Button, TextField, MenuItem, InputAdornment } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../../Components/Progress/Loading";
@@ -15,6 +16,7 @@ import { format } from 'date-fns';
 const IncomeList = () => {
   const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
+  const [incomeTypes, setIncomeTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [incomeTypeQuery, setIncomeTypeQuery] = useState("");
@@ -56,14 +58,22 @@ const IncomeList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllincome();
-        if (Array.isArray(data)) {
-          setCategories(data);
-          setFilteredCategories(data);
-          setLoading(false);
+        const incomeData = await getAllincome();
+        if (Array.isArray(incomeData)) {
+          setCategories(incomeData);
+          setFilteredCategories(incomeData);
         } else {
           throw new Error("Invalid data format received from API");
         }
+
+        const incomeTypeData = await getAllActiveIncomeType();
+        if (Array.isArray(incomeTypeData)) {
+          setIncomeTypes(incomeTypeData);
+        } else {
+          throw new Error("Invalid data format received from API");
+        }
+        
+        setLoading(false);
       } catch (error) {
         setError(error.message);
         setLoading(false);
@@ -156,21 +166,23 @@ const IncomeList = () => {
           >
             <Stack direction="row" spacing={2}>
 
-            <TextField
-              select
-              size="small"
-              value={incomeTypeQuery}
-              onChange={(e) => setIncomeTypeQuery(e.target.value)}
-              label="Income Type"
-              sx={{ minWidth: "180px" }}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value="bill">Bill</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
-            </TextField>
-
+              <TextField
+                select
+                size="small"
+                value={incomeTypeQuery}
+                onChange={(e) => setIncomeTypeQuery(e.target.value)}
+                label="Income Type"
+                sx={{ minWidth: "180px" }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {incomeTypes.map((type) => (
+                  <MenuItem key={type.typeName} value={type.typeName}>
+                    {type.typeName}
+                  </MenuItem>
+                ))}
+              </TextField>
 
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker

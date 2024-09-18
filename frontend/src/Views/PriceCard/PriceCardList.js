@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getAllCategories } from '../../services/PriceCardService'; // Import the API function
+import { getAllCategories } from '../../services/PriceCardService';
+import { getAllActiveTreeType } from '../../services/SettingManagementService/TreeTypeService';
+import { getAllActiveTimberNature } from '../../services/SettingManagementService/TimberNatureService'; // Import Timber Nature API
 import {
   Stack,
   Typography,
@@ -26,6 +28,9 @@ const PriceCardList = () => {
   const [dimensionsQuery, setDimensionsQuery] = useState("");
   const [generalQuery, setGeneralQuery] = useState("");
   const [dimensionOptions, setDimensionOptions] = useState([]);
+  const [treeTypes, setTreeTypes] = useState([]);
+  const [timberNatures, setTimberNatures] = useState([]); // New state to hold timber natures
+  console.log("dimensionOptions:",dimensionOptions);
 
   const columns = [
     { field: "categoryId", headerName: "Id", width: 130 },
@@ -74,18 +79,36 @@ const PriceCardList = () => {
     },
   ];
 
+  // Fetch categories, tree types, and timber natures on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllCategories();
-        console.log("Fetched data:", data); // Log fetched data to inspect its format
-        if (Array.isArray(data)) {
-          setCategories(data);
-          setFilteredCategories(data);
-          setLoading(false);
+        // Fetch categories
+        const categoryData = await getAllCategories();
+        if (Array.isArray(categoryData)) {
+          setCategories(categoryData);
+          setFilteredCategories(categoryData);
         } else {
           throw new Error("Invalid data format received from API");
         }
+
+        // Fetch tree types for the dropdown
+        const treeTypeData = await getAllActiveTreeType();
+        if (Array.isArray(treeTypeData)) {
+          setTreeTypes(treeTypeData);
+        } else {
+          throw new Error("Invalid tree type data format received from API");
+        }
+
+        // Fetch timber natures for the dimensions dropdown
+        const timberNatureData = await getAllActiveTimberNature();
+        if (Array.isArray(timberNatureData)) {
+          setTimberNatures(timberNatureData); // Set timber natures for the dropdown
+        } else {
+          throw new Error("Invalid timber nature data format received from API");
+        }
+
+        setLoading(false);
       } catch (error) {
         setError(error.message);
         setLoading(false);
@@ -98,10 +121,23 @@ const PriceCardList = () => {
   const updateDimensionOptions = (nature) => {
     if (nature === "Planks") {
       setDimensionOptions([
+        "0.1 x 5",
+        "0.2 x 5",
         "0.3 x 5",
+        "0.4 x 5",
+        "0.5 x 5",
         "0.6 x 5",
-        "0.9 x 5",
-        "0 x 0"
+        "0.7 x 5",
+        "0.8 x 5",
+
+        "0.1 x 6",
+        "0.2 x 6",
+        "0.3 x 6",
+        "0.4 x 6",
+        "0.5 x 6",
+        "0.6 x 6",
+        "0.7 x 6",
+        "0.8 x 6",
       ]);
     } else if (nature === "Lumber&beam") {
       setDimensionOptions([
@@ -110,7 +146,14 @@ const PriceCardList = () => {
         "2 x 5",
         "2 x 6",
         "3 x 2",
-        "3 x 4"
+        "3 x 3",
+        "3 x 4",
+        "3 x 5",
+        "3 x 6",
+        "4 x 3",
+        "4 x 4",
+        "4 x 5",
+        "4 x 6",
       ]);
     } else {
       setDimensionOptions([]);
@@ -129,8 +172,8 @@ const PriceCardList = () => {
 
     if (timberNatuerQuery) {
       const lowercasedTimberNatuerQuery = timberNatuerQuery.toLowerCase();
-      console.log("timberNatuerQuery:", timberNatuerQuery);
       updateDimensionOptions(timberNatuerQuery);
+      console.log("timberNatuerQuery:",timberNatuerQuery);
       filteredData = filteredData.filter((category) =>
         category.timberNature.toLowerCase().includes(lowercasedTimberNatuerQuery)
       );
@@ -138,10 +181,7 @@ const PriceCardList = () => {
 
     if (dimensionsQuery) {
       const lowercasedDimensionsQuery = dimensionsQuery.toLowerCase();
-      console.log("lowercasedDimensionsQuery:", lowercasedDimensionsQuery);
-
       const [queryLength, queryWidth] = lowercasedDimensionsQuery.split('x').map(part => part.trim());
-
       filteredData = filteredData.filter((category) =>
         category.areaLength.toString().toLowerCase().includes(queryLength) &&
         category.areaWidth.toString().toLowerCase().includes(queryWidth)
@@ -227,14 +267,11 @@ const PriceCardList = () => {
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                <MenuItem value="Sapu">Sapu</MenuItem>
-                <MenuItem value="Grandis">Grandis</MenuItem>
-                <MenuItem value="Thekka">Thekka</MenuItem>
-                <MenuItem value="Micro">Micro</MenuItem>
-                <MenuItem value="Amba">Amba</MenuItem>
-                <MenuItem value="Kos">Kos</MenuItem>
-                <MenuItem value="Maara">Maara</MenuItem>
-                <MenuItem value="LunuMidella">LunuMidella</MenuItem>
+                {treeTypes.map((treeType) => (
+                  <MenuItem key={treeType.typeId} value={treeType.typeName}>
+                    {treeType.typeName}
+                  </MenuItem>
+                ))}
               </TextField>
 
               <TextField
@@ -253,9 +290,11 @@ const PriceCardList = () => {
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
-                <MenuItem value="Planks">Planks</MenuItem>
-                <MenuItem value="Dust">Dust</MenuItem>
+                {timberNatures.map((nature) => (
+                  <MenuItem key={nature.natureId} value={nature.natureName}>
+                    {nature.natureName}
+                  </MenuItem>
+                ))}
               </TextField>
 
               <TextField
@@ -307,12 +346,13 @@ const PriceCardList = () => {
             initialState={{
               pagination: {
                 paginationModel: {
-                  pageSize: 8,
+                  pageSize: 10,
                 },
               },
             }}
-            pageSizeOptions={[8]}
+            pageSizeOptions={[10, 20, 50]}
             disableRowSelectionOnClick
+            autoHeight
           />
         </Grid>
       </Grid>

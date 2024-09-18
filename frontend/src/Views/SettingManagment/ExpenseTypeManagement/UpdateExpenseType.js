@@ -13,12 +13,12 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  getTreeTypeById,
-  updateTreeType,
-} from "../../../services/SettingManagementService/TreeTypeService";
+    getExpenseTypeDocumentById,
+    updateExpenseType,
+} from "../../../services/SettingManagementService/ExpenseTypeService";
 
-const UpdateTreeType = () => {
-  const { treeTypeId } = useParams();
+const UpdateExpenseType = () => {
+  const { expenseTypeId } = useParams();
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
@@ -34,23 +34,23 @@ const UpdateTreeType = () => {
   let day = ("0" + currentDate.getDate()).slice(-2);
   let formattedDate = `${year}-${month}-${day}`;
 
-  // Fetch the current tree type details using the treeTypeId
+
   useEffect(() => {
     const fetchTreeType = async () => {
       try {
-        const treeTypeData = await getTreeTypeById(treeTypeId);
-        console.log("treeTypeData:", treeTypeData);
+        const expenseTypeData = await getExpenseTypeDocumentById(expenseTypeId);
+        console.log("expenseTypeData:", expenseTypeData);
         setFormData({
-          typeName: treeTypeData.typeName,
-          description: treeTypeData.description,
-          status: treeTypeData.status,
+          typeName: expenseTypeData.typeName,
+          description: expenseTypeData.description,
+          status: expenseTypeData.status,
         });
       } catch (error) {
-        console.error("Error fetching tree type data:", error);
+        console.error("Error fetching expense type data:", error);
       }
     };
     fetchTreeType();
-  }, [treeTypeId]);
+  }, [expenseTypeId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,10 +68,10 @@ const UpdateTreeType = () => {
         modifiedBy: user.displayName,
         modifiedDate: formattedDate,
       };
-      await updateTreeType(treeTypeId, updatedFormData);
-      navigate("/setting/treeType"); // Redirect to tree type listing after successful update
+      await updateExpenseType(expenseTypeId, updatedFormData);
+      navigate("/setting/expenseType"); // Redirect to tree type listing after successful update
     } catch (error) {
-      console.error("Error updating tree type:", error.message);
+      console.error("Error updating expense type:", error.message);
     }
   };
 
@@ -87,7 +87,7 @@ const UpdateTreeType = () => {
       >
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Update Tree Type
+            Update expense type
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -175,4 +175,4 @@ const UpdateTreeType = () => {
   );
 };
 
-export default UpdateTreeType;
+export default UpdateExpenseType;

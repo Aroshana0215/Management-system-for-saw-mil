@@ -39,6 +39,30 @@ export const createTreeType = async (treeTypeData) => {
   }
 };
 
+export const getAllActiveTreeType = async () => {
+  try {
+    // Ensure 'id' is a field in the Firestore documents to order by
+    const treeTypeQuery = query(
+      collection(db, "treeType"), // Collection reference
+      where("status", "==", "A"),
+      orderBy("treeTypeID", "asc") // Order by 'id' in ascending order
+    );
+
+    const querySnapshot = await getDocs(treeTypeQuery);
+
+    const treeTypeList = [];
+    querySnapshot.forEach((doc) => {
+      treeTypeList.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Return the ordered list
+    return treeTypeList;
+  } catch (error) {
+    console.error("Error fetching treeType List: ", error.message);
+    throw error;
+  }
+};
+
 export const getAllTreeType = async () => {
   try {
     // Ensure 'id' is a field in the Firestore documents to order by

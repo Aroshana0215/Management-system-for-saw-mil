@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Grid,
@@ -8,7 +8,7 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { newIncome } from "../../../services/AccountManagementService/IncomeManagmentService";
@@ -17,9 +17,19 @@ import {
   newAccountSummary,
   updateAccountSummary,
 } from "../../../services/AccountManagementService/AccountSummaryManagmentService";
+import { getAllActiveIncomeType } from "../../../services/SettingManagementService/IncomeTypeService";
 
 const AddIncome = () => {
   const { user } = useSelector((state) => state.auth);
+
+  const [formData, setFormData] = useState({
+    date: "",
+    type: "",
+    des: "",
+    amount: "",
+  });
+
+  const [incomeTypes, setIncomeTypes] = useState([]);
 
   let currentDate = new Date();
   let year = currentDate.getFullYear();
@@ -27,12 +37,19 @@ const AddIncome = () => {
   let day = ("0" + currentDate.getDate()).slice(-2);
   let formattedDate = `${year}-${month}-${day}`;
 
-  const [formData, setFormData] = useState({
-    date: "",
-    type: "", // Set default value if needed
-    des: "",
-    amount: ""
-  });
+  // Fetch income types on component mount
+  useEffect(() => {
+    const fetchIncomeTypes = async () => {
+      try {
+        const response = await getAllActiveIncomeType();
+        setIncomeTypes(response || []);
+      } catch (error) {
+        console.error("Error fetching income types:", error.message);
+      }
+    };
+
+    fetchIncomeTypes();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,12 +63,12 @@ const AddIncome = () => {
     event.preventDefault();
     try {
       let formattedFormData = {
-        ...formData, 
+        ...formData,
         status: "A",
         createdBy: user.displayName,
         createdDate: formattedDate,
       };
-      
+
       const incomeId = await newIncome(formattedFormData);
       console.log("New income ID:", incomeId);
       if (incomeId != null) {
@@ -62,7 +79,8 @@ const AddIncome = () => {
             status: "D",
           };
 
-          const updatedAccountSummary = await updateAccountSummary(data.id, accountSummaryData);
+          await updateAccountSummary(data.id, accountSummaryData);
+
           const newAccountSummaryData = {
             totalAmount: Number(data.totalAmount) + Number(formData.amount),
             changedAmount: formData.amount,
@@ -73,8 +91,8 @@ const AddIncome = () => {
             createdBy: user.displayName,
             createdDate: formattedDate,
           };
-          const AccountSummaryId = await newAccountSummary(newAccountSummaryData);
-          console.log("AccountSummaryId:", AccountSummaryId);
+          const accountSummaryId = await newAccountSummary(newAccountSummaryData);
+          console.log("AccountSummaryId:", accountSummaryId);
         }
       }
 
@@ -120,8 +138,11 @@ const AddIncome = () => {
                         variant="outlined"
                         fullWidth
                       >
-                        <MenuItem value="bill">Bill</MenuItem>
-                        <MenuItem value="other">Other</MenuItem>
+                        {incomeTypes.map((type) => (
+                          <MenuItem key={type.id} value={type.typeName}>
+                            {type.typeName}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   ) : (
