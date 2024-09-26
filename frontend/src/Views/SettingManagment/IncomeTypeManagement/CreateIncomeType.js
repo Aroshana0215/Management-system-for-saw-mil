@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Container,
   Grid,
@@ -7,26 +7,12 @@ import {
   Button,
   FormControl,
   InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-  getTreeTypeById,
-  updateTreeType,
-} from "../../../services/SettingManagementService/TreeTypeService";
+import { createIncomeType } from "../../../services/SettingManagementService/IncomeTypeService";
 
-const UpdateTreeType = () => {
-  const { treeTypeId } = useParams();
+const CreateIncomeType = () => {
   const { user } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    status: "",
-    typeName: "",
-    description: "",
-  });
 
   let currentDate = new Date();
   let year = currentDate.getFullYear();
@@ -34,23 +20,10 @@ const UpdateTreeType = () => {
   let day = ("0" + currentDate.getDate()).slice(-2);
   let formattedDate = `${year}-${month}-${day}`;
 
-  // Fetch the current tree type details using the treeTypeId
-  useEffect(() => {
-    const fetchTreeType = async () => {
-      try {
-        const treeTypeData = await getTreeTypeById(treeTypeId);
-        console.log("treeTypeData:", treeTypeData);
-        setFormData({
-          typeName: treeTypeData.typeName,
-          description: treeTypeData.description,
-          status: treeTypeData.status,
-        });
-      } catch (error) {
-        console.error("Error fetching tree type data:", error);
-      }
-    };
-    fetchTreeType();
-  }, [treeTypeId]);
+  const [formData, setFormData] = useState({
+    typeName: "",
+    description: "",
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,15 +36,17 @@ const UpdateTreeType = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const updatedFormData = {
+      let formattedFormData = {
         ...formData,
-        modifiedBy: user.displayName,
-        modifiedDate: formattedDate,
+        status: "A",
+        createdBy: user.displayName,
+        createdDate: formattedDate,
       };
-      await updateTreeType(treeTypeId, updatedFormData);
-      navigate("/setting/treeType"); // Redirect to tree type listing after successful update
+
+       await createIncomeType(formattedFormData);
+      window.location.href = "/setting/incomeType";
     } catch (error) {
-      console.error("Error updating tree type:", error.message);
+      console.error("Error creating tree type:", error.message);
     }
   };
 
@@ -87,7 +62,7 @@ const UpdateTreeType = () => {
       >
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Update Tree Type
+            Add income time
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -113,27 +88,9 @@ const UpdateTreeType = () => {
                   onChange={handleChange}
                   variant="outlined"
                   fullWidth
-                  placeholder="Enter tree type name"
+                  placeholder="Enter nature name"
                   sx={{ mt: 2 }}
                 />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} padding={1}>
-              <FormControl fullWidth>
-                <InputLabel shrink htmlFor="status">
-                  Status
-                </InputLabel>
-                <Select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  variant="outlined"
-                  sx={{ mt: 2 }}
-                >
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="D">D</MenuItem>
-                </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} padding={1}>
@@ -165,7 +122,7 @@ const UpdateTreeType = () => {
               }}
             >
               <Button type="submit" variant="contained" color="primary">
-                Update
+                Create
               </Button>
             </Grid>
           </Grid>
@@ -175,4 +132,4 @@ const UpdateTreeType = () => {
   );
 };
 
-export default UpdateTreeType;
+export default CreateIncomeType;

@@ -45,6 +45,15 @@ import AddExp from "../Views/AccountManagement/ExpenseManagemnt/AddExp";
 import TreeTypeList from "../Views/SettingManagment/TreeTypeManagment/TreeTypeList";
 import CreateTreeType from "../Views/SettingManagment/TreeTypeManagment/CreateTreeType";
 import UpdateTreeType from "../Views/SettingManagment/TreeTypeManagment/UpdateTreeType";
+import CreateTimberNature from "../Views/SettingManagment/TimberNatureManagment/CreateTimberNature";
+import TimberNatureList from "../Views/SettingManagment/TimberNatureManagment/TimberNatureList";
+import UpdateTimberNature from "../Views/SettingManagment/TimberNatureManagment/UpdateTimberNature";
+import IncomeTypeList from "../Views/SettingManagment/IncomeTypeManagement/IncomeTypeList";
+import CreateIncomeType from "../Views/SettingManagment/IncomeTypeManagement/CreateIncomeType";
+import UpdateIncomeType from "../Views/SettingManagment/IncomeTypeManagement/UpdateIncomeType";
+import ExpenseTypeList from "../Views/SettingManagment/ExpenseTypeManagement/ExpenseTypeList";
+import CreateExpenseType from "../Views/SettingManagment/ExpenseTypeManagement/CreateExpense";
+import UpdateExpenseType from "../Views/SettingManagment/ExpenseTypeManagement/UpdateExpenseType";
 
 const privateRouter = createBrowserRouter([
   {
@@ -190,6 +199,42 @@ const privateRouter = createBrowserRouter([
       {
         path: "/setting/treeType/:treeTypeId",
         element: <UpdateTreeType />,
+      },
+      {
+        path: "/setting/timberNature/add",
+        element: <CreateTimberNature />,
+      },
+      {
+        path: "/setting/timberNature",
+        element: <TimberNatureList />,
+      },
+      {
+        path: "/setting/timberNature/:natureId",
+        element: <UpdateTimberNature />,
+      },
+      {
+        path: "/setting/incomeType",
+        element: <IncomeTypeList />,
+      },
+      {
+        path: "/setting/incomeType/add",
+        element: <CreateIncomeType />,
+      },
+      {
+        path: "/setting/incomeType/:incomeTypeId",
+        element: <UpdateIncomeType />,
+      },
+      {
+        path: "/setting/expenseType",
+        element: <ExpenseTypeList />,
+      },
+      {
+        path: "/setting/expenseType/add",
+        element: <CreateExpenseType />,
+      },
+      {
+        path: "/setting/expenseType/:expenseTypeId",
+        element: <UpdateExpenseType />,
       },
       {
         path: "*",

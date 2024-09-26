@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Typography,
@@ -10,141 +10,155 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { createCategory, validateCategoryType, validateCategoryType2 } from "../../services/PriceCardService"; // Import the createCategory function
-import { getAllTreeType} from "../../services/SettingManagementService/TreeTypeService"; 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  createCategory,
+  validateCategoryType,
+  validateCategoryType2,
+} from "../../services/PriceCardService";
+import { getAllActiveTreeType } from "../../services/SettingManagementService/TreeTypeService";
+import { getAllActiveTimberNature } from "../../services/SettingManagementService/TimberNatureService";
 
 const CreateCategory = () => {
-const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
-let currentDate = new Date();
-let year = currentDate.getFullYear();
-let month = ('0' + (currentDate.getMonth() + 1)).slice(-2); // Months are zero-based
-let day = ('0' + currentDate.getDate()).slice(-2);
-let formattedDate = `${year}-${month}-${day}`;
+  let currentDate = new Date();
+  let year = currentDate.getFullYear();
+  let month = ("0" + (currentDate.getMonth() + 1)).slice(-2); // Months are zero-based
+  let day = ("0" + currentDate.getDate()).slice(-2);
+  let formattedDate = `${year}-${month}-${day}`;
 
-const [isplank, setIsplank] = useState(false);
-const [isTimberDust, setIsTimberDust] = useState(false);
-const [isLumber, setisLumber] = useState(false);
+  const [isplank, setIsplank] = useState(false);
+  const [isTimberDust, setIsTimberDust] = useState(false);
+  const [isLumber, setisLumber] = useState(false);
 
-const [treeTypes, setTreeTypes] = useState([]); // State to hold tree types
+  const [treeTypes, setTreeTypes] = useState([]);
+  const [timberNature, setTimberNature] = useState([]);
 
-    const [formData, setFormData] = useState({
-      timberType: { bpMD: 6 },
-      timberNature: { bpMD: 6 },
-      areaLength: { bpMD: 6 },
-      areaWidth: { bpMD: 6 },
-      minlength: { bpMD: 6 },
-      maxlength: { bpMD: 6 },
-      unitPrice: { bpMD: 6},
-      description: { bpMD:6 },
-    });
-    const [payload, setPayload] = useState({
-      timberType: "",
-      timberNature: "",
-      areaLength: 0,
-      areaWidth: 0,
-      minlength: 0,
-      maxlength: 0,
-      description: "",
-      unitPrice: "",
-      status: "A",
-      createdBy: user.displayName,
-      createdDate: formattedDate,
-    });
-
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setPayload((prevPayload) => ({
-        ...prevPayload,
-        [name]: value,
-      }));
-
-      if(name === "timberNature")
-        {
-          if ( value === "Planks") {
-            setIsplank(true);
-            setIsTimberDust(false);
-            setisLumber(false);
-          } else if ( value === "Dust") {
-            setIsplank(false);
-            setIsTimberDust(true);
-            setisLumber(false);
-          }else{
-            setIsplank(false);
-            setIsTimberDust(false);
-            setisLumber(true);
-          }
-      }
-    };
-
-    useEffect(() => {
-      // Fetch the tree types when the component mounts
-      const fetchTreeTypes = async () => {
-        try {
-          const response = await getAllTreeType(); // Call the service to fetch tree types
-          setTreeTypes(response); // Set the fetched tree types to state
-        } catch (error) {
-          console.error("Error fetching tree types:", error);
-        }
-      };
+  const [formData, setFormData] = useState({
+    timberType: { bpMD: 6 },
+    timberNature: { bpMD: 6 },
+    areaLength: { bpMD: 6 },
+    areaWidth: { bpMD: 6 },
+    minlength: { bpMD: 6 },
+    maxlength: { bpMD: 6 },
+    unitPrice: { bpMD: 6 },
+    description: { bpMD: 6 },
+  });
   
-      fetchTreeTypes();
-    }, []);
+  const [payload, setPayload] = useState({
+    timberType: "",
+    timberNature: "",
+    areaLength: 0,
+    areaWidth: 0,
+    minlength: 0,
+    maxlength: 0,
+    description: "",
+    unitPrice: "",
+    status: "A",
+    createdBy: user.displayName,
+    createdDate: formattedDate,
+  });
 
-    const handleSubmit = async (event) => {
-      event.preventDefault();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setPayload((prevPayload) => ({
+      ...prevPayload,
+      [name]: value,
+    }));
+
+    if (name === "timberNature") {
+      if (value === "Planks") {
+        setIsplank(true);
+        setIsTimberDust(false);
+        setisLumber(false);
+      } else if (value === "Dust") {
+        setIsplank(false);
+        setIsTimberDust(true);
+        setisLumber(false);
+      } else {
+        setIsplank(false);
+        setIsTimberDust(false);
+        setisLumber(true);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchTreeTypes = async () => {
       try {
+        const response = await getAllActiveTreeType();
+        setTreeTypes(response);
 
-        const categoryData = await validateCategoryType(payload);
-        if(categoryData != null){
-        if (Array.isArray(categoryData)) {
-
-          for (const category of categoryData) {
-
-            if(category.areaLength == payload.areaLength &&  category.areaWidth == payload.areaWidth){
-              throw new Error("Already exist record");
-
-            }
-            if(category.areaLength == payload.areaWidth &&  category.areaWidth == payload.areaLength){
-              throw new Error("Already exist record");
-            }
-          }
-
-        } else {
-          throw new Error("Invalid data format received from API");
-        }
-      }
-
-
-        const categoryData2 = await validateCategoryType2(payload);
-        if(categoryData2 != null){
-        if (Array.isArray(categoryData2)) {
-
-          for (const category of categoryData2) {
-
-            if(category.minlength >= payload.minlength <= category.maxlength ){
-              throw new Error("Already exist record");
-  
-          }
-
-          if(category.minlength >= payload.maxlength <= category.maxlength ){
-            throw new Error("Already exist record");
-
-        }
-          }
-
-        } else {
-          throw new Error("Invalid data format received from API");
-        }
-      }
-        
-          await createCategory(payload);
-          window.location.href = `/price`;
-        
+        const response2 = await getAllActiveTimberNature();
+        setTimberNature(response2);
       } catch (error) {
-        console.error("Error creating category:", error.message);
+        console.error("Error fetching tree types:", error);
+        toast.error("Error fetching tree types.");
       }
     };
+
+    fetchTreeTypes();
+  }, []);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const categoryData = await validateCategoryType(payload);
+      if (categoryData != null) {
+        if (Array.isArray(categoryData)) {
+          for (const category of categoryData) {
+            if (
+              (category.areaLength === payload.areaLength &&
+                category.areaWidth === payload.areaWidth) ||
+              (category.areaLength === payload.areaWidth &&
+                category.areaWidth === payload.areaLength)
+            ) {
+              toast.error("Record already exists with the same length and width.");
+              return;
+            }
+          }
+        } else {
+          throw new Error("Invalid data format received from API");
+        }
+      }
+
+      const categoryData2 = await validateCategoryType2(payload);
+      if (categoryData2 != null) {
+        if (Array.isArray(categoryData2)) {
+          for (const category of categoryData2) {
+            if (
+              category.minlength <= payload.minlength &&
+              payload.minlength <= category.maxlength
+            ) {
+              toast.error("Already existing record entered for min length.");
+              return;
+            }
+
+            if (
+              category.minlength <= payload.maxlength &&
+              payload.maxlength <= category.maxlength
+            ) {
+              toast.error("Already existing record entered for max length.");
+              return;
+            }
+          }
+        } else {
+          throw new Error("Invalid data format received from API");
+        }
+      }
+
+      await createCategory(payload);
+      toast.success("Category created successfully!");
+      setTimeout(() => {
+        window.location.href = `/price`;
+      }, 2000); // Delay redirect to allow user to see success message
+    } catch (error) {
+      console.error("Error creating category:", error.message);
+      toast.error(error.message);
+    }
+  };
 
   const plankValues = [0.3, 0.6, 0.9, 1, 1.3, 1.6, 1.9, 2, 2.3, 2.6, 2.9, 3, 3.2, 3.6, 3.9, 4];
   const defaultValues = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -157,8 +171,7 @@ const [treeTypes, setTreeTypes] = useState([]); // State to hold tree types
     ));
   };
 
-  const menuItems = isplank  ? renderMenuItems(plankValues) : renderMenuItems(defaultValues);
-
+  const menuItems = isplank ? renderMenuItems(plankValues) : renderMenuItems(defaultValues);
 
   return (
     <>
@@ -217,10 +230,12 @@ const [treeTypes, setTreeTypes] = useState([]); // State to hold tree types
                 onChange={handleChange}
                 required
               >
-                <MenuItem value="Lumber&beam">Lumber & Beams</MenuItem>
-                <MenuItem value="Planks">Planks</MenuItem>
-                <MenuItem value="Dust">Timber Dust</MenuItem>
-              </Select>
+                  {timberNature.map((type) => (
+                    <MenuItem key={type.id} value={type.natureName}>
+                      {type.natureName}
+                    </MenuItem>
+                  ))}
+                </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} md={4} padding={1}>
@@ -262,7 +277,7 @@ const [treeTypes, setTreeTypes] = useState([]); // State to hold tree types
                 onChange={handleChange}
                 disabled={isTimberDust}
               >
-                {[...Array(15)].map((_, i) => (
+                {[...Array(25)].map((_, i) => (
                   <MenuItem key={i + 1} value={i + 1}>
                     {i + 1}
                   </MenuItem>

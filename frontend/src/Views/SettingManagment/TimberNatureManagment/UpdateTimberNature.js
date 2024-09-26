@@ -13,18 +13,18 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  getTreeTypeById,
-  updateTreeType,
-} from "../../../services/SettingManagementService/TreeTypeService";
+    getTimberNatureDocumentById,
+    updateTimberNatureById,
+} from "../../../services/SettingManagementService/TimberNatureService";
 
-const UpdateTreeType = () => {
-  const { treeTypeId } = useParams();
+const UpdateTimberNature = () => {
+  const { natureId } = useParams();
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     status: "",
-    typeName: "",
+    natureName: "",
     description: "",
   });
 
@@ -34,23 +34,23 @@ const UpdateTreeType = () => {
   let day = ("0" + currentDate.getDate()).slice(-2);
   let formattedDate = `${year}-${month}-${day}`;
 
-  // Fetch the current tree type details using the treeTypeId
+  // Fetch the current nature details using the natureId
   useEffect(() => {
     const fetchTreeType = async () => {
       try {
-        const treeTypeData = await getTreeTypeById(treeTypeId);
-        console.log("treeTypeData:", treeTypeData);
+        const natureData = await getTimberNatureDocumentById(natureId);
+        console.log("natureeData:", natureData);
         setFormData({
-          typeName: treeTypeData.typeName,
-          description: treeTypeData.description,
-          status: treeTypeData.status,
+          natureName: natureData.natureName,
+          description: natureData.description,
+          status: natureData.status,
         });
       } catch (error) {
         console.error("Error fetching tree type data:", error);
       }
     };
     fetchTreeType();
-  }, [treeTypeId]);
+  }, [natureId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,8 +68,8 @@ const UpdateTreeType = () => {
         modifiedBy: user.displayName,
         modifiedDate: formattedDate,
       };
-      await updateTreeType(treeTypeId, updatedFormData);
-      navigate("/setting/treeType"); // Redirect to tree type listing after successful update
+      await updateTimberNatureById(natureId, updatedFormData);
+      navigate("/setting/timberNature"); // Redirect to tree type listing after successful update
     } catch (error) {
       console.error("Error updating tree type:", error.message);
     }
@@ -87,7 +87,7 @@ const UpdateTreeType = () => {
       >
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Update Tree Type
+            Update timber nature
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -103,17 +103,17 @@ const UpdateTreeType = () => {
           >
             <Grid item xs={12} padding={1}>
               <FormControl fullWidth>
-                <InputLabel shrink htmlFor="typeName">
-                  Type Name
+                <InputLabel shrink htmlFor="natureName">
+                  Nature Name
                 </InputLabel>
                 <TextField
-                  id="typeName"
-                  name="typeName"
-                  value={formData.typeName}
+                  id="natureName"
+                  name="natureName"
+                  value={formData.natureName}
                   onChange={handleChange}
                   variant="outlined"
                   fullWidth
-                  placeholder="Enter tree type name"
+                  placeholder="Enter timber nature name"
                   sx={{ mt: 2 }}
                 />
               </FormControl>
@@ -175,4 +175,4 @@ const UpdateTreeType = () => {
   );
 };
 
-export default UpdateTreeType;
+export default UpdateTimberNature;

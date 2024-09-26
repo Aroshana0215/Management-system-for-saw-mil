@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllTreeType } from '../../../services/SettingManagementService/TreeTypeService'; 
+import { getAllTimberNature } from '../../../services/SettingManagementService/TimberNatureService'; 
 import { Stack, Typography, Grid, Button, TextField, InputAdornment } from "@mui/material";
 import { Link } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
@@ -8,7 +8,7 @@ import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import SearchIcon from "@mui/icons-material/Search";
 
-const TreeTypeList = () => {
+const TimberNatureList = () => {
   const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,8 +16,8 @@ const TreeTypeList = () => {
   const [generalQuery, setGeneralQuery] = useState("");
 
   const columns = [
-    { field: "treeTypeID", headerName: "Tree Type Id", width: 150 },
-    { field: "typeName", headerName: "typeName", width: 150 },
+    { field: "timberNatureID", headerName: "Timber Nature Id", width: 150 },
+    { field: "natureName", headerName: "Name", width: 150 },
     { field: "description", headerName: "description", width: 150 },
     { field: "createdDate", headerName: "createdDate", width: 150 },
     { field: "createdBy", headerName: "createdBy", width: 150 },
@@ -29,7 +29,7 @@ const TreeTypeList = () => {
       headerName: "View",
       width: 120,
       renderCell: ({ row }) => (
-        <Link to={`/setting/treeType/${row.id}`}>
+        <Link to={`/setting/timberNature/${row.id}`}>
           <Button variant="contained" size="small">
             View
           </Button>
@@ -41,7 +41,7 @@ const TreeTypeList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllTreeType();
+        const data = await getAllTimberNature();
         console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
           setCategories(data);
@@ -99,7 +99,7 @@ const TreeTypeList = () => {
               variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
-              to={"/setting/treeType/add"}
+              to={"/setting/timberNature/add"}
             >
               New
             </Button>
@@ -157,4 +157,4 @@ const TreeTypeList = () => {
   );
 };
 
-export default TreeTypeList;
+export default TimberNatureList;

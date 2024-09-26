@@ -13,12 +13,12 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  getTreeTypeById,
-  updateTreeType,
-} from "../../../services/SettingManagementService/TreeTypeService";
+    getIncomeTypeDocumentById,
+    updateIncomeType,
+} from "../../../services/SettingManagementService/IncomeTypeService";
 
-const UpdateTreeType = () => {
-  const { treeTypeId } = useParams();
+const UpdateIncomeType = () => {
+  const { incomeTypeId } = useParams();
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
@@ -38,19 +38,19 @@ const UpdateTreeType = () => {
   useEffect(() => {
     const fetchTreeType = async () => {
       try {
-        const treeTypeData = await getTreeTypeById(treeTypeId);
-        console.log("treeTypeData:", treeTypeData);
+        const incomeTypeData = await getIncomeTypeDocumentById(incomeTypeId);
+        console.log("incomeTypeData:", incomeTypeData);
         setFormData({
-          typeName: treeTypeData.typeName,
-          description: treeTypeData.description,
-          status: treeTypeData.status,
+          typeName: incomeTypeData.typeName,
+          description: incomeTypeData.description,
+          status: incomeTypeData.status,
         });
       } catch (error) {
-        console.error("Error fetching tree type data:", error);
+        console.error("Error fetching income type data:", error);
       }
     };
     fetchTreeType();
-  }, [treeTypeId]);
+  }, [incomeTypeId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,10 +68,10 @@ const UpdateTreeType = () => {
         modifiedBy: user.displayName,
         modifiedDate: formattedDate,
       };
-      await updateTreeType(treeTypeId, updatedFormData);
-      navigate("/setting/treeType"); // Redirect to tree type listing after successful update
+      await updateIncomeType(incomeTypeId, updatedFormData);
+      navigate("/setting/incomeType"); // Redirect to tree type listing after successful update
     } catch (error) {
-      console.error("Error updating tree type:", error.message);
+      console.error("Error updating income type:", error.message);
     }
   };
 
@@ -87,7 +87,7 @@ const UpdateTreeType = () => {
       >
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Update Tree Type
+            Update income type
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -175,4 +175,4 @@ const UpdateTreeType = () => {
   );
 };
 
-export default UpdateTreeType;
+export default UpdateIncomeType;

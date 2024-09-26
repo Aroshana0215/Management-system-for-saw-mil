@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Grid, Typography, TextField, Button, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -8,6 +8,7 @@ import {
   newAccountSummary,
   updateAccountSummary,
 } from "../../../services/AccountManagementService/AccountSummaryManagmentService";
+import { getAllActiveExpenseType } from "../../../services/SettingManagementService/ExpenseTypeService"; // Importing the service
 
 
 const AddExp = () => {
@@ -28,6 +29,21 @@ const AddExp = () => {
     createdBy: user.displayName,
     createdDate: formattedDate,
   });
+
+  const [expenseTypes, setExpenseTypes] = useState([]); // State to store the fetched expense types
+
+  // Fetch expense types on component mount
+  useEffect(() => {
+    const fetchExpenseTypes = async () => {
+      try {
+        const response = await getAllActiveExpenseType();
+        setExpenseTypes(response); // Assuming response is an array of types
+      } catch (error) {
+        console.error("Error fetching expense types:", error);
+      }
+    };
+    fetchExpenseTypes();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,11 +132,11 @@ const AddExp = () => {
                   onChange={handleChange}
                   label="Type"
                 >
-                  <MenuItem value="Employee">Employee</MenuItem>
-                  <MenuItem value="External">External</MenuItem>
-                  <MenuItem value="Kitchen">Kitchen</MenuItem>
-                  <MenuItem value="Electricity">Electricity</MenuItem>
-                  <MenuItem value="Water">Water</MenuItem>
+                  {expenseTypes.map((type) => (
+                    <MenuItem key={type.id} value={type.typeName}>
+                      {type.typeName}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>

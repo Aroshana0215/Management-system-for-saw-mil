@@ -338,15 +338,33 @@ export default function MainSideBar() {
                 }}
               />
             </ListItemButton>
-            {/* <ListItemButton component={Link} to={"/employee/daily"}>
+            <ListItemButton component={Link} to={"/setting/timberNature"}>
               <ListItemIcon></ListItemIcon>
               <ListItemText
-                primary="Daily Records"
+                primary="Timber Nature"
                 primaryTypographyProps={{
-                  color: isSelected("/employee/daily") ? primaryColor : secondaryColor,
+                  color: isSelected("/setting/timberNature") ? primaryColor : secondaryColor,
                 }}
               />
-            </ListItemButton> */}
+            </ListItemButton>
+            <ListItemButton component={Link} to={"/setting/incomeType"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Income Type"
+                primaryTypographyProps={{
+                  color: isSelected("/setting/incomeType") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton component={Link} to={"/setting/expenseType"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Expense Type"
+                primaryTypographyProps={{
+                  color: isSelected("/setting/expenseType") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
           </List>
         </Collapse>
 
