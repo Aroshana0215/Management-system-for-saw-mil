@@ -5,47 +5,52 @@ const db = getFirestore();
 
 // Insert new category for price Card List
 export const createCategory = async (categoryData) => {
-  console.log("New Category entered into the system", categoryData);
-
-  const counterDocRef = doc(db, "counters", "categoryCounter");
-
-  try {
-    // Run a transaction to ensure atomicity
-    const categoryID = await runTransaction(db, async (transaction) => {
-      const counterDoc = await transaction.get(counterDocRef);
-
-      if (!counterDoc.exists()) {
-        throw new Error("Counter document does not exist!");
-      }
-
-      const currentID = counterDoc.data().currentID || 0;
-      const newID = currentID + 1;
-      const newCategoryID = `CAT-${newID}`;
-
-      // Update the counter document with the new ID
-      transaction.update(counterDocRef, { currentID: newID });
-
-      return newCategoryID;
-    });
-
-    // Add the new category record with the generated categoryID
-    const categoryDataWithID = { ...categoryData, categoryId: categoryID };
-    const docRef = await addDoc(collection(db, "priceCard"), categoryDataWithID);
-    console.log("New Category entered into the system with ID: ", docRef.id);
-    return docRef.id;
-  } catch (error) {
-    console.error("Error Entering New Category: ", error.message);
-    throw error;
-  }
-};
-
+    console.log("New Category entered into the system", categoryData);
+  
+    const counterDocRef = doc(db, "counters", "categoryCounter");
+  
+    try {
+      // Run a transaction to ensure atomicity
+      const categoryID = await runTransaction(db, async (transaction) => {
+        const counterDoc = await transaction.get(counterDocRef);
+  
+        if (!counterDoc.exists()) {
+          throw new Error("Counter document does not exist!");
+        }
+  
+        const currentID = counterDoc.data().currentID || 0;
+        const newID = currentID + 1;
+  
+        // Update the counter document with the new ID
+        transaction.update(counterDocRef, { currentID: newID });
+  
+        return newID;
+      });
+  
+      // Add the new category record with the generated categoryID and categoryNumber
+      const newCategoryID = `CAT-${categoryID}`;
+      const categoryDataWithID = {
+        ...categoryData,
+        categoryId: newCategoryID,
+        categoryNumber: categoryID, // Add categoryNumber field
+      };
+  
+      // Add the document to Firestore
+      const docRef = await addDoc(collection(db, "priceCard"), categoryDataWithID);
+      console.log("New Category entered into the system with ID: ", docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error("Error Entering New Category: ", error.message);
+      throw error;
+    }
+  };
 
 export const getAllCategories = async () => {
     try {
       // Ensure 'id' is a field in the Firestore documents to order by
       const priceCardQuery = query(
         collection(db, "priceCard"), // Collection reference
-        orderBy("categoryId", "asc") // Order by 'id' in ascending order
+        orderBy("categoryNumber", "desc") // Order by 'id' in ascending order
       );
       
       const querySnapshot = await getDocs(priceCardQuery);
