@@ -77,62 +77,68 @@ const ShowRemainWood = () => {
     fetchData();
   }, [payloadBulk]);
 
-  const handleBillPriceChange = (index, event) => {
-    const { value } = event.target;
-    setWoodData((prevWoodData) => {
-      const updatedWoodData = [...prevWoodData];
-      updatedWoodData[index].billPrice = value;
-      return updatedWoodData;
-    });
-  };
+  // Handle change in Bill Price input
+const handleBillPriceChange = (index, event) => {
+  const { value } = event.target;
+  setWoodData((prevWoodData) => {
+    const updatedWoodData = [...prevWoodData];
+    updatedWoodData[index].billPrice = value; // Update the billPrice
+    return updatedWoodData;
+  });
+};
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+// Handle form submission
+const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    const updatedWoodData = await Promise.all(
-      woodData.map(async (payload) => {
-        const categoryData = await getCategoryById(payload.categoryId);
-        const data = await getActiveStockSummaryDetails(
-          categoryData.categoryId,
-          payload.requestLength
-        );
+  const updatedWoodData = await Promise.all(
+    woodData.map(async (payload) => {
+      const categoryData = await getCategoryById(payload.categoryId);
+      const data = await getActiveStockSummaryDetails(
+        categoryData.categoryId,
+        payload.requestLength
+      );
 
-        let updatedPayload = { ...payload };
+      let updatedPayload = { ...payload };
 
-        if (!data) {
-          const stockSumData = {
-            totalPieces: "0",
-            changedAmount: "0",
-            previousAmount: "0",
-            toBeCutAmount : 0,
-            categoryId_fk: categoryData.categoryId,
-            maxlength : categoryData.minlength,
-            minlength : categoryData.minlength,
-            timberNature : categoryData.timberNature,
-            timberType : categoryData.timberType,
-            areaLength : categoryData.areaLength,
-            areaWidth : categoryData.areaWidth,
-            stk_id_fk: null,
-            length: String(payload.requestLength),
-            status: "A",
-            billId_fk: "",
-            createdBy: user.displayName,
-            createdDate: formattedDate,
-          };
+      // If no stock summary exists, create it
+      if (!data) {
+        const stockSumData = {
+          totalPieces: "0",
+          changedAmount: "0",
+          previousAmount: "0",
+          toBeCutAmount: 0,
+          categoryId_fk: categoryData.categoryId,
+          maxlength: categoryData.minlength,
+          minlength: categoryData.minlength,
+          timberNature: categoryData.timberNature,
+          timberType: categoryData.timberType,
+          areaLength: categoryData.areaLength,
+          areaWidth: categoryData.areaWidth,
+          stk_id_fk: null,
+          length: String(payload.requestLength),
+          status: "A",
+          billId_fk: "",
+          createdBy: user.displayName,
+          createdDate: formattedDate,
+        };
 
-          const stockSummaryData = await createStockSummary(stockSumData);
+        const stockSummaryData = await createStockSummary(stockSumData);
 
-          updatedPayload.summaryId = stockSummaryData;
-        }
+        updatedPayload.summaryId = stockSummaryData;
+      }
 
-        return updatedPayload;
-      })
-    );
+      // Pass both `unitPrice` and `billPrice` (ensure the latest `billPrice` is sent)
+      return updatedPayload;
+    })
+  );
 
-    setWoodData(updatedWoodData);
+  setWoodData(updatedWoodData);
 
-    navigate("/bill/add", { state: { woodData: updatedWoodData } });
-  };
+  // Navigate to next route and send updatedWoodData with both unitPrice and billPrice
+  navigate("/bill/add", { state: { woodData: updatedWoodData } });
+};
+
 
   return (
     <>
@@ -260,7 +266,7 @@ const ShowRemainWood = () => {
                   <OutlinedInput
                     size="small"
                     name="billPrice"
-                    value={wood.billPrice}
+                    value={wood.unitPrice}
                     onChange={(event) => handleBillPriceChange(index, event)}
                     fullWidth
                   />

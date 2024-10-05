@@ -104,6 +104,41 @@ const CreateCategory = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+  
+    const requiredFields = [
+      { name: "timberType", label: "Timber Type" },
+      { name: "timberNature", label: "Timber Nature" },
+      { name: "areaLength", label: "Area Length" },
+      { name: "areaWidth", label: "Area Width" },
+      { name: "minlength", label: "Min Length" },
+      { name: "maxlength", label: "Max Length" },
+      { name: "unitPrice", label: "Unit Price" },
+      { name: "description", label: "Description" },
+    ];
+    
+    for (const field of requiredFields) {
+      if (isTimberDust) {
+        if (
+          field.name === "timberType" ||
+          field.name === "timberNature" ||
+          field.name === "unitPrice" ||
+          field.name === "description"
+        ) {
+          if (!payload[field.name] || payload[field.name] === "") {
+            toast.error(`${field.label} is required`);
+            return;
+          }
+        }
+      } else {
+        if (!payload[field.name] || payload[field.name] === "") {
+          toast.error(`${field.label} is required`);
+          return;
+        }
+      }
+    }
+    
+    
+  
     try {
       const categoryData = await validateCategoryType(payload);
       if (categoryData != null) {
@@ -123,7 +158,7 @@ const CreateCategory = () => {
           throw new Error("Invalid data format received from API");
         }
       }
-
+  
       const categoryData2 = await validateCategoryType2(payload);
       if (categoryData2 != null) {
         if (Array.isArray(categoryData2)) {
@@ -135,7 +170,7 @@ const CreateCategory = () => {
               toast.error("Already existing record entered for min length.");
               return;
             }
-
+  
             if (
               category.minlength <= payload.maxlength &&
               payload.maxlength <= category.maxlength
@@ -148,7 +183,7 @@ const CreateCategory = () => {
           throw new Error("Invalid data format received from API");
         }
       }
-
+  
       await createCategory(payload);
       toast.success("Category created successfully!");
       setTimeout(() => {
@@ -159,6 +194,7 @@ const CreateCategory = () => {
       toast.error(error.message);
     }
   };
+  
 
   const plankValues = [0.3, 0.6, 0.9, 1, 1.3, 1.6, 1.9, 2, 2.3, 2.6, 2.9, 3, 3.2, 3.6, 3.9, 4];
   const defaultValues = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -211,7 +247,6 @@ const CreateCategory = () => {
                   name="timberType"
                   value={payload.timberType}
                   onChange={handleChange}
-                  required
                 >
                   {treeTypes.map((type) => (
                     <MenuItem key={type.id} value={type.typeName}>
@@ -228,7 +263,6 @@ const CreateCategory = () => {
                 name="timberNature"
                 value={payload.timberNature}
                 onChange={handleChange}
-                required
               >
                   {timberNature.map((type) => (
                     <MenuItem key={type.id} value={type.natureName}>

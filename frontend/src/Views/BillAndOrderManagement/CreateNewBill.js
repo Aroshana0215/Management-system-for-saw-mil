@@ -312,7 +312,6 @@ const CreateNewBill = () => {
                             >
                               <MenuItem value="ORDER">ORDER</MenuItem>
                               <MenuItem value="COMPLETE">COMPLETE</MenuItem>
-                              <MenuItem value="PENDING">PENDING</MenuItem>
                             </Select>
                           </FormControl>
                         ) : (

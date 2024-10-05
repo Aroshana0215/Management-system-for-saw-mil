@@ -11,7 +11,8 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { getById, updateCategory } from "../../services/PriceCardService"; // Import getCategoryById and updateCategory functions
+import { getById, updateCategory , validateCategoryType2 , validateCategoryType} from "../../services/PriceCardService"; // Import getCategoryById and updateCategory functions
+import { ToastContainer, toast } from "react-toastify";
 
 const UpdateCategory = () => {
   const { categoryId } = useParams(); // Get categoryId from URL params
@@ -97,6 +98,39 @@ console.log("isTimberDust:",isTimberDust);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const requiredFields = [
+      { name: "timberType", label: "Timber Type" },
+      { name: "timberNature", label: "Timber Nature" },
+      { name: "areaLength", label: "Area Length" },
+      { name: "areaWidth", label: "Area Width" },
+      { name: "minlength", label: "Min Length" },
+      { name: "maxlength", label: "Max Length" },
+      { name: "unitPrice", label: "Unit Price" },
+      { name: "description", label: "Description" },
+    ];
+    
+    for (const field of requiredFields) {
+      if (isTimberDust) {
+        if (
+          field.name === "timberType" ||
+          field.name === "timberNature" ||
+          field.name === "unitPrice" ||
+          field.name === "description"
+        ) {
+          if (!payload[field.name] || payload[field.name] === "") {
+            toast.error(`${field.label} is required`);
+            return;
+          }
+        }
+      } else {
+        if (!payload[field.name] || payload[field.name] === "") {
+          toast.error(`${field.label} is required`);
+          return;
+        }
+      }
+    }
+
     try {
       await updateCategory(categoryId, payload);;
       window.location.href = `/price`;
@@ -191,7 +225,8 @@ console.log("isTimberDust:",isTimberDust);
                 name="areaLength"
                 value={payload.areaLength}
                 onChange={handleChange}
-                disabled={isTimberDust}
+                disabled
+                required
               >
                 {menuItems}
               </Select>
@@ -204,7 +239,8 @@ console.log("isTimberDust:",isTimberDust);
                 name="areaWidth"
                 value={payload.areaWidth}
                 onChange={handleChange}
-                disabled={isTimberDust}
+                disabled
+                required
               >
                 {[...Array(10)].map((_, i) => (
                   <MenuItem key={i + 1} value={i + 1}>
@@ -221,7 +257,8 @@ console.log("isTimberDust:",isTimberDust);
                 name="minlength"
                 value={payload.minlength}
                 onChange={handleChange}
-                disabled={isTimberDust}
+                disabled
+                required
               >
                 {[...Array(15)].map((_, i) => (
                   <MenuItem key={i + 1} value={i + 1}>
@@ -238,9 +275,10 @@ console.log("isTimberDust:",isTimberDust);
                 name="maxlength"
                 value={payload.maxlength}
                 onChange={handleChange}
-                disabled={isTimberDust}
+                disabled
+                required
               >
-                {[...Array(30)].map((_, i) => (
+                {[...Array(25)].map((_, i) => (
                   <MenuItem key={i + 1} value={i + 1}>
                     {i + 1}
                   </MenuItem>
