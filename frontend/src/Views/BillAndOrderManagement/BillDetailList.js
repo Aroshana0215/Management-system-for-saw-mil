@@ -12,6 +12,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import UpdateBill from './UpdateBill'; // Import the dialog component
+import { useSelector } from "react-redux";
 
 const BillDetailList = () => {
   const [categories, setCategories] = useState([]);
@@ -23,11 +24,12 @@ const BillDetailList = () => {
   const [createdDate, setCreatedDate] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog visibility
   const [selectedBillId, setSelectedBillId] = useState(null); // State to manage selected bill ID
+  const [selectedBill, setSelectedBill] = useState(null); 
+  const { user } = useSelector((state) => state.auth);
 
   const columns = [
-    { field: "billID", headerName: "ID", width: 140 },
-    { field: "cusName", headerName: "Customer Name", width: 140 },
-    { field: "cusAddress", headerName: "Customer Address", width: 240 },
+    { field: "billID", headerName: "ID", width: 90 },
+    { field: "cusName", headerName: "Customer Name", width: 150 },
     {
       field: "totalAmount",
       headerName: "Total (RS:)",
@@ -43,7 +45,7 @@ const BillDetailList = () => {
     {
       field: "billStatus",
       headerName: "Bill Status",
-      width: 140,
+      width: 120,
       renderCell: ({ value }) => {
         let color;
         switch (value) {
@@ -66,7 +68,7 @@ const BillDetailList = () => {
       }
     },
     { field: "createdDate", headerName: "Created Date", width: 140 },
-    { field: "time", headerName: "Time", width: 140 },
+    { field: "time", headerName: "Time", width: 100 },
     {
       field: "actions",
       headerName: "Actions",
@@ -74,7 +76,11 @@ const BillDetailList = () => {
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
           <Link to={`/bill/view/${params.row.id}`}>
-            <Button variant="contained" size="small">
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ minWidth: '80px', height: '36px', padding: '8px 16px' }} // Set fixed size and padding for the "View" button
+            >
               View
             </Button>
           </Link>
@@ -82,8 +88,10 @@ const BillDetailList = () => {
             <Button
               variant="contained"
               size="small"
+              sx={{ minWidth: '80px', height: '36px', padding: '8px 16px' }} // Set the same size and padding for the "Update" button
               onClick={() => {
                 setSelectedBillId(params.row.id);
+                setSelectedBill(params.row);
                 setDialogOpen(true);
               }}
             >
@@ -93,6 +101,7 @@ const BillDetailList = () => {
         </Stack>
       ),
     },
+        
   ];
 
   const handleComplete = (billID) => {
@@ -108,6 +117,14 @@ const BillDetailList = () => {
     const date = new Date(dateObject);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // window.location.href = `/bill`;
+    };
+
+    fetchData();
+  }, [dialogOpen === false]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -305,7 +322,8 @@ const BillDetailList = () => {
         <UpdateBill
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
-          id={selectedBillId}
+          user={user}
+          bill={selectedBill}
         />
       )}
     </>

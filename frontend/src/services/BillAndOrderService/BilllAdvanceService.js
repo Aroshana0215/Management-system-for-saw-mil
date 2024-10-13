@@ -54,6 +54,7 @@ import {
   
   // Get one bill advance record by ID
   export const getbillAdvanceById = async (billAdvanceId) => {
+    console.log("🚀 ~ getbillAdvanceById ~ billAdvanceId:", billAdvanceId)
     try {
       const billAdvanceRef = doc(db, "billAdvance", billAdvanceId);
       const billAdvanceSnapshot = await getDoc(billAdvanceRef);
@@ -80,7 +81,8 @@ import {
     try {
       const q = query(
         collection(db, "billAdvance"),
-        where("billId_fk", "==", billId)
+        where("BillId", "==", billId),
+        where("status", "==", "A"),
       );
       const querySnapshot = await getDocs(q);
   
