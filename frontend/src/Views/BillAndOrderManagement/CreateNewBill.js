@@ -31,6 +31,7 @@ import {
   getActiveAccountSummaryDetails,
 } from "../../services/AccountManagementService/AccountSummaryManagmentService";
 import { getCategoryById } from "../../services/PriceCardService";
+import { ToastContainer, toast } from "react-toastify";
 
 const CreateNewBill = () => {
   const navigate = useNavigate();
@@ -82,146 +83,235 @@ const CreateNewBill = () => {
     }));
   };
 
+  const validateBillInputs = (woodData,formData) => {
+    let status = false;
+    
+    if(!formData.cusName || formData.cusName === ""){
+      toast.error("Customer Name required");
+      status = true;
+    }else{
+      if(!formData.cusAddress || formData.cusAddress === ""){
+        toast.error("Customer Address required");
+        status = true;
+      }else{
+        if(!formData.cusNIC || formData.cusNIC === ""){
+          toast.error("NIC required");
+          status = true;
+        }else{
+          if(!formData.cusPhoneNumber || formData.cusPhoneNumber === ""){
+            toast.error("Customer Phone Number required");
+            status = true;
+          }else{
+            if(!formData.totalAmount || formData.totalAmount === ""){
+              toast.error("Total amount required");
+              status = true;
+            }else{
+                if(!formData.remainningAmount || formData.remainningAmount === ""){
+                  toast.error("Remaining amount required");
+                  status = true;
+                }else{
+                  if(!formData.PromizeDate || formData.PromizeDate === ""){
+                    toast.error("Promized date required");
+                    status = true;
+                  }else{
+                    if(!formData.billStatus || formData.billStatus === ""){
+                      toast.error("Status required");
+                      status = true;
+                    }
+                  }
+                }
+            }
+          }
+        }          
+      }
+    }
+
+    if(formData.billStatus == "COMPLETE"){
+      if (formData.advance > 0) {
+        toast.error("Cannot have advance for Complete bill !!",);
+        status = true;
+      }   
+    }
+
+    for (const wood of woodData) {
+      if(formData.billStatus != "ORDER"){
+        if (wood.toBeCut > 0) {
+          toast.error("No stock for timber!!",);
+          status = true;
+        }   
+      }
+    }
+
+    // if(formData.billStatus == "ORDER" || formData.billStatus == "ORDER" ){
+    //   if(formData.advance < 1){
+    //     toast.error("advance amount should be greater than 0 for ORDER");
+    //     status = true;
+    //   }
+    // } 
+
+            return status;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+  
     try {
+      const result = validateBillInputs(woodData, formData);
+      if (result) {
+        console.error("Input Validation Error");
+        return;
+      }
+  
       const formattedData = {
-        ...formData, // Spreading formData
+        ...formData,
         dateAndTime: currentDateTime,
         status: "A",
         createdBy: user.displayName,
         createdDate: currentDateTime
       };
-      console.log("woodData:",woodData);
+  
+      console.log("woodData:", woodData);
       const bill = await newBill(formattedData);
-
+  
       if (bill != null) {
         for (const wood of woodData) {
-
-      console.log("wood.tobeCut:",wood.toBeCut);
-      
-          const data = await getStockSummaryById(wood.summaryId);
-
-          console.log("data:",data);
-
-          if (data == null) {
-            console.error("No data for the given stock summaryId:", wood.summaryId);
-          }
-
-          const stockUpdateData = {
-            status: "D",
-            modifiedBy: user.displayName,
-            modifiedDate: currentDateTime
-          };
-          await updateStockSummaryDetails(data.id, stockUpdateData);
-
-          let toBeCutAmount = 0;
-          let totalPieces = 0;
-          
-          if(wood.toBeCut > 0){
-            toBeCutAmount = Number(data.toBeCutAmount) + Number(wood.toBeCut)
-          }else{
-            totalPieces = Number(wood.totalPieces) - Number(wood.amount)
-          }
-
-          const catogoryDatat = await getCategoryById(data.categoryId_fk);
-          if(catogoryDatat == null){
-            console.error("Invalid category:", data.categoryId_fk);
-          }
-        
-          const stockSumData = {
-            totalPieces: totalPieces,
-            changedAmount: wood.amount,
-            previousAmount: wood.totalPieces,
-            categoryId_fk: wood.categoryId_fk,
-            maxlength : catogoryDatat.minlength,
-            minlength : catogoryDatat.minlength,
-            timberNature : catogoryDatat.timberNature,
-            timberType : catogoryDatat.timberType,
-            areaLength : catogoryDatat.areaLength,
-            areaWidth : catogoryDatat.areaWidth,
-            length: String(wood.requestLength),
-            toBeCutAmount : toBeCutAmount,
-            stk_id_fk: "",
-            status: "A",
-            billId_fk: bill.id,
-            createdBy: user.displayName,
-            createdDate: currentDateTime,
-          };
-          const newstockSummaryData = await createStockSummary(stockSumData);
-
-          let complete = false;
-
-          if( wood.toBeCut == 0){
-            complete = true;
-          }else{
-            complete = false;
-          }
-
-          if (newstockSummaryData != null) {
-            const saveOrderData = {
-              discountPrice: wood.billPrice || 0,
-              categoryId_fk: wood.categoryId_fk || 0,
-              availablePiecesAmount: wood.totalPieces || 0,
-              neededPiecesAmount: wood.amount || 0,
-              tobeCut: wood.toBeCut,
-              woodLength: wood.requestLength,
-              isComplete : complete,
+          if (formData.billStatus != "ORDER") {
+            const data = await getStockSummaryById(wood.summaryId);
+            if (!data) {
+              console.error("No data for stock summaryId:", wood.summaryId);
+              continue;
+            }
+  
+            const stockUpdateData = {
+              status: "D",
+              modifiedBy: user.displayName,
+              modifiedDate: currentDateTime
+            };
+            await updateStockSummaryDetails(data.id, stockUpdateData);
+  
+            const categoryData = await getCategoryById(data.categoryId_fk);
+            if (!categoryData) {
+              console.error("Invalid category:", data.categoryId_fk);
+              continue;
+            }
+  
+            const stockSummaryData = {
+              totalPieces: wood.totalPieces - wood.amount,
+              changedAmount: wood.amount,
+              previousAmount: wood.totalPieces,
+              categoryId_fk: wood.categoryId_fk,
+              maxlength: categoryData.minlength,
+              minlength: categoryData.minlength,
+              timberNature: categoryData.timberNature,
+              timberType: categoryData.timberType,
+              areaLength: categoryData.areaLength,
+              areaWidth: categoryData.areaWidth,
+              length: String(wood.requestLength),
+              toBeCutAmount: wood.toBeCut,
+              stk_id_fk: "",
               status: "A",
               billId_fk: bill.id,
               createdBy: user.displayName,
               createdDate: currentDateTime
             };
-            await createOrder(saveOrderData);
+            await createStockSummary(stockSummaryData);
+  
+          } else {
+
+            const data = await getStockSummaryById(wood.summaryId);
+            if (!data) {
+              console.error("No data for stock summaryId:", wood.summaryId);
+              continue;
+            }
+
+              const stockUpdateData = {
+                toBeCutAmount: wood.amount,
+                modifiedBy: user.displayName,
+                modifiedDate: currentDateTime
+              };
+              await updateStockSummaryDetails(data.id, stockUpdateData);
+
           }
+
+  
+          const saveOrderData = {
+            discountPrice: wood.billPrice || 0,
+            categoryId_fk: wood.categoryId_fk || 0,
+            availablePiecesAmount: wood.totalPieces || 0,
+            neededPiecesAmount: wood.amount || 0,
+            tobeCut: wood.toBeCut,
+            woodLength: wood.requestLength,
+            isComplete: formData.billStatus == "ORDER" ? false : true,
+            status: "A",
+            billId_fk: bill.id,
+            createdBy: user.displayName,
+            createdDate: currentDateTime
+          };
+          await createOrder(saveOrderData);
+          
         }
+  
+        if (formData.billStatus !== "INTERNAL") {
 
-        const saveIncomeData = {
-          date: currentDateTime,
-          type: "Bill",
-          des: "Nothing",
-          amount: formData.totalAmount,
-          BilId: bill.billID || "",
-          status: "A",
-          createdBy: user.displayName,
-          createdDate: currentDateTime,
-        };
+          let incomeAmount = 0;
 
-        const incomeId = await newIncome(saveIncomeData);
+          if(formData.billStatus === "COMPLETE"){
+            incomeAmount = formData.totalAmount;
+  
+          }else
+          {
+            if(formData.advance > 0){
+                incomeAmount = formData.advance;
+            }else{
+                incomeAmount = incomeAmount; 
+            }
+          }
 
-        if (incomeId != null) {
-          const data = await getActiveAccountSummaryDetails();
-
-          if (data != null) {
-            const accountSummaryData = {
-              status: "D",
-              modifiedBy: user.displayName,
-              modifiedDate: currentDateTime
-            };
-
-            await updateAccountSummary(data.id, accountSummaryData);
-
-            const newAccountSummaryData = {
-              totalAmount:
-                Number(data.totalAmount) + Number(formData.totalAmount),
-              changedAmount: formData.totalAmount,
-              previousAmount: data.totalAmount,
-              expId_fk: "",
-              incId_fk: incomeId,
-              status: "A",
-              createdBy: user.displayName,
-              createdDate: currentDateTime,
-            };
-
-            await newAccountSummary(newAccountSummaryData);
+          const saveIncomeData = {
+            date: currentDateTime,
+            type: `${formData.billStatus}-Bill`,
+            des: "Nothing",
+            amount:  incomeAmount,
+            BilId: bill.billID || "",
+            status: "A",
+            createdBy: user.displayName,
+            createdDate: currentDateTime
+          };
+          const incomeId = await newIncome(saveIncomeData);
+  
+          if (incomeId) {
+            const data = await getActiveAccountSummaryDetails();
+  
+            if (data) {
+              const accountSummaryData = {
+                status: "D",
+                modifiedBy: user.displayName,
+                modifiedDate: currentDateTime
+              };
+              await updateAccountSummary(data.id, accountSummaryData);
+  
+              const newAccountSummaryData = {
+                totalAmount: Number(data.totalAmount) + Number(formData.totalAmount),
+                changedAmount: formData.totalAmount,
+                previousAmount: data.totalAmount,
+                expId_fk: "",
+                incId_fk: incomeId,
+                status: "A",
+                createdBy: user.displayName,
+                createdDate: currentDateTime
+              };
+              await newAccountSummary(newAccountSummaryData);
+            }
           }
         }
       }
+  
       navigate(`/bill/view/${bill.id}`);
     } catch (error) {
       console.error("Error creating bill:", error.message);
     }
   };
+  
 
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
@@ -312,6 +402,7 @@ const CreateNewBill = () => {
                             >
                               <MenuItem value="ORDER">ORDER</MenuItem>
                               <MenuItem value="COMPLETE">COMPLETE</MenuItem>
+                              <MenuItem value="INTERNAL">INTERNAL</MenuItem>
                             </Select>
                           </FormControl>
                         ) : (

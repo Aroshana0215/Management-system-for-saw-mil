@@ -69,9 +69,10 @@ const [formData, setFormData] = useState({
           createdDate: formattedDate,
         }
         const catogoryDatat = await getCategoryById(newItemData.categoryId_fk);
+
         if(catogoryDatat == null){
           console.error("Invalid category:", newItemData.categoryId_fk);
-        }
+        }else{}
         const stockData = await NewInventory(newItemData);
         console.log("stockData:",stockData)
         if (stockData != null){
@@ -79,6 +80,7 @@ const [formData, setFormData] = useState({
          const resultData  = await getActiveStockSummaryDetails(stockData.categoryId_fk, stockData.length);
           if(resultData == null){
             console.log("in");
+            console.log("🚀 ~ handleSubmit ~ catogoryDatat:", catogoryDatat)
             const stockSumData = {
               totalPieces: stockData.amountOfPieces,
               changedAmount: stockData.amountOfPieces,
