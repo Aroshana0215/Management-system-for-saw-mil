@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -8,14 +8,10 @@ import {
   TableRow,
   Switch,
   FormControlLabel,
-  Container,
   Grid,
   Typography,
   TextField,
   Button,
-  RadioGroup,
-  Radio,
-  FormControl,
   Stack,
 } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -95,7 +91,7 @@ const CreateDailyDetails = () => {
   const handleChange = (index, field) => (event) => {
     const value =
       field === "isPresent"
-        ? event.target.value === "true"
+        ? event.target.checked
         : event.target.value;
     const updatedDetails = [...details];
     updatedDetails[index][field] = value;
@@ -305,7 +301,8 @@ const CreateDailyDetails = () => {
                               size="small"
                               fullWidth
                               value={details[index].otHours}
-                              disabled
+                              onChange={handleChange(index, "otHours")}
+                              disabled={!details[index].isPresent}
                             />
                           </TableCell>
                           <TableCell>
@@ -335,75 +332,6 @@ const CreateDailyDetails = () => {
                     </TableBody>
                   </Table>
                 </TableContainer>
-                {/* <Grid container spacing={2}>
-              {employees.map((employee, index) => (
-                <Grid item xs={12} key={employee.id}>
-                  <Typography variant="h6" color="textSecondary" gutterBottom>
-                    {employee.name}
-                  </Typography>
-                  <Stack direction="row" spacing={2}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      label="In Time"
-                      type="time"
-                      value={details[index].inTime}
-                      onChange={handleChange(index, "inTime")}
-                      disabled={!details[index].isPresent}
-                    />
-
-                    <TextField
-                      size="small"
-                      fullWidth
-                      label="Out Time"
-                      type="time"
-                      value={details[index].outTime}
-                      onChange={handleChange(index, "outTime")}
-                      disabled={!details[index].isPresent}
-                    />
-
-                    <TextField
-                      size="small"
-                      fullWidth
-                      label="OT Hours"
-                      value={details[index].otHours}
-                      disabled
-                    />
-
-                    <TextField
-                      size="small"
-                      fullWidth
-                      label="Advance Per Day"
-                      value={details[index].advancePerDay}
-                      onChange={handleChange(index, "advancePerDay")}
-                      disabled={!details[index].isPresent}
-                    />
-
-                    <FormControl component="fieldset" fullWidth>
-                      <Typography variant="subtitle1"></Typography>
-                      <RadioGroup
-                        row
-                        aria-label="isPresent"
-                        name={`isPresent-${employee.id}`}
-                        value={details[index].isPresent.toString()}
-                        onChange={handleChange(index, "isPresent")}
-                      >
-                        <FormControlLabel
-                          value="true"
-                          control={<Radio />}
-                          label="Present"
-                        />
-                        <FormControlLabel
-                          value="false"
-                          control={<Radio />}
-                          label="Absent"
-                        />
-                      </RadioGroup>
-                    </FormControl>
-                  </Stack>
-                </Grid>
-              ))}
-            </Grid> */}
                 <Button
                   type="submit"
                   variant="contained"
@@ -414,18 +342,18 @@ const CreateDailyDetails = () => {
                 </Button>
               </form>
             </Grid>
-            <Grid item xs={12}>
-              <Typography
-                component={Link}
-                to={"/price"}
-                variant="body2"
-                sx={{ textAlign: "center", textDecoration: "none" }}
-              >
-                Go to Price Page
-              </Typography>
-            </Grid>
           </Grid>
         </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Typography
+          component={Link}
+          to={"/price"}
+          variant="body2"
+          sx={{ textAlign: "center", textDecoration: "none" }}
+        >
+          Go to Price Page
+        </Typography>
       </Grid>
     </Grid>
   );
