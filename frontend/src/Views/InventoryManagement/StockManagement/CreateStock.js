@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Stack, Grid, Typography, TextField, Button,IconButton, Divider,  } from "@mui/material";
 import { Link } from "react-router-dom";
 import { NewInventory } from "../../../services/InventoryManagementService/StockManagementService"; 
+import { getCategoryById } from "../../../services/PriceCardService"; 
 import { useSelector } from "react-redux";
 import { createStockSummary, getActiveStockSummaryDetails, updateStockSummaryDetails } from "../../../services/InventoryManagementService/StockSummaryManagementService"; 
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
@@ -67,27 +68,37 @@ const [formData, setFormData] = useState({
           createdBy: user.displayName,
           createdDate: formattedDate,
         }
+        const catogoryDatat = await getCategoryById(newItemData.categoryId_fk);
+
+        if(catogoryDatat == null){
+          console.error("Invalid category:", newItemData.categoryId_fk);
+        }else{}
         const stockData = await NewInventory(newItemData);
         console.log("stockData:",stockData)
         if (stockData != null){
           
          const resultData  = await getActiveStockSummaryDetails(stockData.categoryId_fk, stockData.length);
-         console.log("resultData:",resultData)
           if(resultData == null){
             console.log("in");
+            console.log("🚀 ~ handleSubmit ~ catogoryDatat:", catogoryDatat)
             const stockSumData = {
               totalPieces: stockData.amountOfPieces,
               changedAmount: stockData.amountOfPieces,
               previousAmount: "0",
-              categoryId_fk: stockData.categoryId_fk,
               stk_id_fk: stockData.inventoryId,
               length : stockData.length,
+              toBeCutAmount : 0,
               status: "A",
               billId_fk:"",
-              createdBy:"",
-              createdDate:"",
-              modifiedBy:"",
-              modifiedDate:"",
+              categoryId_fk: stockData.categoryId_fk,
+              maxlength : catogoryDatat.minlength,
+              minlength : catogoryDatat.minlength,
+              timberNature : catogoryDatat.timberNature,
+              timberType : catogoryDatat.timberType,
+              areaLength : catogoryDatat.areaLength,
+              areaWidth : catogoryDatat.areaWidth,
+              createdBy: user.displayName,
+              createdDate: formattedDate,
             };
             const stockSummarykData = await createStockSummary(stockSumData);
           }else{
@@ -95,20 +106,25 @@ const [formData, setFormData] = useState({
               status: "D",
             };
             const updatedkData = await updateStockSummaryDetails(resultData.id, stockUpdateData);
-  
+        
             const stockSumData = {
               totalPieces: Number(resultData.totalPieces) + Number(stockData.amountOfPieces),
               changedAmount: stockData.amountOfPieces,
               previousAmount: resultData.totalPieces,
               categoryId_fk: resultData.categoryId_fk,
+              maxlength : catogoryDatat.minlength,
+              minlength : catogoryDatat.minlength,
+              timberNature : catogoryDatat.timberNature,
+              timberType : catogoryDatat.timberType,
+              areaLength : catogoryDatat.areaLength,
+              areaWidth : catogoryDatat.areaWidth,
               stk_id_fk:  resultData.stk_id_fk,
               length : resultData.length,
+              toBeCutAmount : resultData.toBeCutAmount,
               status: "A",
               billId_fk:"",
-              createdBy:"",
-              createdDate:"",
-              modifiedBy:"",
-              modifiedDate:"",
+              createdBy: user.displayName,
+              createdDate: formattedDate,
             };
             const newstockSummaryData = await createStockSummary(stockSumData);
             
@@ -120,7 +136,7 @@ const [formData, setFormData] = useState({
       }
 
 
-      window.location.href = "/stock";
+      window.location.href = "/activeStock";
     } catch (error) {
       console.error("Error creating category:", error.message);
       // Handle error

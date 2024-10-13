@@ -26,6 +26,7 @@ export default function MainSideBar() {
   const [openEmployee, setOpenEmployee] = React.useState(true);
   const [openFinance, setOpenFinance] = React.useState(true);
   const [openReport, setOpenReport] = React.useState(true);
+  const [openSetting , setOpenSetting] = React.useState(true)
 
   const handleInventoryClick = () => {
     setOpenInventory(!openInventory);
@@ -38,6 +39,9 @@ export default function MainSideBar() {
   };
   const handleReportClick = () => {
     setOpenReport(!openReport);
+  };
+  const handleSettinglick = () => {
+    setOpenSetting(!openSetting);
   };
   return (
     <Box
@@ -247,9 +251,6 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
-
-
-
         <ListItemButton
           onClick={handleReportClick}
           selected={isSelected("/income") || isSelected("/exp")}
@@ -264,6 +265,7 @@ export default function MainSideBar() {
           >
             <AccountBalanceOutlinedIcon />
           </ListItemIcon>
+          
           <ListItemText
             sx={{ marginLeft: "-18px" }}
             primaryTypographyProps={{
@@ -297,6 +299,74 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
+
+
+        <ListItemButton
+          onClick={handleSettinglick}
+          selected={isSelected("/employee") || isSelected("/employee/daily")}
+        >
+          <ListItemIcon
+            sx={{
+              color:
+                isSelected("/employee") || isSelected("/employee/daily")
+                  ? primaryColor
+                  : secondaryColor,
+            }}
+          >
+            <BadgeIcon />
+          </ListItemIcon>
+          <ListItemText
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color:
+                isSelected("/employee") || isSelected("/employee/daily")
+                  ? primaryColor
+                  : secondaryColor,
+            }}
+            primary="Setting"
+          />
+        </ListItemButton>
+        <Collapse in={openSetting} timeout="auto" unmountOnExit>
+          <List dense disablePadding>
+            <ListItemButton component={Link} to={"/setting/treeType"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Tree type"
+                primaryTypographyProps={{
+                  color: isSelected("/setting/treeType") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton component={Link} to={"/setting/timberNature"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Timber Nature"
+                primaryTypographyProps={{
+                  color: isSelected("/setting/timberNature") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton component={Link} to={"/setting/incomeType"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Income Type"
+                primaryTypographyProps={{
+                  color: isSelected("/setting/incomeType") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton component={Link} to={"/setting/expenseType"}>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText
+                primary="Expense Type"
+                primaryTypographyProps={{
+                  color: isSelected("/setting/expenseType") ? primaryColor : secondaryColor,
+                }}
+              />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
       </List>
     </Box>
   );

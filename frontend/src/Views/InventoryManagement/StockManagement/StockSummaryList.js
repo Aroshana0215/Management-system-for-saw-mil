@@ -22,7 +22,7 @@ const StockSummaryList = () => {
 
 
   const columns = [
-    { field: "categoryId", headerName: "Category ID", width: 150 },
+    { field: "categoryId_fk", headerName: "Category ID", width: 150 },
     { field: "length", headerName: "length", width: 150 },
     { field: "totalPieces", headerName: "Total Pieces", width: 120 },
     { field: "changedAmount", headerName: "Changed Amount", width: 150 },
@@ -38,25 +38,6 @@ const StockSummaryList = () => {
     const fetchData = async () => {
       try {
         let summaryData = await getAllSummaryDetails();
-
-        if (Array.isArray(summaryData) && summaryData.length > 0) {
-          for (let index = 0; index < summaryData.length; index++) {
-            if (summaryData[index].categoryId_fk) {
-              const categoryData = await getCategoryById(summaryData[index].categoryId_fk);
-              summaryData[index].categoryId = categoryData?.categoryId || '';
-            }
-            if (summaryData[index].billId_fk) {
-              const billData = await getbillDetailsById(summaryData[index].billId_fk);
-              summaryData[index].billID = billData?.billID || ''; 
-            }
-            if (summaryData[index].stk_id_fk) {
-              const stockData = await getInventoryDetailsById(summaryData[index].stk_id_fk);
-              summaryData[index].stockData = stockData; // Add stock data
-            }
-          }
-        }
-
-        console.log("Fetched data:", summaryData); // Log fetched data to inspect its format
 
         if (Array.isArray(summaryData)) {
           setCategories(summaryData);

@@ -79,7 +79,7 @@ const CreateDailyDetails = () => {
     const totalWorkingHours = totalWorkingMinutes / 60; // Convert minutes to hours
 
     // Calculate OT hours
-    const standardWorkingMinutes = 8 * 60; // 8 hours in minutes
+    const standardWorkingMinutes = 9 * 60; // 8 hours in minutes
     const otMinutes =
       totalWorkingMinutes > standardWorkingMinutes
         ? totalWorkingMinutes - standardWorkingMinutes
@@ -158,11 +158,11 @@ const CreateDailyDetails = () => {
         if (dailyDetailId) {
           const saveExpData = {
             date: combinedDateTime,
-            type: "EmployeEXP",
-            des: "EmployeEXP",
+            type: "Employee",
+            des: "Employee daily Advance",
             amount: detail.advancePerDay,
             status: "A",
-            // createdBy: user.displayName,
+            createdBy: user.displayName,
             createdDate: currentDate,
           };
 

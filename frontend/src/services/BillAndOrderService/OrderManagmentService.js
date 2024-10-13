@@ -14,6 +14,7 @@ const db = getFirestore();
 
 // Insert new order for price Card List
 export const createOrder = async (orderData) => {
+  console.log("orderData: ", orderData);
   try {
     const docRef = await addDoc(collection(db, "orderDetails"), orderData);
     console.log("New order entered into the system with ID: ", docRef.id);

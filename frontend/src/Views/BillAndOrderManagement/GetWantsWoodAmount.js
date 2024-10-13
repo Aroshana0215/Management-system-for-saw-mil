@@ -1,25 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Typography,
   Button,
   FormControl,
   FormLabel,
-  OutlinedInput,
+  Select,
+  MenuItem,
   Stack,
   IconButton,
   Divider,
+  OutlinedInput,
 } from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { useNavigate } from "react-router-dom";
+import { getAllCategories } from "../../services/PriceCardService"; // Import the API call
 
 const GetWantsWood = () => {
   const [payloadBulk, setPayloadBulk] = useState([
     { categoryId: "", length: "", amount: "" },
   ]);
+  const [categories, setCategories] = useState([]); // State to store categories
+
+  console.log("categories:", categories);
 
   const navigate = useNavigate();
+
+  // Fetch categories when the component mounts
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategories();
+        setCategories(response); // Assuming the response is an array of categories
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (index, event) => {
     const values = [...payloadBulk];
@@ -39,7 +59,7 @@ const GetWantsWood = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    navigate('/bill/show-remain-wood', { state: { payloadBulk } });
+    navigate("/bill/show-remain-wood", { state: { payloadBulk } });
   };
 
   return (
@@ -84,42 +104,82 @@ const GetWantsWood = () => {
               <Grid item xs={12} md={4} p={1}>
                 <FormControl fullWidth>
                   <FormLabel>Category ID</FormLabel>
-                  <OutlinedInput
+                  <Select
                     size="small"
                     name="categoryId"
                     value={row.categoryId}
                     onChange={(event) => handleInputChange(index, event)}
                     fullWidth
                     required
-                  />
+                    MenuProps={{
+                      PaperProps: {
+                        style: {
+                          maxHeight: 200, // Set the max height for the dropdown list
+                        },
+                      },
+                    }}
+                  >
+                    {categories.map((category) => (
+                      <MenuItem key={category.categoryId} value={category.categoryId}>
+                        {category.categoryId} {/* Assuming the category has an id and name */}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} md={4} p={1}>
                 <FormControl fullWidth>
                   <FormLabel>Length</FormLabel>
-                  <OutlinedInput
+                  <Select
                     size="small"
                     name="length"
                     value={row.length}
                     onChange={(event) => handleInputChange(index, event)}
                     fullWidth
                     required
-                  />
+                    MenuProps={{
+                      PaperProps: {
+                        style: {
+                          maxHeight: 200, // Set the max height for the dropdown list
+                        },
+                      },
+                    }}
+                  >
+                    {[...Array(25).keys()].map((num) => (
+                      <MenuItem key={num + 1} value={num + 1}>
+                        {num + 1}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} md={4} p={1}>
                 <FormControl fullWidth>
                   <FormLabel>Amount</FormLabel>
-                  <OutlinedInput
+                  <Select
                     size="small"
                     name="amount"
                     value={row.amount}
                     onChange={(event) => handleInputChange(index, event)}
                     fullWidth
                     required
-                  />
+                    MenuProps={{
+                      PaperProps: {
+                        style: {
+                          maxHeight: 200, // Set the max height for the dropdown list
+                        },
+                      },
+                    }}
+                  >
+                    {[...Array(101).keys()].map((num) => (
+                      <MenuItem key={num} value={num}>
+                        {num}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 </FormControl>
               </Grid>
+
               <Grid item xs={12}>
                 <Divider />
               </Grid>

@@ -108,3 +108,34 @@ export const getActiveAccountSummaryDetails = async () => {
     throw error;
   }
 };
+
+
+// Get One accountSummary by ID
+export const getActiveaccountSummaryById = async (accountSummaryId) => {
+  try {
+
+    const q = query(
+      collection(db, "accountSummary"),
+      where("accountSummaryId", "==", "A")
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    const accountSummaryRef = doc(db, "accountSummary", accountSummaryId);
+    const accountSummarySnapshot = await getDoc(accountSummaryRef);
+
+    if (accountSummarySnapshot.exists()) {
+      const accountSummary = {
+        id: accountSummarySnapshot.id,
+        ...accountSummarySnapshot.data(),
+      };
+      return accountSummary;
+    } else {
+      console.log("accountSummary not found");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting accountSummary: ", error.message);
+    throw error;
+  }
+};

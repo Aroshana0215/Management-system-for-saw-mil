@@ -58,16 +58,16 @@ const UpdateCategory = () => {
     { field: "perimeter", headerName: "Perimeter", width: 120 },
     { field: "length", headerName: "Length", width: 120 },
     { field: "cubicAmount", headerName: "Cubic Amount", width: 140 },
-    { field: "otherDetails", headerName: "Other Details", width: 140 },
     { field: "unitPrice", headerName: "Unit Price", width: 120 },
-    { field: "totalTimerValue", headerName: "Total Timer Value", width: 160 },
-    {
-      field: "totalCuttingValue",
-      headerName: "Total Cutting Value",
-      width: 180,
-    },
-    { field: "outComeValue", headerName: "Out Come Value", width: 150 },
-    { field: "status", headerName: "Status", width: 120 },
+    { field: "otherDetails", headerName: "Other Details", width: 140 },
+    // { field: "totalTimerValue", headerName: "Total Timer Value", width: 160 },
+    // {
+    //   field: "totalCuttingValue",
+    //   headerName: "Total Cutting Value",
+    //   width: 180,
+    // },
+    // { field: "outComeValue", headerName: "Out Come Value", width: 150 },
+    // { field: "status", headerName: "Status", width: 120 },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
     {
@@ -76,7 +76,7 @@ const UpdateCategory = () => {
       width: 120,
       renderCell: (params) => (
         <Button variant="contained" component={Link} size="small" to="/load">
-          Wood Pieces
+          Update
         </Button>
       ),
     },
@@ -135,7 +135,7 @@ const UpdateCategory = () => {
             alignItems="center"
           >
             <Typography variant="h6" fontWeight="bold" color="primary">
-              Load Details and related Timber details
+              Related Timber details
             </Typography>
           </Stack>
         </Grid>
@@ -237,20 +237,6 @@ const UpdateCategory = () => {
                   Add Timber
                 </Button>
               </Stack>
-            </Grid>
-            <Grid item xs={12} padding={1}>
-              <TableContainer>
-                <Table size="small">
-                  <TableBody>
-                    <TableRow>
-                      <TableCell colSpan={7}>Total Value</TableCell>
-                      <TableCell>{totalTimberValue}</TableCell>
-                      <TableCell colSpan={5}></TableCell>
-                      <TableCell>{totalCubicValue}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
             </Grid>
             <Grid item xs={12} padding={1}>
               <DataGrid

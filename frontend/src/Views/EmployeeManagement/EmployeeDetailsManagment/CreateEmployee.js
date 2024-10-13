@@ -29,9 +29,8 @@ const CreateEmployee = () => {
     otValuePerHour: { bpMD: 6 },
     salaryPerDay: { bpMD: 6 },
     currentLendAmount: { bpMD: 6 },
-    joinDate: { bpMD: 6 },
     dateOfBirth: { bpMD: 6 },
-    status: { bpMD: 6 },
+    joinDate: { bpMD: 6 },
   });
 
   const [payload, setPayload] = useState({
@@ -44,9 +43,9 @@ const CreateEmployee = () => {
     currentLendAmount: "",
     joinDate: "",
     dateOfBirth: "",
-    status: "",
-    createdBy: user.displayName,
+    status: "A",
     createdDate: formattedDate,
+    createdBy: user.displayName,
     modifiedBy: "",
     modifiedDate: "",
   });
@@ -130,16 +129,6 @@ const CreateEmployee = () => {
               </Button>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography
-            component={Link}
-            to={"/employee/dependatnt"}
-            variant="body2"
-            sx={{ textAlign: "center", textDecoration: "none" }}
-          >
-            Go to Employee Page
-          </Typography>
         </Grid>
       </Grid>
     </Container>

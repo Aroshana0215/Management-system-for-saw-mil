@@ -1,51 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { getPaysheetDetailsByEmployee } from '../../../services/EmployeeManagementService/EmployeePaySheetService';
-import { Button, Grid, Stack, Typography, InputAdornment, TextField } from "@mui/material";
-import { Link, useParams } from "react-router-dom";
+import { getAllTimberNature } from '../../../services/SettingManagementService/TimberNatureService'; 
+import { Stack, Typography, Grid, Button, TextField, InputAdornment } from "@mui/material";
+import { Link } from "react-router-dom";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { DataGrid } from "@mui/x-data-grid";
-import CreditScoreIcon from "@mui/icons-material/CreditScore";
-import SearchIcon from "@mui/icons-material/Search";
 import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
+import SearchIcon from "@mui/icons-material/Search";
 
-const EPaymentList = () => {
+const TimberNatureList = () => {
   const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [generalQuery, setGeneralQuery] = useState("");
-  const { eid } = useParams();
 
   const columns = [
-    { field: "paySheetID", headerName: "ID", width: 90 },
+    { field: "timberNatureID", headerName: "Timber Nature Id", width: 150 },
+    { field: "natureName", headerName: "Name", width: 150 },
+    { field: "description", headerName: "description", width: 150 },
+    { field: "createdDate", headerName: "createdDate", width: 150 },
+    { field: "createdBy", headerName: "createdBy", width: 150 },
+    { field: "modifiedDate", headerName: "modifiedDate", width: 150 },
+    { field: "modifiedBy", headerName: "modifiedBy", width: 150 },
+    { field: "status", headerName: "status", width: 150 },
     {
-      field: "fromDate",
-      headerName: "From Date",
-      width: 150,
-      renderCell: ({ row }) => formatDateOfBirth(row.fromDate),
+      field: "view",
+      headerName: "View",
+      width: 120,
+      renderCell: ({ row }) => (
+        <Link to={`/setting/timberNature/${row.id}`}>
+          <Button variant="contained" size="small">
+            View
+          </Button>
+        </Link>
+      ),
     },
-    {
-      field: "toDate",
-      headerName: "To Date",
-      width: 150,
-      renderCell: ({ row }) => formatDateOfBirth(row.toDate),
-    },
-    { field: "totalDay", headerName: "Total Days", width: 120 },
-    { field: "totalOt", headerName: "Total Ot", width: 120 },
-    { field: "reduceAmount", headerName: "Reduce Amount", width: 150 },
-    { field: "paymentStatus", headerName: "Payment Status", width: 150 },
-    { field: "employeeName", headerName: "Employee Name", width: 120 },
-    { field: "totalPayment", headerName: "Total Payment", width: 150 },
-    { field: "totalAdvance", headerName: "Total Advance", width: 150 },
-    { field: "createdBy", headerName: "Created By", width: 120 },
-    { field: "modifiedBy", headerName: "Modified By", width: 130 },
   ];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getPaysheetDetailsByEmployee(eid);
-        console.log("Fetched data:", data);
+        const data = await getAllTimberNature();
+        console.log("Fetched data:", data); // Log fetched data to inspect its format
         if (Array.isArray(data)) {
           setCategories(data);
           setFilteredCategories(data);
@@ -60,26 +57,21 @@ const EPaymentList = () => {
     };
 
     fetchData();
-  }, [eid]);
-
-  useEffect(() => {
-    handleSearch();
-  }, [generalQuery]);
-
-  const formatDateOfBirth = (dateObject) => {
-    const date = new Date(dateObject.seconds * 1000);
-    return date.toISOString().slice(0, 10);
-  };
+  }, []);
 
   const handleSearch = () => {
-    const lowercasedGeneralQuery = generalQuery.toLowerCase();
-    const filteredData = categories.filter(category =>
-      Object.values(category).some(value =>
-        String(value).toLowerCase().includes(lowercasedGeneralQuery)
+    const lowercasedQuery = generalQuery.toLowerCase();
+    const filteredData = categories.filter((item) =>
+      Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(lowercasedQuery)
       )
     );
     setFilteredCategories(filteredData);
   };
+
+  useEffect(() => {
+    handleSearch();
+  }, [generalQuery]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -99,26 +91,22 @@ const EPaymentList = () => {
     <>
       <Grid container>
         <Grid item xs={12} p={2}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6" fontWeight="bold" color="primary">
-              Employee Payment Details
+              Stock Details
             </Typography>
             <Button
               variant="contained"
-              startIcon={<CreditScoreIcon />}
+              startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
-              to={`/employee/payment/add/${eid}`}
+              to={"/setting/timberNature/add"}
             >
-              Process Payment
+              New
             </Button>
           </Stack>
         </Grid>
-
-        <Grid item xs={12} p={1}>
+        
+        <Grid item xs={12} p={2}>
           <Stack
             p={2}
             direction="row"
@@ -150,9 +138,7 @@ const EPaymentList = () => {
 
         <Grid item xs={12} p={2}>
           <DataGrid
-            sx={{
-              bgcolor: "background.default",
-            }}
+            sx={{ bgcolor: "background.default" }}
             rows={filteredCategories}
             columns={columns}
             initialState={{
@@ -171,4 +157,4 @@ const EPaymentList = () => {
   );
 };
 
-export default EPaymentList;
+export default TimberNatureList;

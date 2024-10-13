@@ -25,7 +25,7 @@ const ActiveStockList = () => {
   const [dimensionOptions, setDimensionOptions] = useState([]);
 
   const columns = [
-    { field: "categoryId", headerName: "Category ID", width: 150 },
+    { field: "categoryId_fk", headerName: "Category ID", width: 150 },
     {
       field: "lengthRange",
       headerName: "Length Range",
@@ -59,6 +59,7 @@ const ActiveStockList = () => {
         );
       },
     },
+    { field: "toBeCutAmount", headerName: "Order Amount", width: 150 },
     { field: "createdBy", headerName: "Created By", width: 120 },
   ];
 
@@ -67,31 +68,6 @@ const ActiveStockList = () => {
       try {
         let summaryData = await getAllActiveStockDetails();
         console.log("summaryData:",summaryData);
-
-        if (Array.isArray(summaryData) && summaryData.length > 0) {
-          for (let index = 0; index < summaryData.length; index++) {
-            if (summaryData[index].categoryId_fk) {
-              console.log("summaryData[index].categoryId_fk:",summaryData[index].categoryId_fk);
-              const categoryData = await getCategoryById(summaryData[index].categoryId_fk);
-              console.log("categoryData:",categoryData);
-              summaryData[index].categoryId = categoryData?.categoryId || '';
-              summaryData[index].areaLength = categoryData?.areaLength || '';
-              summaryData[index].areaWidth = categoryData?.areaWidth || '';
-              summaryData[index].minlength = categoryData?.minlength || '';
-              summaryData[index].maxlength = categoryData?.maxlength || '';
-              summaryData[index].timberNature = categoryData?.timberNature || '';
-              summaryData[index].timberType = categoryData?.timberType || '';
-            }
-            if (summaryData[index].billId_fk) {
-              const billData = await getbillDetailsById(summaryData[index].billId_fk);
-              summaryData[index].billID = billData?.billID || ''; 
-            }
-            if (summaryData[index].stk_id_fk) {
-              const stockData = await getInventoryDetailsById(summaryData[index].stk_id_fk);
-              summaryData[index].stockData = stockData; // Add stock data
-            }
-          }
-        }
 
         if (Array.isArray(summaryData)) {
           setSummaryData(summaryData);

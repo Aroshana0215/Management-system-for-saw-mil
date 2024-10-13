@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllemployeeDetails } from '../../../services/EmployeeManagementService/EmployeeDetailService';
-import { Stack, Typography, InputAdornment } from "@mui/material";
-import { Grid, Button, TextField } from "@mui/material";
+import { Stack, Typography, InputAdornment, TextField, Grid, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../../Components/Progress/Loading";
@@ -11,43 +10,32 @@ import SearchIcon from "@mui/icons-material/Search";
 
 const EmployeeList = () => {
   const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filteredCategories, setFilteredCategories] = useState([]);
   const [generalQuery, setGeneralQuery] = useState("");
+  
   const columns = [
     { field: "empID", headerName: "ID", width: 90 },
     { field: "name", headerName: "Name", width: 150 },
     { field: "phoneNo", headerName: "Phone No", width: 120 },
-    // {
-    //   field: "dateOfBirth",
-    //   headerName: "DOB",
-    //   width: 120,
-    //   renderCell: ({ row }) => formatDate(row.dateOfBirth),
-    // },
     {
       field: "currentLendAmount",
       headerName: "Lend (RS:)",
       width: 130,
-      renderCell: ({ row }) => {
-        return `${row.currentLendAmount}.00`;
-      },
+      renderCell: ({ row }) => `${row.currentLendAmount}.00`,
     },
     {
       field: "otValuePerHour",
       headerName: "OT (RS:)",
       width: 130,
-      renderCell: ({ row }) => {
-        return `${row.otValuePerHour}.00`;
-      },
+      renderCell: ({ row }) => `${row.otValuePerHour}.00`,
     },
     {
       field: "salaryPerDay",
       headerName: "Salary (RS:)",
       width: 130,
-      renderCell: ({ row }) => {
-        return `${row.salaryPerDay}.00`;
-      },
+      renderCell: ({ row }) => `${row.salaryPerDay}.00`,
     },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
@@ -58,15 +46,10 @@ const EmployeeList = () => {
       renderCell: ({ row }) => (
         <>
           <Link to={`/employee/payment/${row.id}`}>
-            <Button sx={{ marginX: 1 }} variant="contained" size="small">
-              Payment
-            </Button>
+            <Button sx={{ marginX: 1 }} variant="contained" size="small">Payment</Button>
           </Link>
-          {/* TODO : Change the path */}
           <Link to={`/employee/dependatnt/${row.id}`}>
-            <Button sx={{ marginX: 1 }} variant="contained" size="small">
-              View
-            </Button>
+            <Button sx={{ marginX: 1 }} variant="contained" size="small">View</Button>
           </Link>
         </>
       ),
@@ -95,17 +78,12 @@ const EmployeeList = () => {
   }, []);
 
   const handleSearch = () => {
-    let filteredData = categories;
-
-    if (generalQuery) {
-      const lowercasedGeneralQuery = generalQuery.toLowerCase();
-      filteredData = filteredData.filter((category) =>
-        Object.values(category).some((value) =>
-          String(value).toLowerCase().includes(lowercasedGeneralQuery)
-        )
-      );
-    }
-
+    const lowercasedGeneralQuery = generalQuery.toLowerCase();
+    const filteredData = categories.filter(category =>
+      Object.values(category).some(value =>
+        String(value).toLowerCase().includes(lowercasedGeneralQuery)
+      )
+    );
     setFilteredCategories(filteredData);
   };
 
@@ -126,11 +104,6 @@ const EmployeeList = () => {
   if (error) {
     return <ErrorAlert error={error} />;
   }
-
-  const formatDate = (dateObject) => {
-    const date = new Date(dateObject.seconds * 1000);
-    return date.toISOString().slice(0, 10); // Extracting only the date part
-  };
 
   return (
     <>
@@ -188,16 +161,12 @@ const EmployeeList = () => {
 
         <Grid item xs={12} p={1}>
           <DataGrid
-            sx={{
-              bgcolor: "background.default",
-            }}
+            sx={{ bgcolor: "background.default" }}
             rows={filteredCategories}
             columns={columns}
             initialState={{
               pagination: {
-                paginationModel: {
-                  pageSize: 8,
-                },
+                paginationModel: { pageSize: 8 },
               },
             }}
             pageSizeOptions={[8]}
