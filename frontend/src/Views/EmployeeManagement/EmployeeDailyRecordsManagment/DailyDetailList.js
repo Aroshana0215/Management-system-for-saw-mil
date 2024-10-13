@@ -164,7 +164,6 @@ const DailyDetailList = () => {
             }}
           >
             <Stack direction="row" spacing={2}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   label="From Date"
                   value={fromDate}
@@ -187,7 +186,6 @@ const DailyDetailList = () => {
                     />
                   )}
                 />
-              </LocalizationProvider>
               <Button variant="outlined" onClick={clearDateFilters}>
                 Clear
               </Button>
