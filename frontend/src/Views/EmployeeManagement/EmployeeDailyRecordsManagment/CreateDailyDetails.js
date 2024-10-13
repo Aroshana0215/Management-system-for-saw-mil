@@ -1,10 +1,35 @@
 import React, { useState, useEffect  } from "react";
-import { Container, Grid, Typography, TextField, Button, RadioGroup, Radio, FormControl, FormControlLabel} from "@mui/material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Switch,
+  FormControlLabel,
+  Container,
+  Grid,
+  Typography,
+  TextField,
+  Button,
+  RadioGroup,
+  Radio,
+  FormControl,
+  Stack,
+} from "@mui/material";
 import { Link } from "react-router-dom";
-import { newDailyDetail } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService"; 
+import { newDailyDetail } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
 import { newExpense } from "../../../services/AccountManagementService/ExpenseManagmentService";
-import {newAccountSummary, updateAccountSummary , getActiveAccountSummaryDetails } from "../../../services/AccountManagementService/AccountSummaryManagmentService";
-import { getAllemployeeDetails ,getemployeeDetailsById} from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import {
+  newAccountSummary,
+  updateAccountSummary,
+  getActiveAccountSummaryDetails,
+} from "../../../services/AccountManagementService/AccountSummaryManagmentService";
+import {
+  getAllemployeeDetails,
+  getemployeeDetailsById,
+} from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import { useSelector } from "react-redux";
 
 const CreateDailyDetails = () => {
@@ -13,21 +38,22 @@ const CreateDailyDetails = () => {
   const [commonDate, setCommonDate] = useState("");
   const { user } = useSelector((state) => state.auth);
 
-
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
         const employeesList = await getAllemployeeDetails();
         setEmployees(employeesList);
-        setDetails(employeesList.map(employee => ({
-          employeeId: employee.id,
-          selectedDateTime: commonDate, // Initialize with commonDate
-          isPresent: false,
-          inTime: "",
-          outTime: "",
-          otHours: "",
-          advancePerDay: "",
-        })));
+        setDetails(
+          employeesList.map((employee) => ({
+            employeeId: employee.id,
+            selectedDateTime: commonDate, // Initialize with commonDate
+            isPresent: false,
+            inTime: "",
+            outTime: "",
+            otHours: "",
+            advancePerDay: "",
+          }))
+        );
       } catch (error) {
         console.error("Error fetching employees:", error.message);
       }
@@ -38,7 +64,7 @@ const CreateDailyDetails = () => {
 
   useEffect(() => {
     // Set commonDate to the current date when the component mounts
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     setCommonDate(today);
   }, []);
 
@@ -54,17 +80,23 @@ const CreateDailyDetails = () => {
 
     // Calculate OT hours
     const standardWorkingMinutes = 8 * 60; // 8 hours in minutes
-    const otMinutes = totalWorkingMinutes > standardWorkingMinutes ? totalWorkingMinutes - standardWorkingMinutes : 0;
+    const otMinutes =
+      totalWorkingMinutes > standardWorkingMinutes
+        ? totalWorkingMinutes - standardWorkingMinutes
+        : 0;
 
     // Format hours and minutes
     const otHours = Math.floor(otMinutes / 60); // Hours part
     const otMinutesPart = Math.round(otMinutes % 60); // Minutes part
 
-    return `${otHours}.${otMinutesPart.toString().padStart(2, '0')}`; // Format as "hours.minutes"
+    return `${otHours}.${otMinutesPart.toString().padStart(2, "0")}`; // Format as "hours.minutes"
   };
 
   const handleChange = (index, field) => (event) => {
-    const value = field === "isPresent" ? event.target.value === "true" : event.target.value;
+    const value =
+      field === "isPresent"
+        ? event.target.value === "true"
+        : event.target.value;
     const updatedDetails = [...details];
     updatedDetails[index][field] = value;
 
@@ -80,7 +112,7 @@ const CreateDailyDetails = () => {
   const handleCommonDateChange = (event) => {
     const newDate = event.target.value;
     setCommonDate(newDate);
-    const updatedDetails = details.map(detail => ({
+    const updatedDetails = details.map((detail) => ({
       ...detail,
       selectedDateTime: newDate,
     }));
@@ -92,7 +124,6 @@ const CreateDailyDetails = () => {
 
     try {
       for (const detail of details) {
-
         const employee = await getemployeeDetailsById(detail.employeeId);
 
         const combinedDateTime = new Date(detail.selectedDateTime);
@@ -142,11 +173,12 @@ const CreateDailyDetails = () => {
             const accountSummaryData = {
               status: "D",
             };
-            if(data){
+            if (data) {
               await updateAccountSummary(data.id, accountSummaryData);
 
               const newAccountSummaryData = {
-                totalAmount: Number(data.totalAmount) - Number(detail.advancePerDay),
+                totalAmount:
+                  Number(data.totalAmount) - Number(detail.advancePerDay),
                 changedAmount: detail.advancePerDay,
                 previousAmount: data.totalAmount,
                 expId_fk: expenseId,
@@ -155,10 +187,9 @@ const CreateDailyDetails = () => {
                 // createdBy: user.displayName,
                 createdDate: currentDate,
               };
-  
-              await newAccountSummary(newAccountSummaryData);
-            }else{
 
+              await newAccountSummary(newAccountSummaryData);
+            } else {
               const newAccountSummaryData = {
                 totalAmount: Number(detail.advancePerDay),
                 changedAmount: Number(detail.advancePerDay),
@@ -169,9 +200,8 @@ const CreateDailyDetails = () => {
                 // createdBy: user.displayName,
                 createdDate: currentDate,
               };
-  
-              await newAccountSummary(newAccountSummaryData);
 
+              await newAccountSummary(newAccountSummaryData);
             }
           }
         }
@@ -185,104 +215,219 @@ const CreateDailyDetails = () => {
   };
 
   return (
-    <Container>
-      <Grid container direction="column" alignItems="center" spacing={2} p={2}>
-        <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
-            Create Daily Record
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            label="Common Date"
-            type="date"
-            value={commonDate}
-            onChange={handleCommonDateChange}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
+    <Grid
+      container
+      direction="row"
+      justifyContent="center"
+      alignItems="stretch"
+    >
+      {" "}
+      <Grid item xs={12}>
+        <Grid
+          container
+          component={"form"}
+          onSubmit={handleSubmit}
+          padding={2}
+          sx={{
+            bgcolor: "background.default",
+            borderRadius: 2,
+          }}
+        >
+          <Grid item xs={12} padding={1}>
+            <Stack
+              direction="row"
+              justifyContent="flex-start"
+              alignItems="center"
+              spacing={2}
+            >
+              <Typography variant="h6" color="primary" align="center">
+                Create Daily Record
+              </Typography>
+            </Stack>
+          </Grid>
+          <Grid
+            container
+            direction="column"
+            alignItems="center"
+            spacing={2}
+            p={2}
+          >
+            <Grid item xs={12}>
+              <TextField
+                label="Common Date"
+                type="date"
+                value={commonDate}
+                onChange={handleCommonDateChange}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+                sx={{ mb: 2 }}
+                size="small"
+              />
+              <form onSubmit={handleSubmit}>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Employee Name</TableCell>
+                        <TableCell>In Time</TableCell>
+                        <TableCell>Out Time</TableCell>
+                        <TableCell>OT Hours</TableCell>
+                        <TableCell>Advance Per Day</TableCell>
+                        <TableCell>Present</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {employees.map((employee, index) => (
+                        <TableRow key={employee.id}>
+                          <TableCell>{employee.name}</TableCell>
+                          <TableCell>
+                            <TextField
+                              size="small"
+                              fullWidth
+                              type="time"
+                              value={details[index].inTime}
+                              onChange={handleChange(index, "inTime")}
+                              disabled={!details[index].isPresent}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              size="small"
+                              fullWidth
+                              type="time"
+                              value={details[index].outTime}
+                              onChange={handleChange(index, "outTime")}
+                              disabled={!details[index].isPresent}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              size="small"
+                              fullWidth
+                              value={details[index].otHours}
+                              disabled
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              size="small"
+                              fullWidth
+                              value={details[index].advancePerDay}
+                              onChange={handleChange(index, "advancePerDay")}
+                              disabled={!details[index].isPresent}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={details[index].isPresent}
+                                  onChange={handleChange(index, "isPresent")}
+                                />
+                              }
+                              label={
+                                details[index].isPresent ? "Present" : "Absent"
+                              }
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                {/* <Grid container spacing={2}>
               {employees.map((employee, index) => (
                 <Grid item xs={12} key={employee.id}>
                   <Typography variant="h6" color="textSecondary" gutterBottom>
-                     {employee.name}
+                    {employee.name}
                   </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        label="In Time"
-                        type="time"
-                        value={details[index].inTime}
-                        onChange={handleChange(index, "inTime")}
-                        disabled={!details[index].isPresent}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        label="Out Time"
-                        type="time"
-                        value={details[index].outTime}
-                        onChange={handleChange(index, "outTime")}
-                        disabled={!details[index].isPresent}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        label="OT Hours"
-                        value={details[index].otHours}
-                        disabled
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        label="Advance Per Day"
-                        value={details[index].advancePerDay}
-                        onChange={handleChange(index, "advancePerDay")}
-                        disabled={!details[index].isPresent}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <FormControl component="fieldset" fullWidth>
-                        <Typography variant="subtitle1"></Typography>
-                        <RadioGroup
-                          row
-                          aria-label="isPresent"
-                          name={`isPresent-${employee.id}`}
-                          value={details[index].isPresent.toString()}
-                          onChange={handleChange(index, "isPresent")}
-                        >
-                          <FormControlLabel value="true" control={<Radio />} label="Present" />
-                          <FormControlLabel value="false" control={<Radio />} label="Absent" />
-                        </RadioGroup>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
+                  <Stack direction="row" spacing={2}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      label="In Time"
+                      type="time"
+                      value={details[index].inTime}
+                      onChange={handleChange(index, "inTime")}
+                      disabled={!details[index].isPresent}
+                    />
+
+                    <TextField
+                      size="small"
+                      fullWidth
+                      label="Out Time"
+                      type="time"
+                      value={details[index].outTime}
+                      onChange={handleChange(index, "outTime")}
+                      disabled={!details[index].isPresent}
+                    />
+
+                    <TextField
+                      size="small"
+                      fullWidth
+                      label="OT Hours"
+                      value={details[index].otHours}
+                      disabled
+                    />
+
+                    <TextField
+                      size="small"
+                      fullWidth
+                      label="Advance Per Day"
+                      value={details[index].advancePerDay}
+                      onChange={handleChange(index, "advancePerDay")}
+                      disabled={!details[index].isPresent}
+                    />
+
+                    <FormControl component="fieldset" fullWidth>
+                      <Typography variant="subtitle1"></Typography>
+                      <RadioGroup
+                        row
+                        aria-label="isPresent"
+                        name={`isPresent-${employee.id}`}
+                        value={details[index].isPresent.toString()}
+                        onChange={handleChange(index, "isPresent")}
+                      >
+                        <FormControlLabel
+                          value="true"
+                          control={<Radio />}
+                          label="Present"
+                        />
+                        <FormControlLabel
+                          value="false"
+                          control={<Radio />}
+                          label="Absent"
+                        />
+                      </RadioGroup>
+                    </FormControl>
+                  </Stack>
                 </Grid>
               ))}
+            </Grid> */}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={{ mt: 2 }}
+                >
+                  Create
+                </Button>
+              </form>
             </Grid>
-            <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
-              Create
-            </Button>
-          </form>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography
-            component={Link}
-            to={"/price"}
-            variant="body2"
-            sx={{ textAlign: "center", textDecoration: "none" }}
-          >
-            Go to Price Page
-          </Typography>
+            <Grid item xs={12}>
+              <Typography
+                component={Link}
+                to={"/price"}
+                variant="body2"
+                sx={{ textAlign: "center", textDecoration: "none" }}
+              >
+                Go to Price Page
+              </Typography>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
-    </Container>
+    </Grid>
   );
 };
 

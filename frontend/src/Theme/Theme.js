@@ -14,7 +14,7 @@ const Theme = createTheme({
   palette: {
     primary: {
       main: "#0d66e4",
-      mainBgS1: "#f1f2f4",
+      mainBgS1: "#f9f9f9",
     },
     background: {
       default: "#fff",
@@ -38,7 +38,7 @@ const Theme = createTheme({
     MuiInputBase: {
       styleOverrides: {
         root: {
-          backgroundColor: "#f1f2f4",
+          backgroundColor: "#f9f9f9",
         },
       },
     },

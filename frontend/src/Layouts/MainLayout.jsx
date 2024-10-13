@@ -3,6 +3,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import HeaderMain from "../Components/Headers/HeaderMain";
 import MainSideBar from "../Components/SideBars/MainSideBar";
+import Theme from "../Theme/Theme";
 
 const MainLayout = () => {
   return (
@@ -36,7 +37,7 @@ const MainLayout = () => {
           <Box
             sx={{
               height: "100%",
-              // bgcolor: Theme.palette.primary.mainBgS1,
+              bgcolor: Theme.palette.primary.mainBgS1,
               // borderTopLeftRadius: 8,
               // borderBottomLeftRadius: 8,
               padding: 1,

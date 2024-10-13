@@ -126,7 +126,7 @@ const DailyDetailList = () => {
   return (
     <>
       <Grid container>
-        <Grid item xs={12} p={2}>
+        <Grid item xs={12} p={1}>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -193,7 +193,7 @@ const DailyDetailList = () => {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} p={2}>
+        <Grid item xs={12} p={1}>
           <DataGrid
             sx={{
               bgcolor: "background.default",

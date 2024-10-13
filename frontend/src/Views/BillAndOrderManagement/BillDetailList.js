@@ -224,13 +224,25 @@ const BillDetailList = () => {
                 <MenuItem value="PENDING">PENDING</MenuItem>
                 <MenuItem value="CANCEL">CANCEL</MenuItem>
               </TextField>
-
               <DatePicker
                 label="Created Date"
-                size="small"
                 value={createdDate}
                 onChange={(newValue) => setCreatedDate(newValue)}
-                renderInput={(params) => <TextField {...params} size="small" />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    sx={{
+                      "& .MuiInputBase-root": {
+                        fontSize: "0.875rem",
+                        minWidth: "200px",
+                      },
+                      "& .MuiFormLabel-root": {
+                        fontSize: "0.875rem",
+                      },
+                    }}
+                  />
+                )}
               />
               <Button variant="outlined" onClick={clearDateFilter}>
                 Clear
