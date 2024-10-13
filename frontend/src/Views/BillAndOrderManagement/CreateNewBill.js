@@ -32,6 +32,7 @@ import {
 } from "../../services/AccountManagementService/AccountSummaryManagmentService";
 import { getCategoryById } from "../../services/PriceCardService";
 import { ToastContainer, toast } from "react-toastify";
+import {createbillAdvance } from "../../services/BillAndOrderService/BilllAdvanceService";
 
 const CreateNewBill = () => {
   const navigate = useNavigate();
@@ -41,6 +42,11 @@ const CreateNewBill = () => {
   const { user } = useSelector((state) => state.auth);
   const currentDate = new Date();
   const currentDateTime = currentDate.toISOString();
+
+  let year = currentDate.getFullYear();
+  let month = ("0" + (currentDate.getMonth() + 1)).slice(-2); // Months are zero-based
+  let day = ("0" + currentDate.getDate()).slice(-2);
+  let formattedDate = `${year}-${month}-${day}`;
 
   // Calculate total amount and remaining amount from wood data
   const calculateTotals = (advance) => {
@@ -174,6 +180,20 @@ const CreateNewBill = () => {
       const bill = await newBill(formattedData);
   
       if (bill != null) {
+
+        if(formData.advance > 0){
+          const payLoad = {
+            amount: formData.advance,
+            description: "Initial Advance",
+            date: formattedDate,
+            BillId : bill.id, 
+            status: "A",
+            createdBy: user.displayName,
+            createdDate: formattedDate,
+          }
+         const advanceId = await createbillAdvance(payLoad);
+        }
+      
         for (const wood of woodData) {
           if (formData.billStatus != "ORDER") {
             const data = await getStockSummaryById(wood.summaryId);
