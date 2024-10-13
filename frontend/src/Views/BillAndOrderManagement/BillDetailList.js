@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllbillDetails } from '../../services/BillAndOrderService/BilllManagemntService';
-import { Stack, Typography, InputAdornment } from "@mui/material";
+import { Stack, Typography, InputAdornment, Box } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Grid, Button, MenuItem, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -47,17 +47,17 @@ const BillDetailList = () => {
       renderCell: ({ value }) => {
         let color;
         switch (value) {
-          case 'ORDER':
-            color = 'red';
+          case "ORDER":
+            color = "red";
             break;
-          case 'INTERNAL':
-            color = 'blue';
+          case "INTERNAL":
+            color = "blue";
             break;
-            case 'CANCEL':
-              color = 'black';
-              break;
-            case 'COMPLETE':
-              color = 'green';  
+          case "CANCEL":
+            color = "black";
+            break;
+          case "COMPLETE":
+            color = "green";
             break;
           default:
             color = "inherit";
@@ -73,11 +73,14 @@ const BillDetailList = () => {
       width: 200,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          <Link to={`/bill/view/${params.row.id}`}>
-            <Button variant="contained" size="small">
+            <Button
+              component={Link}
+              to={`/bill/view/${params.row.id}`}
+              variant="contained"
+              size="small"
+            >
               View
             </Button>
-          </Link>
           {params.row.billStatus === "ORDER" && (
             <Button
               variant="contained"
@@ -106,7 +109,7 @@ const BillDetailList = () => {
 
   const formatTime = (dateObject) => {
     const date = new Date(dateObject);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Extracting only the time part
   };
 
   useEffect(() => {
@@ -245,26 +248,14 @@ const BillDetailList = () => {
                 <MenuItem value="INTERNAL">INTERNAL</MenuItem>
                 <MenuItem value="CANCEL">CANCEL</MenuItem>
               </TextField>
-              <DatePicker
-                label="Created Date"
-                value={createdDate}
-                onChange={(newValue) => setCreatedDate(newValue)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        fontSize: "0.875rem",
-                        minWidth: "200px",
-                      },
-                      "& .MuiFormLabel-root": {
-                        fontSize: "0.875rem",
-                      },
-                    }}
-                  />
-                )}
-              />
+              <Box sx={{ height: "40px" }}>
+                <DatePicker sx={{ height: "40px" }}
+                  size="small"
+                  label="Created Date"
+                  value={createdDate} 
+                  onChange={(newValue) => setCreatedDate(newValue)}
+                />
+              </Box>
               <Button variant="outlined" onClick={clearDateFilter}>
                 Clear
               </Button>
