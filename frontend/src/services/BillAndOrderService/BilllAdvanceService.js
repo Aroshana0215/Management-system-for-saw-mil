@@ -13,8 +13,8 @@ import {
   const db = getFirestore();
   
   // Insert new bill advance record
-  export const createBillAdvance = async (billAdvanceData) => {
-    console.log("billAdvanceData: ", billAdvanceData);
+  export const createbillAdvance = async (billAdvanceData) => {
+    console.log("billAdvance: ", billAdvanceData);
     try {
       const docRef = await addDoc(collection(db, "billAdvance"), billAdvanceData);
       console.log("New bill advance entered into the system with ID: ", docRef.id);
@@ -26,7 +26,7 @@ import {
   };
   
   // Get all bill advance records
-  export const getAllBillAdvances = async () => {
+  export const getAllbillAdvances = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "billAdvance"));
       const billAdvanceList = [];
@@ -41,7 +41,7 @@ import {
   };
   
   // Update bill advance record
-  export const updateBillAdvance = async (billAdvanceId, billAdvanceData) => {
+  export const updatebillAdvance = async (billAdvanceId, billAdvanceData) => {
     try {
       const billAdvanceRef = doc(db, "billAdvance", billAdvanceId);
       await updateDoc(billAdvanceRef, billAdvanceData);
@@ -53,7 +53,7 @@ import {
   };
   
   // Get one bill advance record by ID
-  export const getBillAdvanceById = async (billAdvanceId) => {
+  export const getbillAdvanceById = async (billAdvanceId) => {
     try {
       const billAdvanceRef = doc(db, "billAdvance", billAdvanceId);
       const billAdvanceSnapshot = await getDoc(billAdvanceRef);
@@ -75,7 +75,7 @@ import {
   };
   
   // Get bill advance records by bill ID
-  export const getBillAdvancesByBillId = async (billId) => {
+  export const getbillAdvancesByBillId = async (billId) => {
     console.log("billId:", billId);
     try {
       const q = query(

@@ -32,6 +32,7 @@ export const getActiveStockSummaryDetails = async (categoryId, length) => {
   const formattedLength = String(length); 
 
   console.log("formattedCategoryId:",formattedCategoryId);
+  console.log("🚀 ~ formattedLength:", formattedLength)
   try {
     const q = query(
       collection(db, "inventorySummary"),

@@ -25,6 +25,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
 
 const ViewBillDetails = () => {
   const { billId } = useParams();
@@ -109,11 +110,6 @@ const ViewBillDetails = () => {
       headerName: "Needed Amount",
       width: 120,
     },
-    {
-      field: "tobeCut",
-      headerName: "To Be Cut",
-      width: 120,
-    },
     { field: "unitPrice", headerName: "Unit Price", width: 120 },
     { field: "discountPrice", headerName: "Discount Price", width: 120 },
     {
@@ -130,7 +126,7 @@ const ViewBillDetails = () => {
                 setComplete(true);
                 setWoodLength(params.row.woodLength);
                 setCategoryId(params.row.categoryId_fk);
-                setTobeCompleteAmount(params.row.tobeCut);
+                setTobeCompleteAmount(params.row.neededPiecesAmount);
                 setToBeCompleteOrder(params.row.id);
               }}
             >
@@ -163,17 +159,15 @@ const ViewBillDetails = () => {
     const completeTimberStock = async () => {
       try {
         const activeData = await getActiveStockSummaryDetails(categoryId, woodLength);
-        console.log("(activeData.toBeCutAmount:",activeData.toBeCutAmount);
-  
         if (activeData != null) {
           // Check if total pieces in stock are sufficient
           if (Number(activeData.totalPieces) - Number(tobeCompleteAmount) < 0) {
-            console.error("Insufficient stock to complete the wood order", categoryId);
+            toast.error("Insufficient stock to complete the wood order!!");
           } 
           else {
             // Check if to-be-cut amount is sufficient
             if (Number(activeData.toBeCutAmount) - Number(tobeCompleteAmount) < 0) {
-              console.error("To-be-cut amount cannot go negative after processing", categoryId);
+              toast.error("Order amount cannot go negative after processing!!");
             } 
             else {
               // Update the stock summary details to mark it as completed
@@ -186,7 +180,7 @@ const ViewBillDetails = () => {
 
               const catogoryDatat = await getCategoryById(activeData.categoryId_fk);
               if(catogoryDatat == null){
-                console.error("Invalid category:", activeData.categoryId_fk);
+                toast.error("Invalid category:!!");
               }
 
               // Create new stock summary with updated details
@@ -211,7 +205,6 @@ const ViewBillDetails = () => {
               };
   
               const newStockSummaryData = await createStockSummary(stockSumData);
-              console.log("Created summary:", newStockSummaryData);
   
               // If the new stock summary was created successfully, update the order
               if (newStockSummaryData) {
@@ -222,7 +215,7 @@ const ViewBillDetails = () => {
                   modifiedDate: currentDateTime
                 };
                 await updateorder(toBeCompleteOrder, orderUpdateData);
-                console.log("Order updated successfully");
+                toast.success("Order updated successfully!!");
   
                 // Navigate to the bill view page
                 navigate(`/bill/view/${billId}`);
@@ -276,6 +269,7 @@ const ViewBillDetails = () => {
       throw new Error("Invalid data format received from API");
     }
   }
+  console.log("🚀 ~ ViewBillDetails ~ loadData.billStatus:", categoryData)
 
   return (
     <>
@@ -386,6 +380,7 @@ const ViewBillDetails = () => {
                   component={Link}
                   variant="outlined"
                   justifyContent="flex-end"
+                  disabled = {categoryData.billStatus != "ORDER" }
                   to={`/bill/wants/wood`}
                 >
                   Add Timber

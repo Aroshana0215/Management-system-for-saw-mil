@@ -50,8 +50,14 @@ const BillDetailList = () => {
           case 'ORDER':
             color = 'red';
             break;
-          case 'COMPLETE':
-            color = 'green';
+          case 'INTERNAL':
+            color = 'blue';
+            break;
+            case 'CANCEL':
+              color = 'black';
+              break;
+            case 'COMPLETE':
+              color = 'green';  
             break;
           default:
             color = 'inherit';
@@ -234,7 +240,7 @@ const BillDetailList = () => {
                 </MenuItem>
                 <MenuItem value="ORDER">ORDER</MenuItem>
                 <MenuItem value="COMPLETE">COMPLETE</MenuItem>
-                <MenuItem value="PENDING">PENDING</MenuItem>
+                <MenuItem value="INTERNAL">INTERNAL</MenuItem>
                 <MenuItem value="CANCEL">CANCEL</MenuItem>
               </TextField>
 

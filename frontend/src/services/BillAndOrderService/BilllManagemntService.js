@@ -6,7 +6,9 @@ import {
   runTransaction,
   getDocs,
   updateDoc,
-  getDoc
+  getDoc,
+  query,
+  orderBy
 } from "firebase/firestore";
 
 const db = getFirestore();
@@ -27,17 +29,23 @@ export const newBill = async (billDetailsData) => {
       
       const currentID = counterDoc.data().currentID || 0;
       const newID = currentID + 1;
-      const newBillID = `BILL-${newID}`;
       
       // Update the counter document with the new ID
       transaction.update(counterDocRef, { currentID: newID });
       
-      return newBillID;
+      return newID;
     });
+
+    const newBillID = `BILL-${billID}`;
+    const billDataWithID = {
+      ...billDetailsData,
+      billID: newBillID,
+      billNumber: billID // Add categoryNumber field
+    };
     
     // Add the new bill record with the generated billID
-    const billDetailsDataWithID = { ...billDetailsData, billID: billID };
-    const docRef = await addDoc(collection(db, "billDetails"), billDetailsDataWithID);
+
+    const docRef = await addDoc(collection(db, "billDetails"), billDataWithID);
     console.log("New billDetails entered into the system with ID: ", docRef.id);
     // Retrieve the saved document
     const savedDoc = await getDoc(docRef);
@@ -54,12 +62,21 @@ export const newBill = async (billDetailsData) => {
 
 export const getAllbillDetails = async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "billDetails"));
+    const priceCardQuery = query(
+      collection(db, "billDetails"), // Collection reference
+      orderBy("billNumber", "desc") // Order by 'id' in ascending order
+    );
+    
+    const querySnapshot = await getDocs(priceCardQuery);
+    
     const billDetailsList = [];
     querySnapshot.forEach((doc) => {
       billDetailsList.push({ id: doc.id, ...doc.data() });
     });
+    
+    // Return the ordered list
     return billDetailsList;
+
   } catch (error) {
     console.error("Error fetching  billDetails List: ", error.message);
     throw error;
