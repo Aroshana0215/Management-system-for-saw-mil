@@ -74,33 +74,32 @@ const BillDetailList = () => {
       headerName: "Actions",
       width: 200,
       renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
+        <>
             <Button
               component={Link}
               to={`/bill/view/${params.row.id}`}
               variant="contained"
               size="small"
+              sx={{marginX:1}}
             >
               View
             </Button>
-          {params.row.billStatus === "ORDER" && (
-            <Button
-              variant="contained"
-              size="small"
-              sx={{ minWidth: '80px', height: '36px', padding: '8px 16px' }} // Set the same size and padding for the "Update" button
-              onClick={() => {
-                setSelectedBillId(params.row.id);
-                setSelectedBill(params.row);
-                setDialogOpen(true);
-              }}
-            >
-              Update
-            </Button>
-          )}
-        </Stack>
+            {params.row.billStatus === "ORDER" && (
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => {
+                  setSelectedBillId(params.row.id);
+                  setSelectedBill(params.row);
+                  setDialogOpen(true);
+                }}
+              >
+                Update
+              </Button>
+            )}
+        </>
       ),
     },
-        
   ];
 
   const handleComplete = (billID) => {
