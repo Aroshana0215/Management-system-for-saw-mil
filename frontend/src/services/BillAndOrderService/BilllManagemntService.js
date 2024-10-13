@@ -85,6 +85,8 @@ export const getAllbillDetails = async () => {
 
 // Update billDetails
 export const updatebillDetails = async (billDetailsId, billDetailsData) => {
+  console.log("🚀 ~ updatebillDetails ~ billDetailsId:", billDetailsId)
+  console.log("🚀 ~ updatebillDetails ~ billDetailsData:", billDetailsData)
   try {
     const billDetailsRef = doc(db, "billDetails", billDetailsId);
     await updateDoc(billDetailsRef, billDetailsData);
@@ -108,11 +110,12 @@ export const getbillDetailsById = async (billDetailsId) => {
       };
       return billDetails;
     } else {
-      console.log("billDetails not found");
+      console.error("Bill details not found");
       return null;
     }
   } catch (error) {
-    console.error("Error getting billDetails: ", error.message);
+    console.error("Error getting bill details: ", error.message);
     throw error;
   }
 };
+
