@@ -108,8 +108,12 @@ const EmployeeList = () => {
   return (
     <>
       <Grid container>
-        <Grid item xs={12} p={2}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Grid item xs={12} p={1}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="h6" fontWeight="bold" color="primary">
               Employee Details
             </Typography>
@@ -155,7 +159,7 @@ const EmployeeList = () => {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} p={2}>
+        <Grid item xs={12} p={1}>
           <DataGrid
             sx={{ bgcolor: "background.default" }}
             rows={filteredCategories}

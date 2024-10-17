@@ -8,8 +8,8 @@ import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 const DailyDetailList = () => {
   const [details, setDetails] = useState([]);
@@ -130,7 +130,7 @@ const DailyDetailList = () => {
   return (
     <>
       <Grid container>
-        <Grid item xs={12} p={2}>
+        <Grid item xs={12} p={1}>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -164,7 +164,6 @@ const DailyDetailList = () => {
             }}
           >
             <Stack direction="row" spacing={2}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   label="From Date"
                   value={fromDate}
@@ -187,7 +186,6 @@ const DailyDetailList = () => {
                     />
                   )}
                 />
-              </LocalizationProvider>
               <Button variant="outlined" onClick={clearDateFilters}>
                 Clear
               </Button>
@@ -210,7 +208,7 @@ const DailyDetailList = () => {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} p={2}>
+        <Grid item xs={12} p={1}>
           <DataGrid
             sx={{
               bgcolor: "background.default",

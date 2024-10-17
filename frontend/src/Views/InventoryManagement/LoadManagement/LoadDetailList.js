@@ -7,10 +7,9 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import SearchIcon from "@mui/icons-material/Search";
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { format } from 'date-fns';
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { format } from "date-fns";
 
 const LoadDetailList = () => {
   const [categories, setCategories] = useState([]);
@@ -67,16 +66,16 @@ const LoadDetailList = () => {
     let filteredData = categories;
 
     if (unLoadedDateQuery) {
-      const formattedDate = format(unLoadedDateQuery, 'yyyy-MM-dd');
-      filteredData = filteredData.filter(category =>
+      const formattedDate = format(unLoadedDateQuery, "yyyy-MM-dd");
+      filteredData = filteredData.filter((category) =>
         category.unloadedDate.includes(formattedDate)
       );
     }
 
     if (generalQuery) {
       const lowercasedGeneralQuery = generalQuery.toLowerCase();
-      filteredData = filteredData.filter(category =>
-        Object.values(category).some(value =>
+      filteredData = filteredData.filter((category) =>
+        Object.values(category).some((value) =>
           String(value).toLowerCase().includes(lowercasedGeneralQuery)
         )
       );
@@ -141,14 +140,12 @@ const LoadDetailList = () => {
             }}
           >
             <Stack direction="row" spacing={2}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  label="UnLoaded date"
-                  value={unLoadedDateQuery}
-                  onChange={(date) => setUnLoadedDateQuery(date)}
-                  renderInput={(params) => <TextField {...params} size="small" />}
-                />
-              </LocalizationProvider>
+              <DatePicker
+                label="UnLoaded date"
+                value={unLoadedDateQuery}
+                onChange={(date) => setUnLoadedDateQuery(date)}
+                renderInput={(params) => <TextField {...params} size="small" />}
+              />
               <Button variant="outlined" onClick={clearDate}>
                 Clear
               </Button>

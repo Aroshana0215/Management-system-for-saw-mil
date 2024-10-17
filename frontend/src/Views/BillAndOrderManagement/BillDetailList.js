@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { getAllbillDetails } from '../../services/BillAndOrderService/BilllManagemntService';
-import { Stack, Typography, InputAdornment } from "@mui/material";
+import { Stack, Typography, InputAdornment, Box } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Grid, Button, MenuItem, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import Loading from "../../Components/Progress/Loading";
 import ErrorAlert from "../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
@@ -49,23 +49,23 @@ const BillDetailList = () => {
       renderCell: ({ value }) => {
         let color;
         switch (value) {
-          case 'ORDER':
-            color = 'red';
+          case "ORDER":
+            color = "red";
             break;
-          case 'INTERNAL':
-            color = 'blue';
+          case "INTERNAL":
+            color = "blue";
             break;
-            case 'CANCEL':
-              color = 'black';
-              break;
-            case 'COMPLETE':
-              color = 'green';  
+          case "CANCEL":
+            color = "black";
+            break;
+          case "COMPLETE":
+            color = "green";
             break;
           default:
-            color = 'inherit';
+            color = "inherit";
         }
         return <span style={{ color }}>{value}</span>;
-      }
+      },
     },
     { field: "createdDate", headerName: "Created Date", width: 140 },
     { field: "time", headerName: "Time", width: 100 },
@@ -74,34 +74,32 @@ const BillDetailList = () => {
       headerName: "Actions",
       width: 200,
       renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          <Link to={`/bill/view/${params.row.id}`}>
+        <>
             <Button
+              component={Link}
+              to={`/bill/view/${params.row.id}`}
               variant="contained"
               size="small"
-              sx={{ minWidth: '80px', height: '36px', padding: '8px 16px' }} // Set fixed size and padding for the "View" button
+              sx={{marginX:1}}
             >
               View
             </Button>
-          </Link>
-          {params.row.billStatus === "ORDER" && (
-            <Button
-              variant="contained"
-              size="small"
-              sx={{ minWidth: '80px', height: '36px', padding: '8px 16px' }} // Set the same size and padding for the "Update" button
-              onClick={() => {
-                setSelectedBillId(params.row.id);
-                setSelectedBill(params.row);
-                setDialogOpen(true);
-              }}
-            >
-              Update
-            </Button>
-          )}
-        </Stack>
+            {params.row.billStatus === "ORDER" && (
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => {
+                  setSelectedBillId(params.row.id);
+                  setSelectedBill(params.row);
+                  setDialogOpen(true);
+                }}
+              >
+                Update
+              </Button>
+            )}
+        </>
       ),
     },
-        
   ];
 
   const handleComplete = (billID) => {
@@ -115,7 +113,7 @@ const BillDetailList = () => {
 
   const formatTime = (dateObject) => {
     const date = new Date(dateObject);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Extracting only the time part
   };
 
   useEffect(() => {
@@ -132,10 +130,10 @@ const BillDetailList = () => {
         const data = await getAllbillDetails();
         console.log("Fetched data:", data);
         if (Array.isArray(data)) {
-          const formattedData = data.map(item => ({
+          const formattedData = data.map((item) => ({
             ...item,
             createdDate: formatDate(item.createdDate),
-            time: formatTime(item.createdDate)
+            time: formatTime(item.createdDate),
           }));
           setCategories(formattedData);
           setFilteredCategories(formattedData);
@@ -173,7 +171,9 @@ const BillDetailList = () => {
 
     if (createdDate) {
       filteredData = filteredData.filter((category) => {
-        const categoryDate = new Date(category.createdDate).toLocaleDateString();
+        const categoryDate = new Date(
+          category.createdDate
+        ).toLocaleDateString();
         const selectedDate = createdDate.toLocaleDateString();
         return categoryDate === selectedDate;
       });
@@ -260,22 +260,15 @@ const BillDetailList = () => {
                 <MenuItem value="INTERNAL">INTERNAL</MenuItem>
                 <MenuItem value="CANCEL">CANCEL</MenuItem>
               </TextField>
-
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
+              <Box sx={{ height: "40px" }}>
+                <DatePicker sx={{ height: "40px" }}
+                  size="small"
                   label="Created Date"
-                  value={createdDate}
+                  value={createdDate} 
                   onChange={(newValue) => setCreatedDate(newValue)}
-                  renderInput={(params) => (
-                    <TextField 
-                      {...params} 
-                      size="small" 
-                      sx={{ minWidth: "180px", height: "40px" }} 
-                    />
-                  )}
                 />
-              </LocalizationProvider>
-               <Button variant="outlined" onClick={clearDateFilter}>
+              </Box>
+              <Button variant="outlined" onClick={clearDateFilter}>
                 Clear
               </Button>
             </Stack>

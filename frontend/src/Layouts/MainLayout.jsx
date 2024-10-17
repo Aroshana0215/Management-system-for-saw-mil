@@ -40,7 +40,7 @@ const MainLayout = () => {
               bgcolor: Theme.palette.primary.mainBgS1,
               // borderTopLeftRadius: 8,
               // borderBottomLeftRadius: 8,
-              padding: 2,
+              padding: 1,
             }}
           >
             <Outlet />
