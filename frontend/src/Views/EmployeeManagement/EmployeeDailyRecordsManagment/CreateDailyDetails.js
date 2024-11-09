@@ -14,7 +14,6 @@ import {
   Button,
   Stack,
 } from "@mui/material";
-import { Link } from "react-router-dom";
 import { newDailyDetail } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
 import { newExpense } from "../../../services/AccountManagementService/ExpenseManagmentService";
 import {
@@ -22,10 +21,7 @@ import {
   updateAccountSummary,
   getActiveAccountSummaryDetails,
 } from "../../../services/AccountManagementService/AccountSummaryManagmentService";
-import {
-  getAllemployeeDetails,
-  getemployeeDetailsById,
-} from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import { getAllemployeeDetails, getemployeeDetailsById } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import { useSelector } from "react-redux";
 
 const CreateDailyDetails = () => {
@@ -42,7 +38,7 @@ const CreateDailyDetails = () => {
         setDetails(
           employeesList.map((employee) => ({
             employeeId: employee.id,
-            selectedDateTime: commonDate, // Initialize with commonDate
+            selectedDateTime: commonDate,
             isPresent: false,
             inTime: "",
             outTime: "",
@@ -54,14 +50,11 @@ const CreateDailyDetails = () => {
         console.error("Error fetching employees:", error.message);
       }
     };
-
     fetchEmployees();
   }, [commonDate]);
 
   useEffect(() => {
-    // Set commonDate to the current date when the component mounts
-    const today = new Date().toISOString().split("T")[0];
-    setCommonDate(today);
+    setCommonDate(new Date().toISOString().split("T")[0]);
   }, []);
 
   const calculateOTHours = (inTime, outTime) => {
@@ -69,50 +62,31 @@ const CreateDailyDetails = () => {
 
     const inDateTime = new Date(`1970-01-01T${inTime}`);
     const outDateTime = new Date(`1970-01-01T${outTime}`);
+    const totalWorkingMinutes = (outDateTime - inDateTime) / (1000 * 60);
+    const standardWorkingMinutes = 9 * 60;
+    const otMinutes = totalWorkingMinutes > standardWorkingMinutes ? totalWorkingMinutes - standardWorkingMinutes : 0;
 
-    // Calculate total working hours
-    const totalWorkingMinutes = (outDateTime - inDateTime) / (1000 * 60); // Convert ms to minutes
-    const totalWorkingHours = totalWorkingMinutes / 60; // Convert minutes to hours
+    const otHours = Math.floor(otMinutes / 60);
+    const otMinutesPart = Math.round(otMinutes % 60);
 
-    // Calculate OT hours
-    const standardWorkingMinutes = 9 * 60; // 8 hours in minutes
-    const otMinutes =
-      totalWorkingMinutes > standardWorkingMinutes
-        ? totalWorkingMinutes - standardWorkingMinutes
-        : 0;
-
-    // Format hours and minutes
-    const otHours = Math.floor(otMinutes / 60); // Hours part
-    const otMinutesPart = Math.round(otMinutes % 60); // Minutes part
-
-    return `${otHours}.${otMinutesPart.toString().padStart(2, "0")}`; // Format as "hours.minutes"
+    return `${otHours}.${otMinutesPart.toString().padStart(2, "0")}`;
   };
 
   const handleChange = (index, field) => (event) => {
-    const value =
-      field === "isPresent"
-        ? event.target.checked
-        : event.target.value;
+    const value = field === "isPresent" ? event.target.checked : event.target.value;
     const updatedDetails = [...details];
     updatedDetails[index][field] = value;
 
     if (field === "inTime" || field === "outTime") {
-      const inTime = updatedDetails[index].inTime;
-      const outTime = updatedDetails[index].outTime;
-      updatedDetails[index].otHours = calculateOTHours(inTime, outTime);
+      updatedDetails[index].otHours = calculateOTHours(updatedDetails[index].inTime, updatedDetails[index].outTime);
     }
-
     setDetails(updatedDetails);
   };
 
   const handleCommonDateChange = (event) => {
     const newDate = event.target.value;
     setCommonDate(newDate);
-    const updatedDetails = details.map((detail) => ({
-      ...detail,
-      selectedDateTime: newDate,
-    }));
-    setDetails(updatedDetails);
+    setDetails(details.map((detail) => ({ ...detail, selectedDateTime: newDate })));
   };
 
   const handleSubmit = async (event) => {
@@ -120,8 +94,9 @@ const CreateDailyDetails = () => {
 
     try {
       for (const detail of details) {
-        const employee = await getemployeeDetailsById(detail.employeeId);
+        if (!detail.isPresent) continue;
 
+        const employee = await getemployeeDetailsById(detail.employeeId);
         const combinedDateTime = new Date(detail.selectedDateTime);
         const currentDate = new Date().toLocaleString("en-US", {
           weekday: "short",
@@ -144,12 +119,10 @@ const CreateDailyDetails = () => {
           eid_fk: detail.employeeId,
           eid_name: employee.name,
           status: "A",
-          // createdBy: user.displayName,
           createdDate: currentDate,
         };
 
         const dailyDetailId = await newDailyDetail(formData);
-        console.log("New daily detail ID:", dailyDetailId);
 
         if (dailyDetailId) {
           const saveExpData = {
@@ -169,18 +142,16 @@ const CreateDailyDetails = () => {
             const accountSummaryData = {
               status: "D",
             };
+
             if (data) {
               await updateAccountSummary(data.id, accountSummaryData);
 
               const newAccountSummaryData = {
-                totalAmount:
-                  Number(data.totalAmount) - Number(detail.advancePerDay),
+                totalAmount: Number(data.totalAmount) - Number(detail.advancePerDay),
                 changedAmount: detail.advancePerDay,
                 previousAmount: data.totalAmount,
                 expId_fk: expenseId,
-                incId_fk: "",
                 status: "A",
-                // createdBy: user.displayName,
                 createdDate: currentDate,
               };
 
@@ -191,9 +162,7 @@ const CreateDailyDetails = () => {
                 changedAmount: Number(detail.advancePerDay),
                 previousAmount: 0,
                 expId_fk: "",
-                incId_fk: "",
                 status: "A",
-                // createdBy: user.displayName,
                 createdDate: currentDate,
               };
 
@@ -202,52 +171,22 @@ const CreateDailyDetails = () => {
           }
         }
       }
-
       window.location.href = "/employee/daily";
     } catch (error) {
       console.error("Error creating Daily Details:", error.message);
-      // Handle error
     }
   };
 
   return (
-    <Grid
-      container
-      direction="row"
-      justifyContent="center"
-      alignItems="stretch"
-    >
-      {" "}
+    <Grid container direction="row" justifyContent="center" alignItems="stretch">
       <Grid item xs={12}>
-        <Grid
-          container
-          component={"form"}
-          onSubmit={handleSubmit}
-          padding={2}
-          sx={{
-            bgcolor: "background.default",
-            borderRadius: 2,
-          }}
-        >
+        <Grid container component="form" onSubmit={handleSubmit} padding={2} sx={{ bgcolor: "background.default", borderRadius: 2 }}>
           <Grid item xs={12} padding={1}>
-            <Stack
-              direction="row"
-              justifyContent="flex-start"
-              alignItems="center"
-              spacing={2}
-            >
-              <Typography variant="h6" color="primary" align="center">
-                Create Daily Record
-              </Typography>
+            <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
+              <Typography variant="h6" color="primary" align="center">Create Daily Record</Typography>
             </Stack>
           </Grid>
-          <Grid
-            container
-            direction="column"
-            alignItems="center"
-            spacing={2}
-            p={2}
-          >
+          <Grid container direction="column" alignItems="center" spacing={2} p={2}>
             <Grid item xs={12}>
               <TextField
                 label="Common Date"
@@ -259,101 +198,75 @@ const CreateDailyDetails = () => {
                 sx={{ mb: 2 }}
                 size="small"
               />
-              <form onSubmit={handleSubmit}>
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Employee Name</TableCell>
-                        <TableCell>In Time</TableCell>
-                        <TableCell>Out Time</TableCell>
-                        <TableCell>OT Hours</TableCell>
-                        <TableCell>Advance Per Day</TableCell>
-                        <TableCell>Present</TableCell>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Employee Name</TableCell>
+                      <TableCell>In Time</TableCell>
+                      <TableCell>Out Time</TableCell>
+                      <TableCell>OT Hours</TableCell>
+                      <TableCell>Advance Per Day</TableCell>
+                      <TableCell>Present</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {employees.map((employee, index) => (
+                      <TableRow key={employee.id}>
+                        <TableCell>{employee.name}</TableCell>
+                        <TableCell>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            type="time"
+                            value={details[index].inTime}
+                            onChange={handleChange(index, "inTime")}
+                            disabled={!details[index].isPresent}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            type="time"
+                            value={details[index].outTime}
+                            onChange={handleChange(index, "outTime")}
+                            disabled={!details[index].isPresent}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            value={details[index].otHours}
+                            onChange={handleChange(index, "otHours")}
+                            disabled
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            value={details[index].advancePerDay}
+                            onChange={handleChange(index, "advancePerDay")}
+                            disabled={!details[index].isPresent}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <FormControlLabel
+                            control={<Switch checked={details[index].isPresent} onChange={handleChange(index, "isPresent")} />}
+                            label={details[index].isPresent ? "Present" : "Absent"}
+                          />
+                        </TableCell>
                       </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {employees.map((employee, index) => (
-                        <TableRow key={employee.id}>
-                          <TableCell>{employee.name}</TableCell>
-                          <TableCell>
-                            <TextField
-                              size="small"
-                              fullWidth
-                              type="time"
-                              value={details[index].inTime}
-                              onChange={handleChange(index, "inTime")}
-                              disabled={!details[index].isPresent}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              size="small"
-                              fullWidth
-                              type="time"
-                              value={details[index].outTime}
-                              onChange={handleChange(index, "outTime")}
-                              disabled={!details[index].isPresent}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              size="small"
-                              fullWidth
-                              value={details[index].otHours}
-                              onChange={handleChange(index, "otHours")}
-                              disabled={!details[index].isPresent}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              size="small"
-                              fullWidth
-                              value={details[index].advancePerDay}
-                              onChange={handleChange(index, "advancePerDay")}
-                              disabled={!details[index].isPresent}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <FormControlLabel
-                              control={
-                                <Switch
-                                  checked={details[index].isPresent}
-                                  onChange={handleChange(index, "isPresent")}
-                                />
-                              }
-                              label={
-                                details[index].isPresent ? "Present" : "Absent"
-                              }
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  sx={{ mt: 2 }}
-                >
-                  Create
-                </Button>
-              </form>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>Create</Button>
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography
-          component={Link}
-          to={"/price"}
-          variant="body2"
-          sx={{ textAlign: "center", textDecoration: "none" }}
-        >
-          Go to Price Page
-        </Typography>
       </Grid>
     </Grid>
   );

@@ -269,7 +269,48 @@ const ViewBillDetails = () => {
       throw new Error("Invalid data format received from API");
     }
   }
-  console.log("🚀 ~ ViewBillDetails ~ loadData.billStatus:", categoryData)
+
+  const handleComplete = async () => {
+    // Get a list of categories where `isComplete` is false
+    const incompleteCategories = categories.filter(category => !category.isComplete);
+  
+    if (incompleteCategories.length > 0) {
+      toast.warn("There are incomplete categories.");
+    } else {
+      toast.success("Complete button clicked");
+    }
+  };
+  
+  // Sample API function
+  const sampleApiUpdateStatus = async (categoryId) => {
+    // Simulate an API call with a delay
+    return new Promise((resolve) => setTimeout(resolve, 1000));
+  };
+  
+
+  const handleCancel = () => {
+    // Get a list of categories where `isComplete` is false
+    const incompleteCategories = categories.filter(category => !category.isComplete);
+  
+    if (incompleteCategories.length > 0) {
+      toast.warn("There are incomplete categories.");
+  
+      // Loop through each incomplete category and call an API to update the status
+      for (const category of incompleteCategories) {
+        try {
+          // Replace this with your actual API call
+          // await sampleApiUpdateStatus(category.id);
+          console.log(`Updated status for category ID: ${category.id}`);
+        } catch (error) {
+          console.error(`Failed to update category ID: ${category.id}`, error);
+          toast.error(`Failed to update category ID: ${category.id}`);
+        }
+      }
+    } else {
+      toast.success("Complete button clicked");
+    };
+  };
+
 
   return (
     <>
@@ -371,7 +412,6 @@ const ViewBillDetails = () => {
                 alignItems="center"
                 spacing={2}
               >
-                {/* TODO: change title */}
                 <Typography variant="h6" color="primary" align="center">
                   Order details
                 </Typography>
@@ -403,6 +443,31 @@ const ViewBillDetails = () => {
               />
             </Grid>
           </Grid>
+
+          <Grid item xs={12} padding={2}>
+            <Stack direction="row" justifyContent="flex-end" spacing={2}>
+              {categoryData.billStatus === "ORDER" && (
+                <>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleComplete}
+                  >
+                    Complete
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={handleCancel}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              )}
+            </Stack>
+          </Grid>
+
+
         </Grid>
       </Grid>
     </>
