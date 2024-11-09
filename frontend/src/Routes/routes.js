@@ -54,6 +54,8 @@ import UpdateIncomeType from "../Views/SettingManagment/IncomeTypeManagement/Upd
 import ExpenseTypeList from "../Views/SettingManagment/ExpenseTypeManagement/ExpenseTypeList";
 import CreateExpenseType from "../Views/SettingManagment/ExpenseTypeManagement/CreateExpense";
 import UpdateExpenseType from "../Views/SettingManagment/ExpenseTypeManagement/UpdateExpenseType";
+import UpdateWantsWood from "../Views/BillAndOrderManagement/UpdateWantsWood";
+import UpdateRemainWood from "../Views/BillAndOrderManagement/UpdateRemainWood";
 
 const privateRouter = createBrowserRouter([
   {
@@ -121,12 +123,20 @@ const privateRouter = createBrowserRouter([
         element: <GetWantsWood />,
       },
       {
+        path: "/bill/update/wood",
+        element: <UpdateWantsWood />,
+      },
+      {
         path: "/bill/process/wood/:woodData",
         element: <ShowRemainWood />,
       },
       {
         path: "/bill/show-remain-wood",
         element: <ShowRemainWood />,
+      },
+      {
+        path: "/bill/update-remain-wood",
+        element: <UpdateRemainWood />,
       },
       {
         path: "/bill/add",
