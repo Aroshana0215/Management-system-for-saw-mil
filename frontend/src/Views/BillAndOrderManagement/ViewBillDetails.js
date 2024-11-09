@@ -256,11 +256,12 @@ const ViewBillDetails = () => {
           const categoryDetails = await getCategoryById(item.categoryId_fk);
           return {
             ...item, // Destructure the original item
-            "timberType" : categoryDetails.timberType,
-            "timberNature" : categoryDetails.timberNature,
-            "areaLength" : categoryDetails.areaLength,
-            "areaWidth" : categoryDetails.areaWidth,
-            "unitPrice"  : categoryDetails.unitPrice,
+            timberType: categoryDetails.timberType,
+            timberNature: categoryDetails.timberNature,
+            areaLength: categoryDetails.areaLength,
+            areaWidth: categoryDetails.areaWidth,
+            unitPrice: categoryDetails.unitPrice,
+            categoryId_fk: item.categoryId_fk,
           };
         })
       );
@@ -270,6 +271,29 @@ const ViewBillDetails = () => {
     }
   }
   console.log("🚀 ~ ViewBillDetails ~ loadData.billStatus:", categoryData)
+  console.log(
+    "🚀 ~ ViewBillDetails ~ loadData.billStatus:",
+    categories.map((item) => ({
+      categoryId: item.categoryId_fk,
+      length: item.areaLength,
+      amount: item.neededPiecesAmount,
+    }))
+  );
+  const onClickUpdate = (event) => {
+    event.preventDefault();
+    navigate(`/bill/update/wood`, {
+      state: {
+        payloadBulkFromUpdate: categories.map((item) => ({
+          categoryId: item.categoryId_fk,
+          length: item.areaLength,
+          amount: item.neededPiecesAmount,
+        })),
+        currentCategoriesData: categories,
+        currentLoadData: loadData,
+      },
+    });
+  };
+
 
   return (
     <>
@@ -376,14 +400,13 @@ const ViewBillDetails = () => {
                   Order details
                 </Typography>
                 <Button
-                  startIcon={<AddCircleOutlineOutlinedIcon />}
-                  component={Link}
+                  startIcon={<EditIcon />} // Changed icon to indicate an update
+                  onClick={onClickUpdate}
                   variant="outlined"
                   justifyContent="flex-end"
-                  disabled = {categoryData.billStatus != "ORDER" }
-                  to={`/bill/wants/wood`}
+                  disabled={categoryData.billStatus !== "ORDER"}
                 >
-                  Add Timber
+                  Update Timber
                 </Button>
               </Stack>
             </Grid>
