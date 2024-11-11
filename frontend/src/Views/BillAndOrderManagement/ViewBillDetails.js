@@ -27,6 +27,8 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 
+import CancelBillDialog from './CancelBillDialog'; // Import the dialog component
+
 const ViewBillDetails = () => {
   const { billId } = useParams();
   const [categories, setCategories] = useState([]);
@@ -41,6 +43,8 @@ const ViewBillDetails = () => {
   const [woodLength, setWoodLength] = useState(0);
   const [tobeCompleteAmount, setTobeCompleteAmount] = useState(0);
   const [toBeCompleteOrder, setToBeCompleteOrder ]= useState(0);
+;
+  const [openDialog, setOpenDialog] = useState(false);
 
   const { user } = useSelector((state) => state.auth);
   const currentDate = new Date();
@@ -168,6 +172,8 @@ const ViewBillDetails = () => {
             // Check if to-be-cut amount is sufficient
             if (Number(activeData.toBeCutAmount) - Number(tobeCompleteAmount) < 0) {
               toast.error("Order amount cannot go negative after processing!!");
+              console.log("🚀 ~ completeTimberStock ~ tobeCompleteAmount:", tobeCompleteAmount)
+              console.log("🚀 ~ completeTimberStock ~ activeData.totalPieces:", activeData.totalPieces)
             } 
             else {
               // Update the stock summary details to mark it as completed
@@ -315,27 +321,35 @@ const ViewBillDetails = () => {
   
 
   const handleCancel = () => {
-    // Get a list of categories where `isComplete` is false
     const incompleteCategories = categories.filter(category => !category.isComplete);
   
+
+      setOpenDialog(true); // Open the dialog when there are incomplete categories
+
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+  };
+
+  const handleDialogConfirm = async () => {
+    // Process the cancellation logic
+    const incompleteCategories = categories.filter(category => !category.isComplete);
     if (incompleteCategories.length > 0) {
-      toast.warn("There are incomplete categories.");
-  
-      // Loop through each incomplete category and call an API to update the status
       for (const category of incompleteCategories) {
         try {
-          // Replace this with your actual API call
-          // await sampleApiUpdateStatus(category.id);
+          // Simulate API call
           console.log(`Updated status for category ID: ${category.id}`);
         } catch (error) {
           console.error(`Failed to update category ID: ${category.id}`, error);
           toast.error(`Failed to update category ID: ${category.id}`);
         }
       }
-    } else {
-      toast.success("Complete button clicked");
-    };
+      toast.success("Cancellation completed successfully.");
+    }
+    setOpenDialog(false); // Close the dialog after confirmation
   };
+
 
   return (
     <>
@@ -494,6 +508,14 @@ const ViewBillDetails = () => {
 
         </Grid>
       </Grid>
+
+      {/* Confirmation Dialog */}
+      <CancelBillDialog
+        open={openDialog}
+        onClose={handleDialogClose}
+        onConfirm={handleDialogConfirm}
+        />
+
     </>
   );
 };
