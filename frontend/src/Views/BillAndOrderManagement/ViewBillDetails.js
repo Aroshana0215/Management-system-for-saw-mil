@@ -27,6 +27,8 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 
+import CancelBillDialog from './CancelBillDialog'; // Import the dialog component
+
 const ViewBillDetails = () => {
   const { billId } = useParams();
   const [categories, setCategories] = useState([]);
@@ -41,6 +43,8 @@ const ViewBillDetails = () => {
   const [woodLength, setWoodLength] = useState(0);
   const [tobeCompleteAmount, setTobeCompleteAmount] = useState(0);
   const [toBeCompleteOrder, setToBeCompleteOrder ]= useState(0);
+;
+  const [openDialog, setOpenDialog] = useState(false);
 
   const { user } = useSelector((state) => state.auth);
   const currentDate = new Date();
@@ -168,6 +172,8 @@ const ViewBillDetails = () => {
             // Check if to-be-cut amount is sufficient
             if (Number(activeData.toBeCutAmount) - Number(tobeCompleteAmount) < 0) {
               toast.error("Order amount cannot go negative after processing!!");
+              console.log("🚀 ~ completeTimberStock ~ tobeCompleteAmount:", tobeCompleteAmount)
+              console.log("🚀 ~ completeTimberStock ~ activeData.totalPieces:", activeData.totalPieces)
             } 
             else {
               // Update the stock summary details to mark it as completed
@@ -295,6 +301,56 @@ const ViewBillDetails = () => {
   };
 
 
+  
+  const handleComplete = async () => {
+    // Get a list of categories where `isComplete` is false
+    const incompleteCategories = categories.filter(category => !category.isComplete);
+  
+    if (incompleteCategories.length > 0) {
+      toast.warn("There are incomplete categories.");
+    } else {
+      toast.success("Complete button clicked");
+    }
+  };
+  
+  // Sample API function
+  const sampleApiUpdateStatus = async (categoryId) => {
+    // Simulate an API call with a delay
+    return new Promise((resolve) => setTimeout(resolve, 1000));
+  };
+  
+
+  const handleCancel = () => {
+    const incompleteCategories = categories.filter(category => !category.isComplete);
+  
+
+      setOpenDialog(true); // Open the dialog when there are incomplete categories
+
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+  };
+
+  const handleDialogConfirm = async () => {
+    // Process the cancellation logic
+    const incompleteCategories = categories.filter(category => !category.isComplete);
+    if (incompleteCategories.length > 0) {
+      for (const category of incompleteCategories) {
+        try {
+          // Simulate API call
+          console.log(`Updated status for category ID: ${category.id}`);
+        } catch (error) {
+          console.error(`Failed to update category ID: ${category.id}`, error);
+          toast.error(`Failed to update category ID: ${category.id}`);
+        }
+      }
+      toast.success("Cancellation completed successfully.");
+    }
+    setOpenDialog(false); // Close the dialog after confirmation
+  };
+
+
   return (
     <>
       <Grid container>
@@ -395,7 +451,6 @@ const ViewBillDetails = () => {
                 alignItems="center"
                 spacing={2}
               >
-                {/* TODO: change title */}
                 <Typography variant="h6" color="primary" align="center">
                   Order details
                 </Typography>
@@ -426,8 +481,41 @@ const ViewBillDetails = () => {
               />
             </Grid>
           </Grid>
+
+          <Grid item xs={12} padding={2}>
+            <Stack direction="row" justifyContent="flex-end" spacing={2}>
+              {categoryData.billStatus === "ORDER" && (
+                <>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleComplete}
+                  >
+                    Complete
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={handleCancel}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              )}
+            </Stack>
+          </Grid>
+
+
         </Grid>
       </Grid>
+
+      {/* Confirmation Dialog */}
+      <CancelBillDialog
+        open={openDialog}
+        onClose={handleDialogClose}
+        onConfirm={handleDialogConfirm}
+        />
+
     </>
   );
 };
