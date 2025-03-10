@@ -9,7 +9,8 @@ import {
   InputLabel,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { createTimberNature } from "../../../services/SettingManagementService/TimberNatureService";
+import { createTimberNature, getAllActiveTimberNature } from "../../../services/SettingManagementService/TimberNatureService";
+import { toast } from "react-toastify";
 
 const CreateTimberNature = () => {
   const { user } = useSelector((state) => state.auth);
@@ -25,6 +26,8 @@ const CreateTimberNature = () => {
     description: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -33,8 +36,38 @@ const CreateTimberNature = () => {
     }));
   };
 
+  const validateInputs = async () => {
+    let tempErrors = {};
+
+    if (!formData.natureName.trim()) {
+      tempErrors.natureName = "Nature name is required";
+    } else {
+      const timberNatureList = await getAllActiveTimberNature();
+      const isDuplicate = timberNatureList.some(
+        (timberNature) => timberNature.natureName.toLowerCase() === formData.natureName.trim().toLowerCase()
+      );
+
+      if (isDuplicate) {
+        tempErrors.natureName = "Nature name already exists";
+        toast.error("Nature name already exists");
+      }
+    }
+
+    if (!formData.description.trim()) {
+      tempErrors.description = "Description is required";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    const validationResult = await validateInputs();
+    
+    if (!validationResult) return;
+    
     try {
       let formattedFormData = {
         ...formData,
@@ -42,11 +75,11 @@ const CreateTimberNature = () => {
         createdBy: user.displayName,
         createdDate: formattedDate,
       };
-
-       await createTimberNature(formattedFormData);
+      
+      await createTimberNature(formattedFormData);
       window.location.href = "/setting/timberNature";
     } catch (error) {
-      console.error("Error creating tree type:", error.message);
+      console.error("Error creating timber nature:", error.message);
     }
   };
 
@@ -62,7 +95,7 @@ const CreateTimberNature = () => {
       >
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Add timber nature
+            Add Timber Nature
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -78,7 +111,7 @@ const CreateTimberNature = () => {
           >
             <Grid item xs={12} padding={1}>
               <FormControl fullWidth>
-                <InputLabel shrink htmlFor="typeName">
+                <InputLabel shrink htmlFor="natureName">
                   Nature Name
                 </InputLabel>
                 <TextField
@@ -90,6 +123,8 @@ const CreateTimberNature = () => {
                   fullWidth
                   placeholder="Enter nature name"
                   sx={{ mt: 2 }}
+                  error={!!errors.natureName}
+                  helperText={errors.natureName}
                 />
               </FormControl>
             </Grid>
@@ -109,6 +144,8 @@ const CreateTimberNature = () => {
                   rows={4}
                   placeholder="Enter description"
                   sx={{ mt: 2 }}
+                  error={!!errors.description}
+                  helperText={errors.description}
                 />
               </FormControl>
             </Grid>

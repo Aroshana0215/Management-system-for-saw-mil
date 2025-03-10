@@ -6,35 +6,19 @@ import {
   TextField,
   Button,
   FormControl,
-  Stack,
+  Input,
 } from "@mui/material";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { newEmployee } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 
 const CreateEmployee = () => {
   const { user } = useSelector((state) => state.auth);
 
-  let currentDate = new Date();
-  let year = currentDate.getFullYear();
-  let month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
-  let day = ("0" + currentDate.getDate()).slice(-2);
-  let formattedDate = `${year}-${month}-${day}`;
-
-  const [formData, setFormData] = useState({
-    name: { bpMD: 6 },
-    nic: { bpMD: 6 },
-    address: { bpMD: 6 },
-    phoneNo: { bpMD: 6 },
-    otValuePerHour: { bpMD: 6 },
-    salaryPerDay: { bpMD: 6 },
-    currentLendAmount: { bpMD: 6 },
-    dateOfBirth: { bpMD: 6 },
-    joinDate: { bpMD: 6 },
-  });
+  let currentDate = new Date().toISOString().split("T")[0];
 
   const [payload, setPayload] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     nic: "",
     address: "",
     phoneNo: "",
@@ -42,13 +26,38 @@ const CreateEmployee = () => {
     salaryPerDay: "",
     currentLendAmount: "",
     joinDate: "",
-    dateOfBirth: "",
+    employeeImage: null,
     status: "A",
-    createdDate: formattedDate,
+    createdDate: currentDate,
     createdBy: user.displayName,
     modifiedBy: "",
     modifiedDate: "",
   });
+
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    let tempErrors = {};
+    if (!payload.firstName) tempErrors.firstName = "First name is required";
+    if (!payload.lastName) tempErrors.lastName = "Last name is required";
+    if (!payload.nic) tempErrors.nic = "NIC is required";
+    else if (!/^[0-9]{9}[VvXx]|[0-9]{12}$/.test(payload.nic))
+      tempErrors.nic = "Invalid NIC format";
+    if (!payload.phoneNo) tempErrors.phoneNo = "Phone number is required";
+    else if (!/^\d{10}$/.test(payload.phoneNo))
+      tempErrors.phoneNo = "Phone number must be 10 digits";
+    if (!payload.salaryPerDay) tempErrors.salaryPerDay = "Salary per day is required";
+    else if (isNaN(payload.salaryPerDay) || payload.salaryPerDay <= 0)
+      tempErrors.salaryPerDay = "Enter a valid positive number";
+    if (!payload.otValuePerHour) tempErrors.otValuePerHour = "OT value per hour is required";
+    else if (isNaN(payload.otValuePerHour) || payload.otValuePerHour <= 0)
+      tempErrors.otValuePerHour = "Enter a valid positive number";
+    if (!payload.address) tempErrors.address = "Address is required";
+    if (!payload.joinDate) tempErrors.joinDate = "Join Date is required";
+    if (!payload.employeeImage) tempErrors.employeeImage = "Employee image is required";
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,11 +67,19 @@ const CreateEmployee = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    setPayload((prevPayload) => ({
+      ...prevPayload,
+      employeeImage: e.target.files[0],
+    }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!validate()) return;
     try {
       const newEmployeeId = await newEmployee(payload);
-      window.location.href = `/employee/dependatnt/${newEmployeeId}`;
+      window.location.href = `/employee`;
     } catch (error) {
       console.error("Error creating employee:", error.message);
     }
@@ -73,57 +90,55 @@ const CreateEmployee = () => {
       <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={2} p={2}>
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Create Employee
+            Employee Details Submission
           </Typography>
         </Grid>
         <Grid item xs={12}>
           <Grid
             container
-            component={"form"}
+            component="form"
             onSubmit={handleSubmit}
             padding={2}
-            sx={{
-              bgcolor: "background.default",
-              borderRadius: 2,
-            }}
+            sx={{ bgcolor: "background.default", borderRadius: 2 }}
           >
-            {Object.entries(formData).map(([key, item]) => (
-              <Grid item key={key} xs={12} md={item.bpMD} padding={1}>
-                <FormControl fullWidth>
-                  <Typography>
-                    {key.charAt(0).toUpperCase() +
-                      key.slice(1).replace(/([A-Z])/g, " $1")}
-                  </Typography>
-                  <TextField
-                    name={key}
-                    value={payload[key]}
-                    onChange={handleChange}
-                    variant="outlined"
-                    fullWidth
-                    type={
-                      key === "joinDate" || key === "dateOfBirth"
-                        ? "datetime-local"
-                        : "text"
-                    }
-                    InputLabelProps={{
-                      shrink: key === "joinDate" || key === "dateOfBirth",
-                    }}
-                    sx={{ mt: 2 }}
-                  />
-                </FormControl>
-              </Grid>
+            {Object.entries(payload).map(([key, value]) => (
+              ["status", "createdDate", "createdBy", "modifiedBy", "modifiedDate", "employeeImage"].includes(key) ? null : (
+                <Grid item key={key} xs={12} md={6} padding={1}>
+                  <FormControl fullWidth>
+                    <Typography>
+                      {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1")}
+                    </Typography>
+                    <TextField
+                      name={key}
+                      value={value}
+                      onChange={handleChange}
+                      variant="outlined"
+                      fullWidth
+                      type={key === "joinDate" ? "date" : "text"}
+                      InputLabelProps={{ shrink: key === "joinDate" }}
+                      error={!!errors[key]}
+                      helperText={errors[key]}
+                      sx={{ mt: 2 }}
+                    />
+                  </FormControl>
+                </Grid>
+              )
             ))}
-            <Grid
-              item
-              xs={12}
-              padding={2}
-              sx={{
-                display: "flex",
-                direction: "row",
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
-              }}
-            >
+            <Grid item xs={12} md={6} padding={1}>
+              <FormControl fullWidth>
+                <Typography>Employee Image</Typography>
+                <Input
+                  type="file"
+                  accept="image/png"
+                  onChange={handleFileChange}
+                  error={!!errors.employeeImage}
+                />
+                {errors.employeeImage && (
+                  <Typography color="error" variant="body2">{errors.employeeImage}</Typography>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} padding={2} sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Button type="submit" variant="contained" color="primary">
                 Create
               </Button>

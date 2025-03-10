@@ -3,53 +3,46 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   Grid,
   Typography,
-  TableContainer,
-  Table,
-  TableBody,
-  TableRow,
-  TableCell,
   Stack,
   Button,
   FormControl,
   OutlinedInput,
   FormLabel,
 } from "@mui/material";
-import { getbillDetailsById } from "../../services/BillAndOrderService/BilllManagemntService";
+import { getbillDetailsById, updatebillDetails } from "../../services/BillAndOrderService/BilllManagemntService";
 import { getorderIdByBillId } from "../../services/BillAndOrderService/OrderManagmentService";
 import { updateorder } from "../../services/BillAndOrderService/OrderManagmentService";
-import { getActiveStockSummaryDetails, createStockSummary, updateStockSummaryDetails } from "../../services/InventoryManagementService/StockSummaryManagementService";
+import { getActiveStockSummaryDetails, createStockSummary, updateStockSummaryDetails, getStockSummaryById } from "../../services/InventoryManagementService/StockSummaryManagementService";
 import { getCategoryById } from "../../services/PriceCardService";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 
 import CancelBillDialog from './CancelBillDialog'; // Import the dialog component
 
 const ViewBillDetails = () => {
   const { billId } = useParams();
   const [categories, setCategories] = useState([]);
-  console.log("categories:",categories);
-  // eslint-disable-next-line no-unused-vars
-  const [totalTimberValue, setTotalTimberValue] = useState(0);
-  // eslint-disable-next-line no-unused-vars
-  const [totalCubicValue, setTotalCubicValue] = useState(0);
-
   const [complete, setComplete] = useState(false);
   const [categoryId, setCategoryId] = useState("");
   const [woodLength, setWoodLength] = useState(0);
   const [tobeCompleteAmount, setTobeCompleteAmount] = useState(0);
   const [toBeCompleteOrder, setToBeCompleteOrder ]= useState(0);
+  const [rerun, setRerun ]= useState(false);
 ;
   const [openDialog, setOpenDialog] = useState(false);
 
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
   const currentDate = new Date();
   const currentDateTime = currentDate.toISOString();
-  const navigate = useNavigate();
+  let year = currentDate.getFullYear();
+  let month = ("0" + (currentDate.getMonth() + 1)).slice(-2); // Months are zero-based
+  let day = ("0" + currentDate.getDate()).slice(-2);
+  let formattedDate = `${year}-${month}-${day}`;
 
   const [categoryData, setCategoryData] = useState({
     dateAndTime: "",
@@ -122,7 +115,7 @@ const ViewBillDetails = () => {
       width: 200,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          {params.row.isComplete == false && (
+          {params.row.isComplete == false && categoryData.billStatus == "ORDER" &&(
             <Button
               variant="contained"
               size="small"
@@ -156,7 +149,7 @@ const ViewBillDetails = () => {
     };
 
     fetchData();
-  }, [billId]);
+  }, [billId,rerun]);
 
 
   useEffect(() => {
@@ -222,9 +215,7 @@ const ViewBillDetails = () => {
                 };
                 await updateorder(toBeCompleteOrder, orderUpdateData);
                 toast.success("Order updated successfully!!");
-  
-                // Navigate to the bill view page
-                navigate(`/bill/view/${billId}`);
+                setRerun(!rerun);
               }
             }
           }
@@ -276,15 +267,6 @@ const ViewBillDetails = () => {
       throw new Error("Invalid data format received from API");
     }
   }
-  console.log("🚀 ~ ViewBillDetails ~ loadData.billStatus:", categoryData)
-  console.log(
-    "🚀 ~ ViewBillDetails ~ loadData.billStatus:",
-    categories.map((item) => ({
-      categoryId: item.categoryId_fk,
-      length: item.areaLength,
-      amount: item.neededPiecesAmount,
-    }))
-  );
   const onClickUpdate = (event) => {
     event.preventDefault();
     navigate(`/bill/update/wood`, {
@@ -310,6 +292,19 @@ const ViewBillDetails = () => {
       toast.warn("There are incomplete categories.");
     } else {
       toast.success("Complete button clicked");
+
+      const newBillDetails = {
+        ...categoryData,
+        billStatus : "COMPLETE",
+        remainningAmount: 0 ,
+        modifiedBy: user.displayName,
+        modifiedDate: formattedDate,
+      }
+  
+      updatebillDetails(billId , newBillDetails);
+
+      // Navigate to the bill view page
+      navigate(`/bill`);
     }
   };
   
@@ -321,9 +316,6 @@ const ViewBillDetails = () => {
   
 
   const handleCancel = () => {
-    const incompleteCategories = categories.filter(category => !category.isComplete);
-  
-
       setOpenDialog(true); // Open the dialog when there are incomplete categories
 
   };
@@ -333,20 +325,85 @@ const ViewBillDetails = () => {
   };
 
   const handleDialogConfirm = async () => {
-    // Process the cancellation logic
-    const incompleteCategories = categories.filter(category => !category.isComplete);
-    if (incompleteCategories.length > 0) {
-      for (const category of incompleteCategories) {
+
+    if (categories.length > 0) {
+      for (const category of categories) {
         try {
-          // Simulate API call
-          console.log(`Updated status for category ID: ${category.id}`);
+          const data = await getActiveStockSummaryDetails(category.categoryId_fk, category.woodLength);
+          console.log("🚀 ~ handleDialogConfirm ~ data:", data)
+          if (!data) {
+            console.error("No data for stock summaryId:", category.summaryId);
+            continue;
+          }
+
+          if (category.isComplete)
+            {
+              const stockUpdateData = {
+                status: "D",
+                modifiedBy: user.displayName,
+                modifiedDate: currentDateTime
+              };
+              await updateStockSummaryDetails(data.id, stockUpdateData);
+    
+              const categoryData = await getCategoryById(data.categoryId_fk);
+              console.log("🚀 ~ handleDialogConfirm ~ categoryData:", categoryData)
+              if (!categoryData) {
+                console.error("Invalid category:", data.categoryId_fk);
+                continue;
+              }
+
+              const stockSummaryData = {
+                totalPieces: data.totalPieces + category.neededPiecesAmount,
+                changedAmount: category.neededPiecesAmount,
+                previousAmount: data.totalPieces,
+                categoryId_fk: category.categoryId_fk,
+                maxlength: categoryData.minlength,
+                minlength: categoryData.minlength,
+                timberNature: categoryData.timberNature,
+                timberType: categoryData.timberType,
+                areaLength: categoryData.woodLength,
+                areaWidth: categoryData.areaWidth,
+                length: category.requestLength,
+                toBeCutAmount: data.toBeCutAmount - category.neededPiecesAmount,
+                stk_id_fk: "",
+                status: "A",
+                billId_fk: billId,
+                createdBy: user.displayName,
+                createdDate: currentDateTime
+              };
+
+              await createStockSummary(stockSummaryData);
+
+            }else
+            {
+             const stockSummaryData = {
+                toBeCutAmount: data.toBeCutAmount - category.neededPiecesAmount,
+                modifiedBy: user.displayName,
+                modifiedDate: currentDateTime
+              };
+
+              await updateStockSummaryDetails(data.id , stockSummaryData);
+            }
+
+          toast.success("Cancellation completed successfully.");
         } catch (error) {
-          console.error(`Failed to update category ID: ${category.id}`, error);
           toast.error(`Failed to update category ID: ${category.id}`);
         }
       }
-      toast.success("Cancellation completed successfully.");
     }
+
+    const newBillDetails = {
+      ...categoryData,
+      billStatus : "CANCEL",
+      remainningAmount: 0 ,
+      modifiedBy: user.displayName,
+      modifiedDate: formattedDate,
+    }
+
+    updatebillDetails(billId , newBillDetails);
+
+    navigate(`/bill`);
+
     setOpenDialog(false); // Close the dialog after confirmation
   };
 

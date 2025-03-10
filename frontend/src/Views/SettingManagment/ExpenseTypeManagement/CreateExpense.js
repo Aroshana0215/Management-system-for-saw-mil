@@ -9,7 +9,8 @@ import {
   InputLabel,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { createExpenseType } from "../../../services/SettingManagementService/ExpenseTypeService";
+import { createExpenseType, getAllActiveExpenseType } from "../../../services/SettingManagementService/ExpenseTypeService";
+import { toast } from "react-toastify";
 
 const CreateExpenseType = () => {
   const { user } = useSelector((state) => state.auth);
@@ -25,6 +26,8 @@ const CreateExpenseType = () => {
     description: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -33,8 +36,38 @@ const CreateExpenseType = () => {
     }));
   };
 
+  const validateInputs = async () => {
+    let tempErrors = {};
+
+    if (!formData.typeName.trim()) {
+      tempErrors.typeName = "Type name is required";
+    } else {
+      const expenseTypeList = await getAllActiveExpenseType();
+      const isDuplicate = expenseTypeList.some(
+        (expenseType) => expenseType.typeName.toLowerCase() === formData.typeName.trim().toLowerCase()
+      );
+
+      if (isDuplicate) {
+        tempErrors.typeName = "Type name already exists";
+        toast.error("Type name already exists");
+      }
+    }
+
+    if (!formData.description.trim()) {
+      tempErrors.description = "Description is required";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    const validationResult = await validateInputs();
+    
+    if (!validationResult) return;
+    
     try {
       let formattedFormData = {
         ...formData,
@@ -42,11 +75,11 @@ const CreateExpenseType = () => {
         createdBy: user.displayName,
         createdDate: formattedDate,
       };
-
-       await createExpenseType(formattedFormData);
+      
+      await createExpenseType(formattedFormData);
       window.location.href = "/setting/expenseType";
     } catch (error) {
-      console.error("Error creating tree type:", error.message);
+      console.error("Error creating expense type:", error.message);
     }
   };
 
@@ -62,7 +95,7 @@ const CreateExpenseType = () => {
       >
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Add expense time
+            Add Expense Type
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -88,8 +121,10 @@ const CreateExpenseType = () => {
                   onChange={handleChange}
                   variant="outlined"
                   fullWidth
-                  placeholder="Enter nature name"
+                  placeholder="Enter type name"
                   sx={{ mt: 2 }}
+                  error={!!errors.typeName}
+                  helperText={errors.typeName}
                 />
               </FormControl>
             </Grid>
@@ -109,6 +144,8 @@ const CreateExpenseType = () => {
                   rows={4}
                   placeholder="Enter description"
                   sx={{ mt: 2 }}
+                  error={!!errors.description}
+                  helperText={errors.description}
                 />
               </FormControl>
             </Grid>

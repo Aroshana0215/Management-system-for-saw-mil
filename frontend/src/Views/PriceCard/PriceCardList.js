@@ -139,7 +139,7 @@ const PriceCardList = () => {
         "0.7 x 6",
         "0.8 x 6",
       ]);
-    } else if (nature === "Lumber&beam") {
+    } else if (nature === "Blocks") {
       setDimensionOptions([
         "2 x 2",
         "2 x 4",

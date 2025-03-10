@@ -85,8 +85,6 @@ export const getAllbillDetails = async () => {
 
 // Update billDetails
 export const updatebillDetails = async (billDetailsId, billDetailsData) => {
-  console.log("🚀 ~ updatebillDetails ~ billDetailsId:", billDetailsId)
-  console.log("🚀 ~ updatebillDetails ~ billDetailsData:", billDetailsData)
   try {
     const billDetailsRef = doc(db, "billDetails", billDetailsId);
     await updateDoc(billDetailsRef, billDetailsData);

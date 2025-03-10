@@ -23,6 +23,7 @@ import {
 } from "../../../services/AccountManagementService/AccountSummaryManagmentService";
 import { getAllemployeeDetails, getemployeeDetailsById } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import { useSelector } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
 
 const CreateDailyDetails = () => {
   const [employees, setEmployees] = useState([]);
@@ -174,6 +175,7 @@ const CreateDailyDetails = () => {
       window.location.href = "/employee/daily";
     } catch (error) {
       console.error("Error creating Daily Details:", error.message);
+      toast.error(error.message);
     }
   };
 

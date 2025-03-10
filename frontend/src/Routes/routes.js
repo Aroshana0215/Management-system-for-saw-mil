@@ -36,7 +36,9 @@ import EPaymentList from "../Views/EmployeeManagement/EmployeeDetailsManagment/E
 import CreateEmployee from "../Views/EmployeeManagement/EmployeeDetailsManagment/CreateEmployee";
 import DailyDetailList from "../Views/EmployeeManagement/EmployeeDailyRecordsManagment/DailyDetailList";
 import CreateDailyDetails from "../Views/EmployeeManagement/EmployeeDailyRecordsManagment/CreateDailyDetails";
+import ViewEmpDetails from "../Views/EmployeeManagement/EmployeeDetailsManagment/ViewEmpDetails";
 import EmpDependatnt from "../Views/EmployeeManagement/EmployeeDetailsManagment/CreateEmpDependants";
+import ViewPaymentDetails from "../Views/EmployeeManagement/EmployeeDetailsManagment/ViewPaymentDetails";
 import CreatePayment from "../Views/EmployeeManagement/EmployeeDetailsManagment/CreatePayment";
 import IncomeList from "../Views/AccountManagement/IncomeManagement/IncomeList";
 import AddIncome from "../Views/AccountManagement/IncomeManagement/AddIncome";
@@ -56,6 +58,7 @@ import CreateExpenseType from "../Views/SettingManagment/ExpenseTypeManagement/C
 import UpdateExpenseType from "../Views/SettingManagment/ExpenseTypeManagement/UpdateExpenseType";
 import UpdateWantsWood from "../Views/BillAndOrderManagement/UpdateWantsWood";
 import UpdateRemainWood from "../Views/BillAndOrderManagement/UpdateRemainWood";
+import SwitchCategory from "../Views/InventoryManagement/StockManagement/SwitchCategory";
 
 const privateRouter = createBrowserRouter([
   {
@@ -119,6 +122,10 @@ const privateRouter = createBrowserRouter([
         element: <ActiveStockList />,
       },
       {
+        path: "/switch-category",
+        element: <SwitchCategory />,
+      },
+      {
         path: "/bill/wants/wood",
         element: <GetWantsWood />,
       },
@@ -175,12 +182,20 @@ const privateRouter = createBrowserRouter([
         element: <CreateDailyDetails />,
       },
       {
+        path: "/employee/view/:eid",
+        element: <ViewEmpDetails />,
+      },
+      {
         path: "/employee/dependatnt/:eid",
         element: <EmpDependatnt />,
       },
       {
         path: "/employee/payment/add/:eid",
         element: <CreatePayment />,
+      },
+      {
+        path: "/payment/view/:paymentId",
+        element: <ViewPaymentDetails />,
       },
       {
         path: "/income/add",

@@ -11,10 +11,10 @@ import {
 const CancelBillDialog = ({ open, onClose, onConfirm }) => {
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Confirm Cancellation</DialogTitle>
+      <DialogTitle>Bill Cancellation</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Are you sure you want to cancel? This action cannot be undone.
+          Are you sure you want to cancel?
         </DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -22,7 +22,7 @@ const CancelBillDialog = ({ open, onClose, onConfirm }) => {
           No
         </Button>
         <Button onClick={onConfirm} color="error" variant="contained">
-          Yes, Cancel
+          Yes
         </Button>
       </DialogActions>
     </Dialog>

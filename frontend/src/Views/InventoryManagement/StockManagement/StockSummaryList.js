@@ -106,7 +106,7 @@ const StockSummaryList = () => {
             alignItems="center"
           >
             <Typography variant="h6" fontWeight="bold" color="primary">
-              Stock Summary
+              Stock Summaryscs
             </Typography>
             <Button
               variant="contained"
@@ -165,7 +165,7 @@ const StockSummaryList = () => {
               <MenuItem value="">
                 <em>None</em>
               </MenuItem>
-              <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
+              <MenuItem value="Blocks">Blocks</MenuItem>
               <MenuItem value="Planks">Planks</MenuItem>
               <MenuItem value="Dust">Dust</MenuItem>
             </TextField>

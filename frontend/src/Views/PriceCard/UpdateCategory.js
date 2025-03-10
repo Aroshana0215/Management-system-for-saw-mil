@@ -107,7 +107,6 @@ console.log("isTimberDust:",isTimberDust);
       { name: "minlength", label: "Min Length" },
       { name: "maxlength", label: "Max Length" },
       { name: "unitPrice", label: "Unit Price" },
-      { name: "description", label: "Description" },
     ];
     
     for (const field of requiredFields) {
@@ -115,8 +114,7 @@ console.log("isTimberDust:",isTimberDust);
         if (
           field.name === "timberType" ||
           field.name === "timberNature" ||
-          field.name === "unitPrice" ||
-          field.name === "description"
+          field.name === "unitPrice" 
         ) {
           if (!payload[field.name] || payload[field.name] === "") {
             toast.error(`${field.label} is required`);
@@ -132,8 +130,13 @@ console.log("isTimberDust:",isTimberDust);
     }
 
     try {
+
+
       await updateCategory(categoryId, payload);;
-      window.location.href = `/price`;
+      toast.success("Category updated successfully!");
+      setTimeout(() => {
+          window.location.href = `/price`;
+      }, 1000);
     } catch (error) {
       console.error("Error creating category:", error.message);
       // Handle error
@@ -212,7 +215,7 @@ console.log("isTimberDust:",isTimberDust);
                 required
                 disabled
               >
-                <MenuItem value="Lumber&beam">Lumber & Beams</MenuItem>
+                <MenuItem value="Blocks">Blocks</MenuItem>
                 <MenuItem value="Planks">Planks</MenuItem>
                 <MenuItem value="Dust">Timber Dust</MenuItem>
               </Select>
@@ -257,10 +260,9 @@ console.log("isTimberDust:",isTimberDust);
                 name="minlength"
                 value={payload.minlength}
                 onChange={handleChange}
-                disabled
                 required
               >
-                {[...Array(15)].map((_, i) => (
+                {[...Array(25)].map((_, i) => (
                   <MenuItem key={i + 1} value={i + 1}>
                     {i + 1}
                   </MenuItem>
@@ -275,7 +277,6 @@ console.log("isTimberDust:",isTimberDust);
                 name="maxlength"
                 value={payload.maxlength}
                 onChange={handleChange}
-                disabled
                 required
               >
                 {[...Array(25)].map((_, i) => (
