@@ -56,6 +56,7 @@ import CreateExpenseType from "../Views/SettingManagment/ExpenseTypeManagement/C
 import UpdateExpenseType from "../Views/SettingManagment/ExpenseTypeManagement/UpdateExpenseType";
 import UpdateWantsWood from "../Views/BillAndOrderManagement/UpdateWantsWood";
 import UpdateRemainWood from "../Views/BillAndOrderManagement/UpdateRemainWood";
+import ImageUploader from "../Views/Common/ImageUploader";
 
 const privateRouter = createBrowserRouter([
   {
@@ -247,6 +248,10 @@ const privateRouter = createBrowserRouter([
         element: <UpdateExpenseType />,
       },
       {
+        path: "/image-upload",
+        element: <ImageUploader />,
+      },
+      {
         path: "*",
         element: <Navigate to="/" replace />,
       },
@@ -269,6 +274,10 @@ const authRouter = createBrowserRouter([
       {
         path: "/auth/sign-up/",
         element: <Register />,
+      },
+      {
+        path: "/image-upload",
+        element: <ImageUploader />,
       },
       {
         path: "*",
