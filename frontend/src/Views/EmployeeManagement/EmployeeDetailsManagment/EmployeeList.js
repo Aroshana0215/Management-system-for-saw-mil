@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getAllemployeeDetails } from '../../../services/EmployeeManagementService/EmployeeDetailService';
-import { Stack, Typography, InputAdornment, TextField, Grid, Button } from "@mui/material";
+import { Avatar, Stack, Typography, InputAdornment, TextField, Grid, Button, Chip, Box, Tooltip, IconButton } from "@mui/material";
 import { Link } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import PaymentIcon from "@mui/icons-material/Payment";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const EmployeeList = () => {
   const [categories, setCategories] = useState([]);
@@ -14,47 +16,122 @@ const EmployeeList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [generalQuery, setGeneralQuery] = useState("");
+
+const columns = [
+  { field: "empID", headerName: "ID", width: 90 },
+  { 
+    field: "firstName", 
+    headerName: "First Name", 
+    width: 150,
+    renderCell: ({ value }) => (
+      <Box 
+        sx={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center", 
+          width: "100%", 
+          height: "100%", 
+          paddingTop: "2px"
+        }}
+      >
+        <Typography fontWeight="bold">{value}</Typography>
+      </Box>
+    ),
+    align: "center",
+    headerAlign: "center",
+  },
+  { field: "lastName", headerName: "Last Name", width: 120 },
+  { field: "phoneNo", headerName: "Phone No", width: 120 },
+  {
+    field: "salaryPerDay",
+    headerName: "Salary (RS:)",
+    width: 130,
+    renderCell: ({ row }) => `${row.salaryPerDay}.00`,
+  },
+  { field: "createdBy", headerName: "Created By", width: 120 },
+  {
+    field: "employeeImage",
+    headerName: "Image",
+    width: 100,
+    renderCell: ({ row }) => (
+      <Box sx={{ paddingTop: "5px", paddingLeft: "20px" }}> 
+        <Avatar
+          src={row.employeeImage || "/default-profile.png"} // Default image if empty
+          alt="Employee"
+          sx={{ width: 40, height: 40, border: "1px solid #ddd" }}
+        />
+      </Box>
+    ),
+    align: "center",
+    headerAlign: "center",
+  },,  
+  {
+    field: "status",
+    headerName: "Status",
+    width: 120,
+    renderCell: ({ row }) => {
+      let chipProps = { label: row.status === "A" ? "Active" : "Inactive", size: "small", variant: "outlined" };
   
-  const columns = [
-    { field: "empID", headerName: "ID", width: 90 },
-    { field: "name", headerName: "Name", width: 150 },
-    { field: "phoneNo", headerName: "Phone No", width: 120 },
-    {
-      field: "currentLendAmount",
-      headerName: "Lend (RS:)",
-      width: 130,
-      renderCell: ({ row }) => `${row.currentLendAmount}.00`,
-    },
-    {
-      field: "otValuePerHour",
-      headerName: "OT (RS:)",
-      width: 130,
-      renderCell: ({ row }) => `${row.otValuePerHour}.00`,
-    },
-    {
-      field: "salaryPerDay",
-      headerName: "Salary (RS:)",
-      width: 130,
-      renderCell: ({ row }) => `${row.salaryPerDay}.00`,
-    },
-    { field: "createdBy", headerName: "Created By", width: 120 },
-    { field: "modifiedBy", headerName: "Modified By", width: 130 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 240,
-      renderCell: ({ row }) => (
-        <>
-          <Link to={`/employee/payment/${row.id}`}>
-            <Button sx={{ marginX: 1 }} variant="contained" size="small">Payment</Button>
-          </Link>
-          <Link to={`/employee/dependatnt/${row.id}`}>
-            <Button sx={{ marginX: 1 }} variant="contained" size="small">View</Button>
-          </Link>
-        </>
-      ),
-    },
-  ];
+      if (row.status === "A") {
+        chipProps = { 
+          ...chipProps, 
+          sx: { borderColor: "#66BB6A", color: "#1B5E20", backgroundColor: "#C8E6C9" } // Green for Active
+        };
+      } else {
+        chipProps = { 
+          ...chipProps, 
+          sx: { borderColor: "#E57373", color: "#C62828", backgroundColor: "#FFCDD2" } // Red for Inactive
+        };
+      }
+  
+      return <Chip {...chipProps} />;
+    }
+  },
+  {
+    field: "actions",
+    headerName: "Actions",
+    width: 120, // Reduced width since no text is needed
+    renderCell: ({ row }) => (
+      <Box sx={{ display: "flex", gap: 1, marginTop: "4px" }}> 
+        {/* Payment Button with Tooltip */}
+        <Tooltip title="Make Payment">
+          <IconButton
+            component={Link}
+            to={`/employee/payment/${row.id}`}
+            color="success"
+            size="medium"
+            sx={{
+              borderRadius: "50%",
+              backgroundColor: "#E8F5E9", // Light green
+              "&:hover": { backgroundColor: "#C8E6C9" }, // Slightly darker on hover
+            }}
+          >
+            <PaymentIcon />
+          </IconButton>
+        </Tooltip>
+
+        {/* View Button with Tooltip */}
+        <Tooltip title="View Details">
+          <IconButton
+            component={Link}
+            to={`/employee/view/${row.id}`}
+            color="info"
+            size="medium"
+            sx={{
+              borderRadius: "50%",
+              backgroundColor: "#E3F2FD", // Light blue
+              "&:hover": { backgroundColor: "#BBDEFB" }, // Slightly darker on hover
+            }}
+          >
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+  }
+  
+];
+
 
   useEffect(() => {
     const fetchData = async () => {

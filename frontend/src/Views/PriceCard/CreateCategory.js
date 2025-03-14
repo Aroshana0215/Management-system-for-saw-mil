@@ -113,7 +113,6 @@ const CreateCategory = () => {
       { name: "minlength", label: "Min Length" },
       { name: "maxlength", label: "Max Length" },
       { name: "unitPrice", label: "Unit Price" },
-      { name: "description", label: "Description" },
     ];
     
     for (const field of requiredFields) {
@@ -121,8 +120,7 @@ const CreateCategory = () => {
         if (
           field.name === "timberType" ||
           field.name === "timberNature" ||
-          field.name === "unitPrice" ||
-          field.name === "description"
+          field.name === "unitPrice" 
         ) {
           if (!payload[field.name] || payload[field.name] === "") {
             toast.error(`${field.label} is required`);
@@ -135,10 +133,18 @@ const CreateCategory = () => {
           return;
         }
       }
+
+      if (field.name === "unitPrice") {
+        if (isNaN(payload.unitPrice) || Number(payload.unitPrice) <= 0) {
+          console.log("(field.value)", (payload.unitPrice));
+          toast.error(`${field.label} must be a valid numeric value greater than 0.00`);
+          return;
+        }
+      }
+      
+
     }
-    
-    
-  
+
     try {
       const categoryData = await validateCategoryType(payload);
       if (categoryData != null) {
@@ -188,7 +194,7 @@ const CreateCategory = () => {
       toast.success("Category created successfully!");
       setTimeout(() => {
         window.location.href = `/price`;
-      }, 2000); // Delay redirect to allow user to see success message
+      }, 1000); // Delay redirect to allow user to see success message
     } catch (error) {
       console.error("Error creating category:", error.message);
       toast.error(error.message);

@@ -5,12 +5,11 @@ import { Link } from "react-router-dom";
 import { Grid, Button, MenuItem, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import Loading from "../../Components/Progress/Loading";
 import ErrorAlert from "../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
+import { Chip } from "@mui/material";
 import UpdateBill from './UpdateBill'; // Import the dialog component
 import { useSelector } from "react-redux";
 
@@ -45,26 +44,43 @@ const BillDetailList = () => {
     {
       field: "billStatus",
       headerName: "Bill Status",
-      width: 120,
+      width: 130,
       renderCell: ({ value }) => {
-        let color;
+        let chipProps = { label: value, size: "small", variant: "outlined" };
+    
         switch (value) {
           case "ORDER":
-            color = "red";
+            chipProps = { 
+              ...chipProps, 
+              sx: { borderColor: "#FFA726", color: "#E65100", backgroundColor: "#FFECB3" } // Brighter orange
+            };
             break;
           case "INTERNAL":
-            color = "blue";
+            chipProps = { 
+              ...chipProps, 
+              sx: { borderColor: "#42A5F5", color: "#0D47A1", backgroundColor: "#BBDEFB" } // Brighter blue
+            };
             break;
           case "CANCEL":
-            color = "black";
+            chipProps = { 
+              ...chipProps, 
+              sx: { borderColor: "#E57373", color: "#C62828", backgroundColor: "#FFCDD2" } // Brighter red
+            };
             break;
           case "COMPLETE":
-            color = "green";
+            chipProps = { 
+              ...chipProps, 
+              sx: { borderColor: "#66BB6A", color: "#1B5E20", backgroundColor: "#C8E6C9" } // Brighter green
+            };
             break;
           default:
-            color = "inherit";
+            chipProps = { 
+              ...chipProps, 
+              sx: { borderColor: "#9E9E9E", color: "#424242", backgroundColor: "#EEEEEE" } // Brighter gray
+            };
         }
-        return <span style={{ color }}>{value}</span>;
+    
+        return <Chip {...chipProps} />;
       },
     },
     { field: "createdDate", headerName: "Created Date", width: 140 },

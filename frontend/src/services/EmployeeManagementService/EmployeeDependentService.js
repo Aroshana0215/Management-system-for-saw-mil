@@ -6,6 +6,8 @@ import {
   getDoc,
   updateDoc,
   doc,
+  query, 
+  where 
 } from "firebase/firestore";
 
 const db = getFirestore();
@@ -75,6 +77,28 @@ export const getemployDependentById = async (employDependentId) => {
     }
   } catch (error) {
     console.error("Error getting employDependent: ", error.message);
+    throw error;
+  }
+};
+
+// Get dependents by eid_fk
+export const getDependentsByEid = async (eid_fk) => {
+  try {
+    const dependentsQuery = query(
+      collection(db, "employDependent"),
+      where("eid_fk", "==", eid_fk)
+    );
+
+    const querySnapshot = await getDocs(dependentsQuery);
+    const dependentsList = [];
+
+    querySnapshot.forEach((doc) => {
+      dependentsList.push({ id: doc.id, ...doc.data() });
+    });
+
+    return dependentsList;
+  } catch (error) {
+    console.error("Error fetching dependents by eid_fk: ", error.message);
     throw error;
   }
 };

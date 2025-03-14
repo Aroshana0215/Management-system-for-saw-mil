@@ -213,6 +213,7 @@ export const validateCategoryType  = async (categoryData) => {
 export const validateCategoryType2  = async (categoryData) => {
 
     try {
+        console.log("categoryData:", categoryData);
         const q = query(
             collection(db, "priceCard"),
             where("timberType", "==", categoryData.timberType),
@@ -238,4 +239,34 @@ export const validateCategoryType2  = async (categoryData) => {
         throw error;
     }
 };
+
+
+export const getCategorybasedOnLength = async (categoryData) => {
+    try {
+        const categoryList = await validateCategoryType2(categoryData);
+        console.log("categoryList:", categoryList);
+
+        if (categoryList && categoryList.length > 0) {
+            // Find the first category where categoryData.length is between minlength and maxlength
+            const matchedCategory = categoryList.find(category =>
+                category.minlength <= categoryData.length && categoryData.length <= category.maxlength
+            );
+
+            if (matchedCategory) {
+                console.log("Matching category:", matchedCategory);
+                return matchedCategory; // Returns a single object, not an array
+            } else {
+                console.log("No matching category found for the given length.");
+                return null;
+            }
+        } else {
+            console.log("No categoryList found for the given parameters.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting stockSummaryDetails: ", error.message);
+        throw error;
+    }
+};
+
 

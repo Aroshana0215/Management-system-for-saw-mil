@@ -30,15 +30,22 @@ const EPaymentList = () => {
       width: 150,
       renderCell: ({ row }) => formatDateOfBirth(row.toDate),
     },
-    { field: "totalDay", headerName: "Total Days", width: 120 },
-    { field: "totalOt", headerName: "Total Ot", width: 120 },
-    { field: "reduceAmount", headerName: "Reduce Amount", width: 150 },
     { field: "paymentStatus", headerName: "Payment Status", width: 150 },
     { field: "employeeName", headerName: "Employee Name", width: 120 },
     { field: "totalPayment", headerName: "Total Payment", width: 150 },
     { field: "totalAdvance", headerName: "Total Advance", width: 150 },
-    { field: "createdBy", headerName: "Created By", width: 120 },
-    { field: "modifiedBy", headerName: "Modified By", width: 130 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 240,
+      renderCell: ({ row }) => (
+        <>
+          <Link to={`/payment/view/${row.id}`}>
+            <Button sx={{ marginX: 1 }} variant="contained" size="small">View</Button>
+          </Link>
+        </>
+      ),
+    },
   ];
 
   useEffect(() => {

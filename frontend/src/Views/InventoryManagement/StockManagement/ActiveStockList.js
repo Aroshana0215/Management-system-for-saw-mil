@@ -93,7 +93,7 @@ const ActiveStockList = () => {
         "0.9 x 5",
         "0 x 0"
       ]);
-    } else if (nature === "Lumber&beam") {
+    } else if (nature === "Blocks") {
       setDimensionOptions([
         "2 x 2",
         "2 x 4",
@@ -198,21 +198,29 @@ const ActiveStockList = () => {
         <Grid item xs={12} p={2}>
           <Stack
             direction="row"
-            justifyContent="flex-start"
+            justifyContent="space-between"
             alignItems="center"
           >
             <Typography variant="h6" fontWeight="bold" color="primary">
               Stock Summary
             </Typography>
+            <Stack direction={"row"} spacing={2}>
+            <Button
+              variant="contained"
+              component={Link}
+              to={"/switch-category"}
+            >
+              Switch Category
+            </Button>
             <Button
               variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               component={Link}
               to={"/stock"}
-              sx={{ padding: "5px 15px", height: "45px", marginLeft: "auto"  }}
             >
               New
             </Button>
+            </Stack>
           </Stack>
         </Grid>
         <Grid item xs={12} p={2}>
@@ -266,7 +274,7 @@ const ActiveStockList = () => {
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                <MenuItem value="Lumber&beam">Lumber&beam</MenuItem>
+                <MenuItem value="Blocks">Blocks</MenuItem>
                 <MenuItem value="Planks">Planks</MenuItem>
                 <MenuItem value="Dust">Dust</MenuItem>
               </TextField>

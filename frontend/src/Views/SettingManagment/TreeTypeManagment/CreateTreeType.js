@@ -9,7 +9,8 @@ import {
   InputLabel,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { createTreeType } from "../../../services/SettingManagementService/TreeTypeService";
+import { createTreeType, getAllActiveTreeType } from "../../../services/SettingManagementService/TreeTypeService";
+import { toast } from "react-toastify";
 
 const CreateTreeType = () => {
   const { user } = useSelector((state) => state.auth);
@@ -25,6 +26,8 @@ const CreateTreeType = () => {
     description: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -33,8 +36,38 @@ const CreateTreeType = () => {
     }));
   };
 
+  const validateInputs = async () => {
+    let tempErrors = {};
+
+    if (!formData.typeName.trim()) {
+      tempErrors.typeName = "Type name is required";
+    } else {
+      const treeTypesList = await getAllActiveTreeType();
+      const isDuplicate = treeTypesList.some(
+        (treeType) => treeType.typeName.toLowerCase() === formData.typeName.trim().toLowerCase()
+      );
+
+      if (isDuplicate) {
+        tempErrors.typeName = "Type name already exists";
+        toast.error("Type name already exists");
+      }
+    }
+
+    if (!formData.description.trim()) {
+      tempErrors.description = "Description is required";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    const validationResult = await validateInputs();
+    
+    if (!validationResult) return;
+    
     try {
       let formattedFormData = {
         ...formData,
@@ -42,8 +75,8 @@ const CreateTreeType = () => {
         createdBy: user.displayName,
         createdDate: formattedDate,
       };
-
-      const treeTypeId = await createTreeType(formattedFormData);
+      
+      await createTreeType(formattedFormData);
       window.location.href = "/setting/treeType";
     } catch (error) {
       console.error("Error creating tree type:", error.message);
@@ -90,6 +123,8 @@ const CreateTreeType = () => {
                   fullWidth
                   placeholder="Enter tree type name"
                   sx={{ mt: 2 }}
+                  error={!!errors.typeName}
+                  helperText={errors.typeName}
                 />
               </FormControl>
             </Grid>
@@ -109,6 +144,8 @@ const CreateTreeType = () => {
                   rows={4}
                   placeholder="Enter description"
                   sx={{ mt: 2 }}
+                  error={!!errors.description}
+                  helperText={errors.description}
                 />
               </FormControl>
             </Grid>

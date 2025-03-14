@@ -7,8 +7,11 @@ import {
   updateDoc,
   doc,
   setDoc,
-  runTransaction
+  runTransaction,
+  query,
+  where
 } from "firebase/firestore";
+import { uploadToCloudinary } from "../../services/ImageUploadService/ImageUploadService";
 
 const db = getFirestore();
 
@@ -18,6 +21,12 @@ export const newEmployee = async (employeeDetailsData) => {
   const counterDocRef = doc(db, "counters", "employeeCounter");
 
   try {
+    // Upload image to Firebase Storage if present
+    let imageUrl = "";
+    if (employeeDetailsData.employeeImage) {
+      imageUrl = await uploadToCloudinary(employeeDetailsData.employeeImage);
+    }
+
     // Check if the counter document exists
     const counterDocSnapshot = await getDoc(counterDocRef);
     
@@ -42,7 +51,7 @@ export const newEmployee = async (employeeDetailsData) => {
     });
     
     // Add the new employee record with the generated empID
-    const employeeDetailsWithID = { ...employeeDetailsData, empID: empID };
+    const employeeDetailsWithID = { ...employeeDetailsData, empID: empID, employeeImage: imageUrl };
     const docRef = await addDoc(collection(db, "employeeDetails"), employeeDetailsWithID);
     console.log("New employeeDetails entered into the system with ID: ", docRef.id);
     return docRef.id;
@@ -61,7 +70,7 @@ export const getAllemployeeDetails = async () => {
     });
     return employeeDetailsList;
   } catch (error) {
-    console.error("Error fetching  employeeDetails List: ", error.message);
+    console.error("Error fetching employeeDetails List: ", error.message);
     throw error;
   }
 };
@@ -74,9 +83,9 @@ export const updateemployeeDetails = async (
   try {
     const employeeDetailsRef = doc(db, "employeeDetails", employeeDetailsId);
     await updateDoc(employeeDetailsRef, employeeDetailsData);
-    console.log("Price Card employeeDetails updated successfully");
+    console.log("Employee details updated successfully");
   } catch (error) {
-    console.error("Error updating Price Card employeeDetails: ", error.message);
+    console.error("Error updating employee details: ", error.message);
     throw error;
   }
 };
@@ -94,11 +103,39 @@ export const getemployeeDetailsById = async (employeeDetailsId) => {
       };
       return employeeDetails;
     } else {
-      console.log("employeeDetails not found");
+      console.log("Employee details not found");
       return null;
     }
   } catch (error) {
-    console.error("Error getting employeeDetails: ", error.message);
+    console.error("Error getting employee details: ", error.message);
     throw error;
+  }
+};
+
+export const getEmployeeByEid = async (eid) => {
+  const formattedEmpId = eid.trim();
+  try {
+      // Create a query against the collection
+      const q = query(
+          collection(db, "employeeDetails"),
+          where("eid", "==", formattedEmpId),
+      );
+
+      // Execute the query
+      const querySnapshot = await getDocs(q);
+
+      // Check if any documents match the query
+      if (!querySnapshot.empty) {
+          // Assuming eid is unique, return the first matching document
+          const docSnapshot = querySnapshot.docs[0];
+          const employee = { id: docSnapshot.id, ...docSnapshot.data() };
+          return employee;
+      } else {
+          console.log("Employee not found");
+          return null;
+      }
+  } catch (error) {
+      console.error("Error retrieving employee:", error.message);
+      throw new Error("Error retrieving employee: " + error.message);
   }
 };
