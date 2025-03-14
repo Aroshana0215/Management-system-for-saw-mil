@@ -9,7 +9,8 @@ import {
   InputLabel,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { createIncomeType } from "../../../services/SettingManagementService/IncomeTypeService";
+import { createIncomeType, getAllActiveIncomeType } from "../../../services/SettingManagementService/IncomeTypeService";
+import { toast } from "react-toastify";
 
 const CreateIncomeType = () => {
   const { user } = useSelector((state) => state.auth);
@@ -25,6 +26,8 @@ const CreateIncomeType = () => {
     description: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -33,8 +36,38 @@ const CreateIncomeType = () => {
     }));
   };
 
+  const validateInputs = async () => {
+    let tempErrors = {};
+
+    if (!formData.typeName.trim()) {
+      tempErrors.typeName = "Type name is required";
+    } else {
+      const incomeTypeList = await getAllActiveIncomeType();
+      const isDuplicate = incomeTypeList.some(
+        (incomeType) => incomeType.typeName.toLowerCase() === formData.typeName.trim().toLowerCase()
+      );
+
+      if (isDuplicate) {
+        tempErrors.typeName = "Type name already exists";
+        toast.error("Type name already exists");
+      }
+    }
+
+    if (!formData.description.trim()) {
+      tempErrors.description = "Description is required";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    const validationResult = await validateInputs();
+    
+    if (!validationResult) return;
+    
     try {
       let formattedFormData = {
         ...formData,
@@ -42,11 +75,11 @@ const CreateIncomeType = () => {
         createdBy: user.displayName,
         createdDate: formattedDate,
       };
-
-       await createIncomeType(formattedFormData);
+      
+      await createIncomeType(formattedFormData);
       window.location.href = "/setting/incomeType";
     } catch (error) {
-      console.error("Error creating tree type:", error.message);
+      console.error("Error creating income type:", error.message);
     }
   };
 
@@ -62,7 +95,7 @@ const CreateIncomeType = () => {
       >
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Add income time
+            Add Income Type
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -88,8 +121,10 @@ const CreateIncomeType = () => {
                   onChange={handleChange}
                   variant="outlined"
                   fullWidth
-                  placeholder="Enter nature name"
+                  placeholder="Enter type name"
                   sx={{ mt: 2 }}
+                  error={!!errors.typeName}
+                  helperText={errors.typeName}
                 />
               </FormControl>
             </Grid>
@@ -109,6 +144,8 @@ const CreateIncomeType = () => {
                   rows={4}
                   placeholder="Enter description"
                   sx={{ mt: 2 }}
+                  error={!!errors.description}
+                  helperText={errors.description}
                 />
               </FormControl>
             </Grid>

@@ -58,16 +58,39 @@ export const getActiveStockSummaryDetails = async (categoryId, length) => {
   }
 };
 
+// export const updateStockSummaryDetails = async (stockId, stockData) => {
+//   try {
+//     const priceCardRef = doc(db, "inventorySummary", stockId);
+//     await updateDoc(priceCardRef, stockData);
+//     console.log("Inventory Summary updated successfully");
+//   } catch (error) {
+//     console.error("Error updating Inventory Summary: ", error.message);
+//     throw error;
+//   }
+// };
+
 export const updateStockSummaryDetails = async (stockId, stockData) => {
   try {
     const priceCardRef = doc(db, "inventorySummary", stockId);
     await updateDoc(priceCardRef, stockData);
-    console.log("Inventory Summary updated successfully");
+
+    // Fetch updated data after update
+    const updatedDoc = await getDoc(priceCardRef);
+
+    if (updatedDoc.exists()) {
+      console.log("Inventory Summary updated successfully:", updatedDoc.data());
+      return updatedDoc.data(); 
+    } else {
+      console.log("Inventory Summary updated, but document not found.");
+      return null
+    }
   } catch (error) {
     console.error("Error updating Inventory Summary: ", error.message);
-    throw error;
+    return { success: false, error: error.message };
   }
 };
+
+
 
 export const getAllSummaryDetails = async () => {
   try {
@@ -132,3 +155,38 @@ export const getStockSummaryById = async (stockId) => {
     throw error;
   }
 };
+
+
+export const getActiveStockForSwitchCategory  = async (categoryData) => {
+
+    try {
+      debugger
+        const q = query(
+            collection(db, "inventorySummary"),
+            where("timberType", "==", categoryData.timberType),
+            where("timberNature", "==", categoryData.timberNature),
+            where("areaLength", "==", categoryData.areaLength),
+            where("areaWidth", "==", categoryData.areaWidth),
+            where("length", "==", categoryData.length),
+            where("status", "==", "A")
+
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const priceCardList = [];
+            querySnapshot.forEach((doc) => {
+                priceCardList.push({ id: doc.id, ...doc.data() });
+            });
+            return priceCardList;
+        } else {
+            console.log("No stockSummaryDetails found for the given parameters.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting stockSummaryDetails: ", error.message);
+        throw error;
+    }
+};
+
+

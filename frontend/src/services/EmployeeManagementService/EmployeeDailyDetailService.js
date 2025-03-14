@@ -26,7 +26,7 @@ export const newDailyDetail = async (employeeDailyDetailsData) => {
     );
 
     if (!querySnapshot.empty) {
-      throw new Error("Cannot enter duplicate record for the same day.");
+      throw new Error("duplicate record for the same day");;
     }
 
     // If no duplicate record found, proceed with adding the new record

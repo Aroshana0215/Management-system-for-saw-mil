@@ -155,9 +155,9 @@ export const updateemployeePaySheet = async (
 };
 
 // Get One employeePaySheet by ID
-export const getemployeePaySheetById = async (employeePaySheetId) => {
+export const getemployeePaySheetById = async (paymentId) => {
   try {
-    const employeePaySheetRef = doc(db, "employeePaySheet", employeePaySheetId);
+    const employeePaySheetRef = doc(db, "employeePaySheet", paymentId);
     const employeePaySheetSnapshot = await getDoc(employeePaySheetRef);
 
     if (employeePaySheetSnapshot.exists()) {
