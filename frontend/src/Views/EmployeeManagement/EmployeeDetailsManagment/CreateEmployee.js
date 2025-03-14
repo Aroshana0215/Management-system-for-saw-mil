@@ -6,7 +6,8 @@ import {
   TextField,
   Button,
   FormControl,
-  Input,
+  Paper,
+  Box,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { newEmployee } from "../../../services/EmployeeManagementService/EmployeeDetailService";
@@ -35,26 +36,15 @@ const CreateEmployee = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [imagePreview, setImagePreview] = useState(null);
 
   const validate = () => {
     let tempErrors = {};
-    if (!payload.firstName) tempErrors.firstName = "First name is required";
-    if (!payload.lastName) tempErrors.lastName = "Last name is required";
-    if (!payload.nic) tempErrors.nic = "NIC is required";
-    else if (!/^[0-9]{9}[VvXx]|[0-9]{12}$/.test(payload.nic))
-      tempErrors.nic = "Invalid NIC format";
-    if (!payload.phoneNo) tempErrors.phoneNo = "Phone number is required";
-    else if (!/^\d{10}$/.test(payload.phoneNo))
-      tempErrors.phoneNo = "Phone number must be 10 digits";
-    if (!payload.salaryPerDay) tempErrors.salaryPerDay = "Salary per day is required";
-    else if (isNaN(payload.salaryPerDay) || payload.salaryPerDay <= 0)
-      tempErrors.salaryPerDay = "Enter a valid positive number";
-    if (!payload.otValuePerHour) tempErrors.otValuePerHour = "OT value per hour is required";
-    else if (isNaN(payload.otValuePerHour) || payload.otValuePerHour <= 0)
-      tempErrors.otValuePerHour = "Enter a valid positive number";
-    if (!payload.address) tempErrors.address = "Address is required";
-    if (!payload.joinDate) tempErrors.joinDate = "Join Date is required";
-    if (!payload.employeeImage) tempErrors.employeeImage = "Employee image is required";
+    Object.entries(payload).forEach(([key, value]) => {
+      if (!value && key !== "currentLendAmount" && key !== "modifiedBy" && key !== "modifiedDate") {
+        tempErrors[key] = `${key.replace(/([A-Z])/g, " $1").trim()} is required`;
+      }
+    });
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
@@ -68,10 +58,18 @@ const CreateEmployee = () => {
   };
 
   const handleFileChange = (e) => {
-    setPayload((prevPayload) => ({
-      ...prevPayload,
-      employeeImage: e.target.files[0],
-    }));
+    const file = e.target.files[0];
+    if (file) {
+      setPayload((prevPayload) => ({
+        ...prevPayload,
+        employeeImage: file,
+      }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -86,66 +84,85 @@ const CreateEmployee = () => {
   };
 
   return (
-    <Container>
-      <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={2} p={2}>
-        <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
-            Employee Details Submission
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid
-            container
-            component="form"
-            onSubmit={handleSubmit}
-            padding={2}
-            sx={{ bgcolor: "background.default", borderRadius: 2 }}
-          >
-            {Object.entries(payload).map(([key, value]) => (
-              ["status", "createdDate", "createdBy", "modifiedBy", "modifiedDate", "employeeImage"].includes(key) ? null : (
-                <Grid item key={key} xs={12} md={6} padding={1}>
-                  <FormControl fullWidth>
-                    <Typography>
-                      {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1")}
-                    </Typography>
-                    <TextField
-                      name={key}
-                      value={value}
-                      onChange={handleChange}
-                      variant="outlined"
-                      fullWidth
-                      type={key === "joinDate" ? "date" : "text"}
-                      InputLabelProps={{ shrink: key === "joinDate" }}
-                      error={!!errors[key]}
-                      helperText={errors[key]}
-                      sx={{ mt: 2 }}
-                    />
-                  </FormControl>
-                </Grid>
-              )
-            ))}
-            <Grid item xs={12} md={6} padding={1}>
-              <FormControl fullWidth>
-                <Typography>Employee Image</Typography>
-                <Input
-                  type="file"
-                  accept="image/png"
-                  onChange={handleFileChange}
-                  error={!!errors.employeeImage}
-                />
-                {errors.employeeImage && (
-                  <Typography color="error" variant="body2">{errors.employeeImage}</Typography>
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+        <Typography variant="h4" color="primary" align="center" gutterBottom>
+          Employee Details Submission
+        </Typography>
+        <Grid container component="form" onSubmit={handleSubmit} spacing={2}>
+          {Object.entries(payload).map(([key, value]) => (
+            ["status", "createdDate", "createdBy", "modifiedBy", "modifiedDate", "employeeImage"].includes(key) ? null : (
+              <Grid item key={key} xs={12} md={6}>
+                <FormControl fullWidth>
+                  <Typography variant="body1" fontWeight={500} gutterBottom>
+                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1")}
+                  </Typography>
+                  <TextField
+                    name={key}
+                    value={value}
+                    onChange={handleChange}
+                    variant="outlined"
+                    fullWidth
+                    type={key === "joinDate" ? "date" : "text"}
+                    InputLabelProps={{ shrink: key === "joinDate" }}
+                    error={!!errors[key]}
+                    helperText={errors[key]}
+                  />
+                </FormControl>
+              </Grid>
+            )
+          ))}
+          <Grid item xs={12} md={6}>
+            <FormControl fullWidth>
+              <Typography variant="body1" fontWeight={500} gutterBottom>
+                Employee Image
+              </Typography>
+              <Box
+                sx={{
+                  border: "2px dashed grey",
+                  borderRadius: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 60,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  p: 2,
+                  backgroundColor: "#f9f9f9",
+                  '&:hover': {
+                    backgroundColor: "#f0f0f0"
+                  }
+                }}
+                onClick={() => document.getElementById("employeeImageInput").click()}
+              >
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" style={{ width: "100px", height: "100px", borderRadius: "50%" }} />
+                ) : (
+                  <Typography variant="body2" color="textSecondary">
+                    Click to upload PNG (Max 5MB)
+                  </Typography>
                 )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} padding={2} sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button type="submit" variant="contained" color="primary">
-                Create
-              </Button>
-            </Grid>
+              </Box>
+              <input
+                id="employeeImageInput"
+                type="file"
+                accept="image/png/jpg"
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              {errors.employeeImage && (
+                <Typography color="error" variant="body2">{errors.employeeImage}</Typography>
+              )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} display="flex" justifyContent="flex-end">
+            <Button type="submit" variant="contained" color="primary" size="large">
+              Create
+            </Button>
           </Grid>
         </Grid>
-      </Grid>
+      </Paper>
     </Container>
   );
 };

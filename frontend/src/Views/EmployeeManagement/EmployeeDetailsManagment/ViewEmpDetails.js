@@ -5,26 +5,19 @@ import {
   Typography,
   Card,
   CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
   Divider,
   CircularProgress,
+  Button,
+  Avatar,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { getemployeeDetailsById } from "../../../services/EmployeeManagementService/EmployeeDetailService";
-import { getDependentsByEid } from "../../../services/EmployeeManagementService/EmployeeDependentService";
+import CircleIcon from "@mui/icons-material/Circle";
 
 const ViewEmpDetails = () => {
   const { eid } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
-  const [dependents, setDependents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,8 +25,6 @@ const ViewEmpDetails = () => {
       try {
         const empDetails = await getemployeeDetailsById(eid);
         setEmployee(empDetails);
-        const empDependents = await getDependentsByEid(eid);
-        setDependents(empDependents);
       } catch (error) {
         console.error("Error fetching employee details:", error.message);
       } finally {
@@ -61,114 +52,72 @@ const ViewEmpDetails = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
+      <Grid container spacing={4} justifyContent="center">
+        <Grid item xs={12} textAlign="center">
+          <Typography variant="h4" color="primary">
             Employee Details
           </Typography>
         </Grid>
 
         {/* Employee Details Card */}
-        <Grid item xs={12} md={8} mx="auto">
-          <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ boxShadow: 3, borderRadius: 2, textAlign: "center", p: 3 }}>
+            <Avatar
+              src={employee.employeeImage}
+              alt={`${employee.firstName} ${employee.lastName}`}
+              sx={{ width: 120, height: 120, margin: "auto", mb: 2 }}
+            />
+            <Typography variant="h5" fontWeight={600} gutterBottom>
+              {employee.firstName} {employee.lastName}
+            </Typography>
+            <Typography variant="subtitle1" sx={{ display: "flex", alignItems: "center", justifyContent: "center", color: employee.status === "A" ? "green" : "red" }}>
+              {employee.status === "A" ? "Active" : "Inactive"}
+              <CircleIcon sx={{ fontSize: 10, ml: 1, color: employee.status === "A" ? "green" : "red" }} />
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
             <CardContent>
-              <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-                Personal Information
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <Typography>
-                    <strong>Name:</strong> {employee.name}
-                  </Typography>
+                  <Typography><strong>NIC:</strong> {employee.nic}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography>
-                    <strong>NIC:</strong> {employee.nic}
-                  </Typography>
+                  <Typography><strong>Phone No:</strong> {employee.phoneNo}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography>
-                    <strong>Phone No:</strong> {employee.phoneNo}
-                  </Typography>
+                  <Typography><strong>Address:</strong> {employee.address}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography>
-                    <strong>Address:</strong> {employee.address}
-                  </Typography>
+                  <Typography><strong>Salary Per Day:</strong> {employee.salaryPerDay}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography>
-                    <strong>Salary Per Day:</strong> {employee.salaryPerDay}
-                  </Typography>
+                  <Typography><strong>OT Value Per Hour:</strong> {employee.otValuePerHour}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography>
-                    <strong>OT Value Per Hour:</strong>{" "}
-                    {employee.otValuePerHour}
-                  </Typography>
+                  <Typography><strong>Join Date:</strong> {new Date(employee.joinDate).toLocaleDateString()}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography>
-                    <strong>Join Date:</strong>{" "}
-                    {new Date(employee.joinDate).toLocaleDateString()}
-                  </Typography>
+                  <Typography><strong>Created By:</strong> {employee.createdBy}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography>
-                    <strong>Date of Birth:</strong>{" "}
-                    {new Date(employee.dateOfBirth).toLocaleDateString()}
-                  </Typography>
+                  <Typography><strong>Created Date:</strong> {new Date(employee.createdDate).toLocaleDateString()}</Typography>
                 </Grid>
+                {employee.modifiedBy && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography><strong>Modified By:</strong> {employee.modifiedBy}</Typography>
+                  </Grid>
+                )}
+                {employee.modifiedDate && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography><strong>Modified Date:</strong> {new Date(employee.modifiedDate).toLocaleDateString()}</Typography>
+                  </Grid>
+                )}
               </Grid>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Dependents Table */}
-        <Grid item xs={12}>
-          <Typography variant="h5" gutterBottom>
-            Dependents
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                  <TableCell><strong>Name</strong></TableCell>
-                  <TableCell><strong>NIC</strong></TableCell>
-                  <TableCell><strong>Phone Number</strong></TableCell>
-                  <TableCell><strong>Relationship</strong></TableCell>
-                  <TableCell><strong>Date of Birth</strong></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {dependents.length > 0 ? (
-                  dependents.map((dependent) => (
-                    <TableRow key={dependent.id}>
-                      <TableCell>{dependent.name}</TableCell>
-                      <TableCell>{dependent.nic}</TableCell>
-                      <TableCell>{dependent.phoneNumber}</TableCell>
-                      <TableCell>{dependent.relationship}</TableCell>
-                      <TableCell>
-                        {new Date(dependent.dateOfBirth).toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center">
-                      No dependents found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Grid>
-
         {/* Actions */}
-        <Grid item xs={12} display="flex" justifyContent="flex-end">
+        <Grid item xs={12} display="flex" justifyContent="center">
           <Button
             variant="contained"
             color="primary"

@@ -11,8 +11,7 @@ import {
   query,
   where
 } from "firebase/firestore";
-import { storage } from "../../firebase/firebaseConfig";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { uploadToCloudinary } from "../../services/ImageUploadService/ImageUploadService";
 
 const db = getFirestore();
 
@@ -25,9 +24,7 @@ export const newEmployee = async (employeeDetailsData) => {
     // Upload image to Firebase Storage if present
     let imageUrl = "";
     if (employeeDetailsData.employeeImage) {
-      const imageRef = ref(storage, `employeeImages/${employeeDetailsData.employeeImage.name}`);
-      await uploadBytes(imageRef, employeeDetailsData.employeeImage);
-      imageUrl = await getDownloadURL(imageRef);
+      imageUrl = await uploadToCloudinary(employeeDetailsData.employeeImage);
     }
 
     // Check if the counter document exists
