@@ -13,6 +13,7 @@ import BadgeIcon from "@mui/icons-material/BadgeOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export default function MainSideBar() {
   const location = useLocation();
@@ -91,7 +92,6 @@ export default function MainSideBar() {
           />
         </ListItemButton>
 
-
         <ListItemButton
           onClick={handleEmployeeClick}
           selected={isSelected("/employee") || isSelected("/employee/daily")}
@@ -124,7 +124,9 @@ export default function MainSideBar() {
               <ListItemText
                 primary="Employee Details"
                 primaryTypographyProps={{
-                  color: isSelected("/employee") ? primaryColor : secondaryColor,
+                  color: isSelected("/employee")
+                    ? primaryColor
+                    : secondaryColor,
                 }}
               />
             </ListItemButton>
@@ -133,7 +135,9 @@ export default function MainSideBar() {
               <ListItemText
                 primary="Daily Records"
                 primaryTypographyProps={{
-                  color: isSelected("/employee/daily") ? primaryColor : secondaryColor,
+                  color: isSelected("/employee/daily")
+                    ? primaryColor
+                    : secondaryColor,
                 }}
               />
             </ListItemButton>
@@ -181,7 +185,9 @@ export default function MainSideBar() {
               <ListItemText
                 primary="Stock"
                 primaryTypographyProps={{
-                  color: isSelected("/activeStock") ? primaryColor : secondaryColor,
+                  color: isSelected("/activeStock")
+                    ? primaryColor
+                    : secondaryColor,
                 }}
               />
             </ListItemButton>
@@ -265,7 +271,7 @@ export default function MainSideBar() {
           >
             <AccountBalanceOutlinedIcon />
           </ListItemIcon>
-          
+
           <ListItemText
             sx={{ marginLeft: "-18px" }}
             primaryTypographyProps={{
@@ -284,7 +290,9 @@ export default function MainSideBar() {
               <ListItemText
                 primary="stock summary"
                 primaryTypographyProps={{
-                  color: isSelected("/stockSummary") ? primaryColor : secondaryColor,
+                  color: isSelected("/stockSummary")
+                    ? primaryColor
+                    : secondaryColor,
                 }}
               />
             </ListItemButton>
@@ -300,7 +308,6 @@ export default function MainSideBar() {
           </List>
         </Collapse>
 
-
         <ListItemButton
           onClick={handleSettinglick}
           selected={isSelected("/employee") || isSelected("/employee/daily")}
@@ -313,7 +320,7 @@ export default function MainSideBar() {
                   : secondaryColor,
             }}
           >
-            <BadgeIcon />
+            <SettingsIcon />
           </ListItemIcon>
           <ListItemText
             sx={{ marginLeft: "-18px" }}
@@ -323,7 +330,7 @@ export default function MainSideBar() {
                   ? primaryColor
                   : secondaryColor,
             }}
-            primary="Setting"
+            primary="Settings"
           />
         </ListItemButton>
         <Collapse in={openSetting} timeout="auto" unmountOnExit>
@@ -333,7 +340,9 @@ export default function MainSideBar() {
               <ListItemText
                 primary="Tree type"
                 primaryTypographyProps={{
-                  color: isSelected("/setting/treeType") ? primaryColor : secondaryColor,
+                  color: isSelected("/setting/treeType")
+                    ? primaryColor
+                    : secondaryColor,
                 }}
               />
             </ListItemButton>
@@ -342,7 +351,9 @@ export default function MainSideBar() {
               <ListItemText
                 primary="Timber Nature"
                 primaryTypographyProps={{
-                  color: isSelected("/setting/timberNature") ? primaryColor : secondaryColor,
+                  color: isSelected("/setting/timberNature")
+                    ? primaryColor
+                    : secondaryColor,
                 }}
               />
             </ListItemButton>
@@ -351,7 +362,9 @@ export default function MainSideBar() {
               <ListItemText
                 primary="Income Type"
                 primaryTypographyProps={{
-                  color: isSelected("/setting/incomeType") ? primaryColor : secondaryColor,
+                  color: isSelected("/setting/incomeType")
+                    ? primaryColor
+                    : secondaryColor,
                 }}
               />
             </ListItemButton>
@@ -360,13 +373,14 @@ export default function MainSideBar() {
               <ListItemText
                 primary="Expense Type"
                 primaryTypographyProps={{
-                  color: isSelected("/setting/expenseType") ? primaryColor : secondaryColor,
+                  color: isSelected("/setting/expenseType")
+                    ? primaryColor
+                    : secondaryColor,
                 }}
               />
             </ListItemButton>
           </List>
         </Collapse>
-
       </List>
     </Box>
   );
