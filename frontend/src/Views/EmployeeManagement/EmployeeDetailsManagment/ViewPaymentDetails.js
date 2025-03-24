@@ -6,30 +6,56 @@ import {
   Card,
   CardContent,
   Divider,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  CircularProgress,
+  Box,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { getemployeePaySheetById } from "../../../services/EmployeeManagementService/EmployeePaySheetService";
+import { getEmployeeWorkedDetail } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import CircularProgress from "@mui/material/CircularProgress";
+import IconButton from "@mui/material/IconButton";
+import Collapse from "@mui/material/Collapse";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 
 const ViewPaymentDetails = () => {
   const { paymentId } = useParams();
   const navigate = useNavigate();
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [workDetail, setWorkDetail] = useState([]);
+  const [showWorkDetails, setShowWorkDetails] = useState(true);
 
   useEffect(() => {
     const fetchPaymentDetails = async () => {
       try {
         const data = await getemployeePaySheetById(paymentId);
         setPaymentDetails(data);
+
+        if (data) {
+          const formatedFromDate = new Date(data.fromDate.seconds * 1000);
+          formatedFromDate.setHours(0, 0, 0, 0);
+
+          const formatedToDate = new Date(data.toDate.seconds * 1000);
+          formatedToDate.setHours(23, 59, 59, 999);
+
+          const workDataList = await getEmployeeWorkedDetail({
+            fromDate: formatedFromDate,
+            toDate: formatedToDate,
+            eid: data.eid_fk,
+          });
+
+          setWorkDetail(workDataList);
+        }
       } catch (error) {
         console.error("Error fetching payment details:", error.message);
       } finally {
@@ -39,6 +65,15 @@ const ViewPaymentDetails = () => {
 
     fetchPaymentDetails();
   }, [paymentId]);
+
+  const formatDate = (timestamp) => {
+    if (!timestamp || !timestamp.seconds) return "N/A";
+    return new Date(timestamp.seconds * 1000).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   if (loading) {
     return (
@@ -56,15 +91,6 @@ const ViewPaymentDetails = () => {
     );
   }
 
-  const formatDate = (timestamp) => {
-    if (!timestamp || !timestamp.seconds) return "N/A";
-    return new Date(timestamp.seconds * 1000).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   return (
     <Container sx={{ mt: 4 }}>
       <Grid container spacing={4}>
@@ -74,107 +100,86 @@ const ViewPaymentDetails = () => {
           </Typography>
         </Grid>
 
-        {/* Payment Summary Section */}
+        {/* Enhanced Payment Summary Section */}
         <Grid item xs={12}>
-          <Card elevation={3} sx={{ borderRadius: 2 }}>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Payment Summary
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Employee Name:</strong> {paymentDetails.employeeName}
+          <Card elevation={3} sx={{ borderRadius: 3, p: 2 }}>
+            <Typography variant="h5" fontWeight={600} gutterBottom>
+              Payment Summary
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Box display="grid" gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }} gap={2}>
+              {[
+                { label: "Employee Name", value: paymentDetails.employeeName },
+                { label: "Employee ID", value: paymentDetails.eid },
+                { label: "From Date", value: formatDate(paymentDetails.fromDate) },
+                { label: "To Date", value: formatDate(paymentDetails.toDate) },
+                { label: "Total Days", value: paymentDetails.totalDay },
+                { label: "Total Half Days", value: paymentDetails.totalHalfDay },
+                { label: "Total OT Hours", value: paymentDetails.totalOt },
+                { label: "Total Advance", value: paymentDetails.totalAdvance },
+                { label: "Reduce Amount", value: paymentDetails.reduceAmount },
+                { label: "Actual Payment", value: paymentDetails.actualPayment },
+                { label: "Payment Status", value: paymentDetails.paymentStatus },
+                { label: "Total Payment", value: paymentDetails.totalPayment }
+              ].map((item, i) => (
+                <Box key={i}>
+                  <Typography variant="caption" color="text.secondary">
+                    {item.label}
                   </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Employee ID:</strong> {paymentDetails.eid}
+                  <Typography fontWeight={500} variant="body1">
+                    {item.value || "-"}
                   </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>From Date:</strong> {formatDate(paymentDetails.fromDate)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>To Date:</strong> {formatDate(paymentDetails.toDate)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Total Days:</strong> {paymentDetails.totalDay}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Total Half Days:</strong> {paymentDetails.totalHalfDay}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Total OT Hours:</strong> {paymentDetails.totalOt}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Total Advance:</strong> {paymentDetails.totalAdvance}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Reduce Amount:</strong> {paymentDetails.reduceAmount}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Actual Payment:</strong> {paymentDetails.actualPayment}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Payment Status:</strong> {paymentDetails.paymentStatus}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
-                    <strong>Total Payment:</strong> {paymentDetails.totalPayment}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </CardContent>
+                </Box>
+              ))}
+            </Box>
           </Card>
         </Grid>
 
         {/* Work Details Table */}
         <Grid item xs={12}>
-          <Typography variant="h5" gutterBottom>
-            Work Details
-          </Typography>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 2 }}>
-            <TableContainer>
-              <Table>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2, mb: 3 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ cursor: "pointer" }}
+              onClick={() => setShowWorkDetails(!showWorkDetails)}
+            >
+              <Typography variant="h6" color="primary">
+                Employee Work Details
+              </Typography>
+              <IconButton>
+                {showWorkDetails ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+              </IconButton>
+            </Stack>
+
+            <Collapse in={showWorkDetails} timeout="auto" unmountOnExit>
+              <Table sx={{ mt: 2 }}>
                 <TableHead>
                   <TableRow>
-                    {["Date", "Is Present", "In Time", "Out Time", "OT Hours", "Advance Per Day"].map(
-                      (header) => (
-                        <TableCell key={header} align="center">
-                          {header}
-                        </TableCell>
-                      )
-                    )}
+                    <TableCell align="center">Employee</TableCell>
+                    <TableCell align="center">Date</TableCell>
+                    <TableCell align="center">Is Present</TableCell>
+                    <TableCell align="center">In Time</TableCell>
+                    <TableCell align="center">Out Time</TableCell>
+                    <TableCell align="center">OT Hours</TableCell>
+                    <TableCell align="center">Advance Per Day</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paymentDetails.workDetails && paymentDetails.workDetails.length > 0 ? (
-                    paymentDetails.workDetails.map((work, index) => (
+                  {workDetail && workDetail.length > 0 ? (
+                    workDetail.map((work, index) => (
                       <TableRow key={index}>
+                        <TableCell align="center">{work.eid_name}</TableCell>
+                        <TableCell align="center">{formatDate(work.dateTime)}</TableCell>
                         <TableCell align="center">
-                          {formatDate(work.dateTime)}
+                          <Chip
+                            label={work.isPresent ? "Present" : "Absent"}
+                            color={work.isPresent ? "success" : "error"}
+                            variant="outlined"
+                            sx={{ fontWeight: "bold" }}
+                          />
                         </TableCell>
-                        <TableCell align="center">{work.isPresent.toString()}</TableCell>
                         <TableCell align="center">{work.inTime}</TableCell>
                         <TableCell align="center">{work.outTime}</TableCell>
                         <TableCell align="center">{work.otHours}</TableCell>
@@ -183,14 +188,14 @@ const ViewPaymentDetails = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} align="center">
+                      <TableCell colSpan={7} align="center">
                         No work details found.
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
-            </TableContainer>
+            </Collapse>
           </Paper>
         </Grid>
 

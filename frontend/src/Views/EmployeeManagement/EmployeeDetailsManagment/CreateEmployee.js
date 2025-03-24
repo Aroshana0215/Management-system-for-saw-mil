@@ -8,12 +8,16 @@ import {
   FormControl,
   Paper,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { newEmployee } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 
 const CreateEmployee = () => {
   const { user } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(false);
 
   let currentDate = new Date().toISOString().split("T")[0];
 
@@ -45,6 +49,23 @@ const CreateEmployee = () => {
         tempErrors[key] = `${key.replace(/([A-Z])/g, " $1").trim()} is required`;
       }
     });
+
+    if (payload.phoneNo && !/^\d{10}$/.test(payload.phoneNo)) {
+      tempErrors.phoneNo = "Phone number must be 10 digits";
+    }
+
+    if (payload.salaryPerDay && isNaN(payload.salaryPerDay)) {
+      tempErrors.salaryPerDay = "Salary must be a valid number";
+    }
+
+    if (payload.otValuePerHour && isNaN(payload.otValuePerHour)) {
+      tempErrors.otValuePerHour = "OT Value must be a valid number";
+    }
+
+    if (!payload.employeeImage) {
+      tempErrors.employeeImage = "Employee image is required";
+    }
+
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
@@ -60,6 +81,14 @@ const CreateEmployee = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (!["image/png", "image/jpeg"].includes(file.type)) {
+        toast.error("Only PNG or JPG images are allowed");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size should be less than 5MB");
+        return;
+      }
       setPayload((prevPayload) => ({
         ...prevPayload,
         employeeImage: file,
@@ -74,12 +103,24 @@ const CreateEmployee = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      toast.error("Please fix validation errors");
+      return;
+    }
+
+    setLoading(true);
     try {
-      const newEmployeeId = await newEmployee(payload);
-      window.location.href = `/employee`;
+      await newEmployee(payload);
+      toast.success("Employee created successfully!");
+
+      setTimeout(() => {
+        setLoading(false);
+        window.location.href = "/employee";
+      }, 1000);
     } catch (error) {
+      toast.error("Error creating employee: " + error.message);
       console.error("Error creating employee:", error.message);
+      setLoading(false);
     }
   };
 
@@ -90,7 +131,7 @@ const CreateEmployee = () => {
           Employee Details Submission
         </Typography>
         <Grid container component="form" onSubmit={handleSubmit} spacing={2}>
-          {Object.entries(payload).map(([key, value]) => (
+          {Object.entries(payload).map(([key, value]) =>
             ["status", "createdDate", "createdBy", "modifiedBy", "modifiedDate", "employeeImage"].includes(key) ? null : (
               <Grid item key={key} xs={12} md={6}>
                 <FormControl fullWidth>
@@ -111,7 +152,7 @@ const CreateEmployee = () => {
                 </FormControl>
               </Grid>
             )
-          ))}
+          )}
           <Grid item xs={12} md={6}>
             <FormControl fullWidth>
               <Typography variant="body1" fontWeight={500} gutterBottom>
@@ -130,9 +171,9 @@ const CreateEmployee = () => {
                   textAlign: "center",
                   p: 2,
                   backgroundColor: "#f9f9f9",
-                  '&:hover': {
-                    backgroundColor: "#f0f0f0"
-                  }
+                  "&:hover": {
+                    backgroundColor: "#f0f0f0",
+                  },
                 }}
                 onClick={() => document.getElementById("employeeImageInput").click()}
               >
@@ -140,25 +181,23 @@ const CreateEmployee = () => {
                   <img src={imagePreview} alt="Preview" style={{ width: "100px", height: "100px", borderRadius: "50%" }} />
                 ) : (
                   <Typography variant="body2" color="textSecondary">
-                    Click to upload PNG (Max 5MB)
+                    Click to upload PNG or JPG (Max 5MB)
                   </Typography>
                 )}
               </Box>
               <input
                 id="employeeImageInput"
                 type="file"
-                accept="image/png/jpg"
+                accept="image/png, image/jpeg"
                 style={{ display: "none" }}
                 onChange={handleFileChange}
               />
-              {errors.employeeImage && (
-                <Typography color="error" variant="body2">{errors.employeeImage}</Typography>
-              )}
+              {errors.employeeImage && <Typography color="error" variant="body2">{errors.employeeImage}</Typography>}
             </FormControl>
           </Grid>
           <Grid item xs={12} display="flex" justifyContent="flex-end">
-            <Button type="submit" variant="contained" color="primary" size="large">
-              Create
+            <Button type="submit" variant="contained" color="primary" size="large" disabled={loading}>
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Create"}
             </Button>
           </Grid>
         </Grid>

@@ -8,6 +8,8 @@ import {
   doc,
   query,
   where,
+  orderBy ,
+  Timestamp 
 } from "firebase/firestore";
 
 const db = getFirestore();
@@ -46,44 +48,56 @@ export const newDailyDetail = async (employeeDailyDetailsData) => {
 };
 
 export const getEmployeeWorkedDetail = async (formData) => {
-  console.log(formData);
+  console.log("Fetching Employee Work Details for:", formData);
+
   try {
+    const fromDateTimestamp = Timestamp.fromDate(new Date(formData.fromDate));
+    
+    // 🔹 Ensure `toDate` includes the **entire day** (until 23:59:59)
+    const toDateObject = new Date(formData.toDate);
+    toDateObject.setHours(23, 59, 59, 999);
+    const toDateTimestamp = Timestamp.fromDate(toDateObject);
+
     const q = query(
       collection(db, "employeeDailyDetails"),
       where("eid_fk", "==", formData.eid),
       where("status", "==", "A"),
-      where("dateTime", ">=", formData.fromDate),
-      where("dateTime", "<=", formData.toDate)
+      where("dateTime", ">=", fromDateTimestamp),
+      where("dateTime", "<=", toDateTimestamp) // 🔥 Ensures end-of-day inclusion
     );
 
     const querySnapshot = await getDocs(q);
-    const employeeWorkList = [];
+    const employeeWorkList = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
-    querySnapshot.forEach((docSnapshot) => {
-      const employeePaySheet = { id: docSnapshot.id, ...docSnapshot.data() };
-      employeeWorkList.push(employeePaySheet);
-    });
-
+    console.log("Fetched Employee Work List:", employeeWorkList);
     return employeeWorkList;
   } catch (error) {
-    console.error("Error getting employeeWorkList: ", error.message);
+    console.error("Error getting employee work details:", error.message);
     throw error;
   }
 };
 
 export const getAllemployeeDailyDetails = async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "employeeDailyDetails"));
-    const employeeDailyDetailsList = [];
-    querySnapshot.forEach((doc) => {
-      employeeDailyDetailsList.push({ id: doc.id, ...doc.data() });
-    });
+    // Query Firestore collection with orderBy descending
+    const q = query(collection(db, "employeeDailyDetails"), orderBy("createdDate", "asc"));
+    const querySnapshot = await getDocs(q);
+    
+    const employeeDailyDetailsList = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
     return employeeDailyDetailsList;
   } catch (error) {
-    console.error("Error fetching  employeeDailyDetails List: ", error.message);
+    console.error("Error fetching employeeDailyDetails List: ", error.message);
     throw error;
   }
 };
+
 
 // Update employeeDailyDetails
 export const updateemployeeDailyDetails = async (
@@ -132,3 +146,47 @@ export const getemployeeDailyDetailsById = async (employeeDailyDetailsId) => {
     throw error;
   }
 };
+
+export const updateDailyDetailsAsPaid = async (data) => {
+  console.log("Updating daily details as paid for range:", data);
+  try {
+
+    const formatedFromDate = new Date(data.fromDate);
+    formatedFromDate.setHours(0, 0, 0, 0);
+
+    const formatedToDate = new Date(data.toDate);
+    formatedToDate.setHours(23, 59, 59, 999);
+
+    const formData = {
+      fromDate: formatedFromDate,
+      toDate: formatedToDate,
+      eid: data.eid_fk,
+    };
+
+    console.log("Updating daily details as paid for range:", formData);
+
+    const paySheetList = await getEmployeeWorkedDetail(formData);
+
+    if (!paySheetList || paySheetList.length === 0) {
+      console.log("No records found within the given date range.");
+      return "No records found.";
+    }
+
+    // Batch update all retrieved documents
+    const batchPromises = paySheetList.map(async (item) => {
+      const docRef = doc(db, "employeeDailyDetails", item.id);
+      return updateDoc(docRef, { isPaid: true });
+    });
+
+    await Promise.all(batchPromises);
+
+    console.log(`Updated ${paySheetList.length} records as Paid.`);
+    return `Updated ${paySheetList.length} records successfully.`;
+  } catch (error) {
+    console.error("Error updating daily details as paid:", error.message);
+    throw error;
+  }
+};
+
+
+

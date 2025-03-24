@@ -90,7 +90,6 @@ const columns = [
   {
     field: "actions",
     headerName: "Actions",
-    width: 120, // Reduced width since no text is needed
     renderCell: ({ row }) => (
       <Box sx={{ display: "flex", gap: 1, marginTop: "4px" }}> 
         {/* Payment Button with Tooltip */}
@@ -101,8 +100,6 @@ const columns = [
             color="success"
             size="medium"
             sx={{
-              borderRadius: "50%",
-              backgroundColor: "#E8F5E9", // Light green
               "&:hover": { backgroundColor: "#C8E6C9" }, // Slightly darker on hover
             }}
           >

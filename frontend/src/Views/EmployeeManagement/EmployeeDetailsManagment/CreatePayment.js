@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Container,
   Grid,
-  Box,
   Typography,
   TextField,
   Button,
@@ -11,23 +10,32 @@ import {
   FormControl,
   InputLabel,
   Stack,
+  Paper,
+  IconButton,
+  Collapse,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
-  Paper,
+  Chip ,
+  CircularProgress
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { getEmployeeWorkedDetail } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
-import { newPaySheet } from "../../../services/EmployeeManagementService/EmployeePaySheetService";
+import { getEmployeeWorkedDetail, updateDailyDetailsAsPaid } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
+import { newPaySheet , getLatestToDateByEmployee} from "../../../services/EmployeeManagementService/EmployeePaySheetService";
 import {
   getemployeeDetailsById,
   updateemployeeDetails,
 } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const CreatePayment = () => {
   const { eid } = useParams();
@@ -61,9 +69,10 @@ const CreatePayment = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [previous, setPrevious] = useState("");
-console.log("totalPayment:",totalPayment);
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().slice(0, 10);
+  const [isExpanded, setIsExpanded] = useState(false); // Expand/Collapse State
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchEmpData = async () => {
@@ -195,6 +204,19 @@ console.log("totalPayment:",totalPayment);
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    setLoading(true);
+    // Validation for totalPayment
+    if (parseFloat(totalPayment) <= 0) {
+      toast.error("Total OT Amount must be greater than 0.");
+      return;
+    }
+
+    // Validation for toDate (Empty Check)
+    if (!toDate) {
+      toast.error("Please select a valid 'To Date' before submitting.");
+      return;
+    }
+
     const formData = {
       totalPayment,
       totalAdvance,
@@ -205,7 +227,7 @@ console.log("totalPayment:",totalPayment);
       currentDate: formattedDate,
       eid_fk: empData.id,
       eid: empData.empID,
-      employeeName: empData.name,
+      employeeName: empData.firstName,
       paymentStatus,
       reduceAmount,
       actualPayment,
@@ -216,13 +238,22 @@ console.log("totalPayment:",totalPayment);
 
     try {
       const paysheetId = await newPaySheet(formData);
+
       if (paysheetId && empData.currentLendAmount > 0 && reduceAmount > 0) {
         const updatedEmployeeData = {
           currentLendAmount: parseFloat(previous) - parseFloat(reduceAmount),
         };
         await updateemployeeDetails(eid, updatedEmployeeData);
       }
-      window.location.href = `/employee/payment/${eid}`;
+
+      if(paysheetId){
+      const stringResulty = updateDailyDetailsAsPaid(formData);
+        toast.success(`${stringResulty}`);
+        setTimeout(() => {
+          setLoading(false);
+          window.location.href = `/employee/payment/${eid}`;
+        }, 1000);
+      }
     } catch (error) {
       console.error("Error creating pay sheet details:", error.message);
     }
@@ -236,6 +267,35 @@ console.log("totalPayment:",totalPayment);
       day: "numeric",
     });
   };
+  console.log("empData.id",eid);
+  useEffect(() => {
+    const fetchLatestToDate = async () => {
+      try {
+        console.log("eid:", eid);
+        if (eid) {
+          const latestToDate = await getLatestToDateByEmployee(eid);
+  
+          let newFromDate;
+          if (latestToDate) {
+            newFromDate = new Date(latestToDate.seconds * 1000);
+            console.log("newFromDate :", newFromDate);
+            newFromDate.setDate(newFromDate.getDate() + 1);
+          }else
+          {
+            newFromDate = formatDate(fromDate);
+          }
+  
+          console.log("newFromDate (after increment):", newFromDate);
+          setFromDate(newFromDate);
+        }
+      } catch (error) {
+        console.error("Error fetching latest toDate:", error.message);
+      }
+    };
+  
+    fetchLatestToDate();
+  }, [eid]);
+  
   
 
   return (
@@ -267,12 +327,18 @@ console.log("totalPayment:",totalPayment);
                     value={fromDate}
                     onChange={(date) => setFromDate(date)}
                     renderInput={(params) => <TextField {...params} size="small" />}
+                    shouldDisableDate={(date) => fromDate && date < fromDate} // Disable dates before latest date
                   />
                   <DatePicker
                     label="To Date"
                     value={toDate}
                     onChange={handleDateChange}
                     renderInput={(params) => <TextField {...params} size="small" />}
+                    shouldDisableDate={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0); // Normalize today's date
+                      return  date > today;
+                    }}
                   />
                 </LocalizationProvider>
                 <Button variant="outlined" onClick={clearDateFilters}>
@@ -284,32 +350,49 @@ console.log("totalPayment:",totalPayment);
         </Grid>
 
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {["Employee", "Date", "Is Present", "In Time", "Out Time", "OT Hours", "Advance Per Day"].map((header) => (
-                    <TableCell key={header} align="center">
-                      {header}
-                    </TableCell>
-                  ))}
+      {/* Expand/Collapse Work Detail Table */}
+      <Paper elevation={3} sx={{ p: 2, borderRadius: 2, mb: 3 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ cursor: "pointer" }} onClick={() => setIsExpanded(!isExpanded)}>
+          <Typography variant="h6" color="primary">Employee Work Details</Typography>
+          <IconButton>{isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</IconButton>
+        </Stack>
+
+        <Collapse in={isExpanded}>
+          <Table sx={{ mt: 2 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell align="center">Employee</TableCell>
+                <TableCell align="center">Date</TableCell>
+                <TableCell align="center">Is Present</TableCell>
+                <TableCell align="center">In Time</TableCell>
+                <TableCell align="center">Out Time</TableCell>
+                <TableCell align="center">OT Hours</TableCell>
+                <TableCell align="center">Advance Per Day</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {workDetail.map((work, index) => (
+                <TableRow key={index}>
+                  <TableCell align="center">{work.eid_name}</TableCell>
+                  <TableCell align="center">{new Date(work.dateTime.seconds * 1000).toLocaleDateString()}</TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={work.isPresent ? "Present" : "Absent"}
+                      color={work.isPresent ? "success" : "error"}
+                      variant="outlined"
+                      sx={{ fontWeight: "bold" }}
+                    />
+                  </TableCell>
+                  <TableCell align="center">{work.inTime}</TableCell>
+                  <TableCell align="center">{work.outTime}</TableCell>
+                  <TableCell align="center">{work.otHours}</TableCell>
+                  <TableCell align="center">{work.advancePerDay}</TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {workDetail.map((work, index) => (
-                  <TableRow key={index}>
-                    <TableCell align="center">{work.eid_name}</TableCell>
-                    <TableCell align="center">{formatDate(work.dateTime)}</TableCell>
-                    <TableCell align="center">{work.isPresent.toString()}</TableCell>
-                    <TableCell align="center">{work.inTime}</TableCell>
-                    <TableCell align="center">{work.outTime}</TableCell>
-                    <TableCell align="center">{work.otHours}</TableCell>
-                    <TableCell align="center">{work.advancePerDay}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Paper>
+              ))}
+            </TableBody>
+          </Table>
+        </Collapse>
+      </Paper>
         </Grid>
 
         <Grid item xs={12}>
@@ -455,9 +538,7 @@ console.log("totalPayment:",totalPayment);
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <Button type="submit" variant="contained" color="primary">
-                  Submit
-                </Button>
+              <Button type="submit" variant="contained" color="primary" disabled={loading}>{loading ? <CircularProgress size={24} /> : "Submit"}</Button>
               </Grid>
             </Grid>
           </Grid>

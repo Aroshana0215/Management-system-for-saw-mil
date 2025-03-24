@@ -9,22 +9,38 @@ import {
   CircularProgress,
   Button,
   Avatar,
+  Switch,
+  FormControl,
+  FormLabel,
+  Box,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { getemployeeDetailsById } from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import { getemployeeDetailsById, updateemployeeDetails } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import CircleIcon from "@mui/icons-material/Circle";
+import PermIdentityIcon from "@mui/icons-material/PermIdentity";
+import PhoneIcon from "@mui/icons-material/Phone";
+import HomeIcon from "@mui/icons-material/Home";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 const ViewEmpDetails = () => {
   const { eid } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
         const empDetails = await getemployeeDetailsById(eid);
         setEmployee(empDetails);
+        setStatus(empDetails.status);
       } catch (error) {
         console.error("Error fetching employee details:", error.message);
       } finally {
@@ -33,6 +49,20 @@ const ViewEmpDetails = () => {
     };
     fetchEmployeeDetails();
   }, [eid]);
+
+  const handleStatusToggle = async () => {
+    setIsUpdating(true);
+    const newStatus = status === "A" ? "D" : "A";
+    try {
+      await updateemployeeDetails(employee.id, { status: newStatus });
+      setStatus(newStatus);
+      setEmployee((prev) => ({ ...prev, status: newStatus }));
+    } catch (error) {
+      console.error("Error updating status:", error.message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -55,7 +85,7 @@ const ViewEmpDetails = () => {
       <Grid container spacing={4} justifyContent="center">
         <Grid item xs={12} textAlign="center">
           <Typography variant="h4" color="primary">
-            Employee Details
+            Employee Profile
           </Typography>
         </Grid>
 
@@ -65,53 +95,58 @@ const ViewEmpDetails = () => {
             <Avatar
               src={employee.employeeImage}
               alt={`${employee.firstName} ${employee.lastName}`}
-              sx={{ width: 120, height: 120, margin: "auto", mb: 2 }}
+              sx={{ width: 100, height: 100, margin: "auto", mb: 2 }}
             />
-            <Typography variant="h5" fontWeight={600} gutterBottom>
+            <Typography variant="h6" fontWeight={600} gutterBottom>
               {employee.firstName} {employee.lastName}
             </Typography>
-            <Typography variant="subtitle1" sx={{ display: "flex", alignItems: "center", justifyContent: "center", color: employee.status === "A" ? "green" : "red" }}>
-              {employee.status === "A" ? "Active" : "Inactive"}
-              <CircleIcon sx={{ fontSize: 10, ml: 1, color: employee.status === "A" ? "green" : "red" }} />
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+            <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+              <Typography variant="subtitle2" color={status === "A" ? "green" : "red"}>
+                {status === "A" ? "Active" : "Inactive"}
+              </Typography>
+              <CircleIcon sx={{ fontSize: 10, color: status === "A" ? "green" : "red" }} />
+            </Box>
+            <Divider sx={{ my: 2 }} />
             <CardContent>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>NIC:</strong> {employee.nic}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>Phone No:</strong> {employee.phoneNo}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>Address:</strong> {employee.address}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>Salary Per Day:</strong> {employee.salaryPerDay}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>OT Value Per Hour:</strong> {employee.otValuePerHour}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>Join Date:</strong> {new Date(employee.joinDate).toLocaleDateString()}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>Created By:</strong> {employee.createdBy}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>Created Date:</strong> {new Date(employee.createdDate).toLocaleDateString()}</Typography>
-                </Grid>
-                {employee.modifiedBy && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography><strong>Modified By:</strong> {employee.modifiedBy}</Typography>
+                {[{ label: "NIC", value: employee.nic, icon: <PermIdentityIcon /> },
+                { label: "Phone", value: employee.phoneNo, icon: <PhoneIcon /> },
+                { label: "Salary", value: employee.salaryPerDay, icon: <AttachMoneyIcon /> },
+                { label: "OT Rate", value: employee.otValuePerHour, icon: <AccessTimeIcon /> },
+                { label: "Join Date", value: new Date(employee.joinDate).toLocaleDateString(), icon: <CalendarTodayIcon /> },
+                { label: "Created By", value: employee.createdBy, icon: <PersonAddIcon /> },
+                { label: "Created Date", value: new Date(employee.createdDate).toLocaleDateString(), icon: <CalendarTodayIcon /> },
+                { label: "Address", value: employee.address, icon: <HomeIcon /> }].map((field, index) => (
+                  <Grid item xs={12} sm={6} key={index}>
+                    <Typography fontWeight={500} sx={{ fontSize: "0.8rem", mb: 0.5, textAlign: "left" }}>
+                      {field.label}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      value={field.value}
+                      InputProps={{
+                        readOnly: true,
+                        endAdornment: (
+                          <InputAdornment position="end">{field.icon}</InputAdornment>
+                        ),
+                        sx: { height: 32, fontSize: "0.85rem" },
+                      }}
+                      sx={{ bgcolor: "#eaeaea", borderRadius: 1 }}
+                    />
                   </Grid>
-                )}
-                {employee.modifiedDate && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography><strong>Modified Date:</strong> {new Date(employee.modifiedDate).toLocaleDateString()}</Typography>
-                  </Grid>
-                )}
+                ))}
               </Grid>
+              <FormControl component="fieldset" sx={{ mt: 2, textAlign: "center" }}>
+                <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1 }}>Change Status
+                <Switch
+                  checked={status === "A"}
+                  onChange={handleStatusToggle}
+                  color="primary"
+                  disabled={isUpdating}
+                />
+                </FormLabel>
+              </FormControl>
             </CardContent>
           </Card>
         </Grid>
