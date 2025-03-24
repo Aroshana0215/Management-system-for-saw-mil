@@ -13,28 +13,26 @@ import {
   TextField,
   Button,
   Stack,
+  CircularProgress,
+  Paper,
 } from "@mui/material";
 import { newDailyDetail } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
-import { newExpense } from "../../../services/AccountManagementService/ExpenseManagmentService";
-import {
-  newAccountSummary,
-  updateAccountSummary,
-  getActiveAccountSummaryDetails,
-} from "../../../services/AccountManagementService/AccountSummaryManagmentService";
-import { getAllemployeeDetails, getemployeeDetailsById } from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import { getAllActiveEmployeeDetails, getemployeeDetailsById } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 
 const CreateDailyDetails = () => {
   const [employees, setEmployees] = useState([]);
   const [details, setDetails] = useState([]);
-  const [commonDate, setCommonDate] = useState("");
+  const [commonDate, setCommonDate] = useState(new Date().toISOString().split("T")[0]);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const employeesList = await getAllemployeeDetails();
+        const employeesList = await getAllActiveEmployeeDetails();
         setEmployees(employeesList);
         setDetails(
           employeesList.map((employee) => ({
@@ -49,39 +47,52 @@ const CreateDailyDetails = () => {
         );
       } catch (error) {
         console.error("Error fetching employees:", error.message);
+        toast.error("Failed to load employee data.");
       }
     };
     fetchEmployees();
   }, [commonDate]);
 
-  useEffect(() => {
-    setCommonDate(new Date().toISOString().split("T")[0]);
-  }, []);
-
   const calculateOTHours = (inTime, outTime) => {
-    if (!inTime || !outTime) return "";
-
+    if (!inTime || !outTime) return "0.00";
     const inDateTime = new Date(`1970-01-01T${inTime}`);
     const outDateTime = new Date(`1970-01-01T${outTime}`);
-    const totalWorkingMinutes = (outDateTime - inDateTime) / (1000 * 60);
-    const standardWorkingMinutes = 9 * 60;
-    const otMinutes = totalWorkingMinutes > standardWorkingMinutes ? totalWorkingMinutes - standardWorkingMinutes : 0;
-
+    if (outDateTime <= inDateTime) return "0.00";
+    const totalMinutes = (outDateTime - inDateTime) / (1000 * 60);
+    const otMinutes = Math.max(totalMinutes - 540, 0);
     const otHours = Math.floor(otMinutes / 60);
-    const otMinutesPart = Math.round(otMinutes % 60);
-
+    const otMinutesPart = otMinutes % 60;
     return `${otHours}.${otMinutesPart.toString().padStart(2, "0")}`;
   };
 
   const handleChange = (index, field) => (event) => {
     const value = field === "isPresent" ? event.target.checked : event.target.value;
-    const updatedDetails = [...details];
-    updatedDetails[index][field] = value;
+    setDetails((prevDetails) => {
+      const updatedDetails = [...prevDetails];
+      updatedDetails[index][field] = value;
 
-    if (field === "inTime" || field === "outTime") {
-      updatedDetails[index].otHours = calculateOTHours(updatedDetails[index].inTime, updatedDetails[index].outTime);
-    }
-    setDetails(updatedDetails);
+      if (field === "isPresent") {
+        if (value) {
+          // Enable fields and set default values when "Present" is checked
+          updatedDetails[index].inTime = "08:00";
+          updatedDetails[index].outTime = "17:00";
+          updatedDetails[index].advancePerDay = "0";
+          updatedDetails[index].otHours = calculateOTHours("08:00", "17:00");
+        } else {
+          // Disable fields and clear values when unchecked
+          updatedDetails[index].inTime = "";
+          updatedDetails[index].outTime = "";
+          updatedDetails[index].advancePerDay = "";
+          updatedDetails[index].otHours = "";
+        }
+      }
+
+      if (field === "inTime" || field === "outTime") {
+        updatedDetails[index].otHours = calculateOTHours(updatedDetails[index].inTime, updatedDetails[index].outTime);
+      }
+
+      return updatedDetails;
+    });
   };
 
   const handleCommonDateChange = (event) => {
@@ -90,186 +101,130 @@ const CreateDailyDetails = () => {
     setDetails(details.map((detail) => ({ ...detail, selectedDateTime: newDate })));
   };
 
+  const validateFields = () => {
+    let newErrors = {};
+    let hasPresentEmployee = false;
+
+    details.forEach((detail, index) => {
+      if (detail.isPresent) {
+        hasPresentEmployee = true;
+        if (!detail.inTime) newErrors[`inTime-${index}`] = "Required";
+        if (!detail.outTime) newErrors[`outTime-${index}`] = "Required";
+      }
+    });
+
+    if (!hasPresentEmployee) {
+      toast.error("Cannot submit no changes");
+      return false;
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fill all required fields for present employees.");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!validateFields()) return;
 
+    setLoading(true);
     try {
       for (const detail of details) {
-        if (!detail.isPresent) continue;
-
         const employee = await getemployeeDetailsById(detail.employeeId);
-        const combinedDateTime = new Date(detail.selectedDateTime);
-        const currentDate = new Date().toLocaleString("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "2-digit",
-          year: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-          second: "numeric",
-          timeZoneName: "short",
-        });
-
         const formData = {
-          dateTime: combinedDateTime,
+          dateTime: new Date(detail.selectedDateTime),
           isPresent: detail.isPresent,
-          inTime: detail.inTime,
-          outTime: detail.outTime,
-          otHours: detail.otHours,
-          advancePerDay: detail.advancePerDay,
+          inTime: detail.inTime || "08:00",
+          outTime: detail.outTime || "17:00",
+          otHours: detail.otHours || "0.00",
+          advancePerDay: detail.advancePerDay || "0",
           eid_fk: detail.employeeId,
-          eid_name: employee.name,
+          eid_name: employee.firstName,
           status: "A",
-          createdDate: currentDate,
+          isPaid: false,
+          createdDate: new Date().toISOString(),
         };
 
-        const dailyDetailId = await newDailyDetail(formData);
-
-        if (dailyDetailId) {
-          const saveExpData = {
-            date: combinedDateTime,
-            type: "Employee",
-            des: "Employee daily Advance",
-            amount: detail.advancePerDay,
-            status: "A",
-            createdBy: user.displayName,
-            createdDate: currentDate,
-          };
-
-          const expenseId = await newExpense(saveExpData);
-
-          if (expenseId) {
-            const data = await getActiveAccountSummaryDetails();
-            const accountSummaryData = {
-              status: "D",
-            };
-
-            if (data) {
-              await updateAccountSummary(data.id, accountSummaryData);
-
-              const newAccountSummaryData = {
-                totalAmount: Number(data.totalAmount) - Number(detail.advancePerDay),
-                changedAmount: detail.advancePerDay,
-                previousAmount: data.totalAmount,
-                expId_fk: expenseId,
-                status: "A",
-                createdDate: currentDate,
-              };
-
-              await newAccountSummary(newAccountSummaryData);
-            } else {
-              const newAccountSummaryData = {
-                totalAmount: Number(detail.advancePerDay),
-                changedAmount: Number(detail.advancePerDay),
-                previousAmount: 0,
-                expId_fk: "",
-                status: "A",
-                createdDate: currentDate,
-              };
-
-              await newAccountSummary(newAccountSummaryData);
-            }
-          }
-        }
+        await newDailyDetail(formData);
       }
-      window.location.href = "/employee/daily";
+      toast.success(`Attendance recorded for ${new Date(details.selectedDateTime)}`);
+      setTimeout(() => {
+        setLoading(false);
+        window.location.href = "/employee/daily";
+      }, 1000);
     } catch (error) {
       console.error("Error creating Daily Details:", error.message);
       toast.error(error.message);
+      setLoading(false);
     }
   };
 
   return (
-    <Grid container direction="row" justifyContent="center" alignItems="stretch">
-      <Grid item xs={12}>
-        <Grid container component="form" onSubmit={handleSubmit} padding={2} sx={{ bgcolor: "background.default", borderRadius: 2 }}>
-          <Grid item xs={12} padding={1}>
-            <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
-              <Typography variant="h6" color="primary" align="center">Create Daily Record</Typography>
-            </Stack>
-          </Grid>
-          <Grid container direction="column" alignItems="center" spacing={2} p={2}>
-            <Grid item xs={12}>
+    <Grid container justifyContent="center" alignItems="stretch" sx={{ p: 3 }}>
+      <Grid item xs={12} md={10}>
+        <Paper sx={{ p: 3, borderRadius: 2 }}>
+          <Typography variant="h5" color="primary" align="center" sx={{ mb: 3 }}>
+            Create Daily Record
+          </Typography>
+          <Grid container component="form" onSubmit={handleSubmit} spacing={3}>
+            <Grid item xs={12} md={6}>
               <TextField
-                label="Common Date"
+                label="Date"
                 type="date"
                 value={commonDate}
                 onChange={handleCommonDateChange}
                 InputLabelProps={{ shrink: true }}
                 fullWidth
-                sx={{ mb: 2 }}
                 size="small"
               />
+            </Grid>
+            <Grid item xs={12}>
               <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Employee Name</TableCell>
+                      <TableCell>Employee</TableCell>
                       <TableCell>In Time</TableCell>
                       <TableCell>Out Time</TableCell>
                       <TableCell>OT Hours</TableCell>
-                      <TableCell>Advance Per Day</TableCell>
+                      <TableCell>Advance</TableCell>
                       <TableCell>Present</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {employees.map((employee, index) => (
                       <TableRow key={employee.id}>
-                        <TableCell>{employee.name}</TableCell>
+                        <TableCell>{employee.firstName}</TableCell>
                         <TableCell>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            type="time"
-                            value={details[index].inTime}
-                            onChange={handleChange(index, "inTime")}
-                            disabled={!details[index].isPresent}
-                          />
+                          <TextField size="small" fullWidth type="time" value={details[index]?.inTime} onChange={handleChange(index, "inTime")} disabled={!details[index]?.isPresent} />
                         </TableCell>
                         <TableCell>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            type="time"
-                            value={details[index].outTime}
-                            onChange={handleChange(index, "outTime")}
-                            disabled={!details[index].isPresent}
-                          />
+                          <TextField size="small" fullWidth type="time" value={details[index]?.outTime} onChange={handleChange(index, "outTime")} disabled={!details[index]?.isPresent} />
+                        </TableCell>
+                        <TableCell>{details[index]?.otHours}</TableCell>
+                        <TableCell>
+                          <TextField size="small" fullWidth type="number" value={details[index]?.advancePerDay} onChange={handleChange(index, "advancePerDay")} disabled={!details[index]?.isPresent} />
                         </TableCell>
                         <TableCell>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={details[index].otHours}
-                            onChange={handleChange(index, "otHours")}
-                            disabled
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={details[index].advancePerDay}
-                            onChange={handleChange(index, "advancePerDay")}
-                            disabled={!details[index].isPresent}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <FormControlLabel
-                            control={<Switch checked={details[index].isPresent} onChange={handleChange(index, "isPresent")} />}
-                            label={details[index].isPresent ? "Present" : "Absent"}
-                          />
+                          <FormControlLabel control={<Switch checked={details[index]?.isPresent} onChange={handleChange(index, "isPresent")} />} label="Present" />
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </TableContainer>
-              <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>Create</Button>
+            </Grid>
+            <Grid item xs={12} textAlign="center">
+              <Button type="submit" variant="contained" color="primary" disabled={loading}>{loading ? <CircularProgress size={24} /> : "Submit"}</Button>
             </Grid>
           </Grid>
-        </Grid>
+        </Paper>
       </Grid>
+      <ToastContainer />
     </Grid>
   );
 };

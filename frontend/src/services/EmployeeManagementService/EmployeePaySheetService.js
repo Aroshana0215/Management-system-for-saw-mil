@@ -17,7 +17,7 @@ import {
 const db = getFirestore();
 
 export const newPaySheet = async (employeePaySheetData) => {
-  console.log("employeePaySheetData:", employeePaySheetData.eid_fk);
+  console.log("employeePaySheetData:", employeePaySheetData);
 
   const counterDocRef = doc(db, "counters", "paySheetCounter");
 
@@ -175,3 +175,29 @@ export const getemployeePaySheetById = async (paymentId) => {
     throw error;
   }
 };
+
+export const getLatestToDateByEmployee = async (eid) => {
+  try {
+    const q = query(
+      collection(db, "employeePaySheet"),
+      where("eid_fk", "==", eid),
+      where("status", "==", "A"),
+      orderBy("toDate", "desc"), // Order by toDate in descending order
+      limit(1) // Get only the latest record
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const latestPaySheet = querySnapshot.docs[0].data();
+      return latestPaySheet.toDate;
+    } else {
+      console.log("No active paysheet found for this employee.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching latest toDate: ", error.message);
+    throw error;
+  }
+};
+

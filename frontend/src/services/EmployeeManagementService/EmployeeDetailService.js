@@ -75,6 +75,30 @@ export const getAllemployeeDetails = async () => {
   }
 };
 
+export const getAllActiveEmployeeDetails = async () => {
+  try {
+    const q = query(
+      collection(db, "employeeDetails"),
+      where("status", "==", "A")
+    );
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const activeEmployeeDetailsList = [];
+      querySnapshot.forEach((doc) => {
+        activeEmployeeDetailsList.push({ id: doc.id, ...doc.data() });
+      });
+      return activeEmployeeDetailsList;
+    } else {
+      console.error("No active employees available.");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching active employee details list:", error.message);
+    throw error;
+  }
+};
+
+
 // Update employeeDetails
 export const updateemployeeDetails = async (
   employeeDetailsId,
