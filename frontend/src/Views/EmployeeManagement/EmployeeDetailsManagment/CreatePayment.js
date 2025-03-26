@@ -337,7 +337,7 @@ const CreatePayment = () => {
                     shouldDisableDate={(date) => {
                       const today = new Date();
                       today.setHours(0, 0, 0, 0); // Normalize today's date
-                      return  date > today;
+                      return  date < fromDate;
                     }}
                   />
                 </LocalizationProvider>

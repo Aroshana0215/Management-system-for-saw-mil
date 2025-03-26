@@ -14,20 +14,21 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 export default function MainSideBar() {
   const location = useLocation();
 
   const isSelected = (path) => {
-    return location.pathname.includes(path);
+    return location.pathname === path;
   };
   const primaryColor = Theme.palette.primary.main;
   const secondaryColor = "text.secondary";
-  const [openInventory, setOpenInventory] = React.useState(true);
-  const [openEmployee, setOpenEmployee] = React.useState(true);
-  const [openFinance, setOpenFinance] = React.useState(true);
-  const [openReport, setOpenReport] = React.useState(true);
-  const [openSetting , setOpenSetting] = React.useState(true)
+  const [openInventory, setOpenInventory] = React.useState(false);
+  const [openEmployee, setOpenEmployee] = React.useState(false);
+  const [openFinance, setOpenFinance] = React.useState(false);
+  const [openReport, setOpenReport] = React.useState(false);
+  const [openSetting , setOpenSetting] = React.useState(false)
 
   const handleInventoryClick = () => {
     setOpenInventory(!openInventory);
@@ -51,6 +52,8 @@ export default function MainSideBar() {
       }}
     >
       <List dense sx={{ paddingX: 2 }}>
+
+        {/* price card section */}
         <ListItemButton
           component={Link}
           to={"/price"}
@@ -71,6 +74,9 @@ export default function MainSideBar() {
             }}
           />
         </ListItemButton>
+
+
+        {/* bill and order section */}
         <ListItemButton
           component={Link}
           to={"/bill"}
@@ -92,6 +98,8 @@ export default function MainSideBar() {
           />
         </ListItemButton>
 
+
+        {/* employee management section */}
         <ListItemButton
           onClick={handleEmployeeClick}
           selected={isSelected("/employee") || isSelected("/employee/daily")}
@@ -114,7 +122,7 @@ export default function MainSideBar() {
                   ? primaryColor
                   : secondaryColor,
             }}
-            primary="Emplyee"
+            primary="Employee"
           />
         </ListItemButton>
         <Collapse in={openEmployee} timeout="auto" unmountOnExit>
@@ -144,6 +152,8 @@ export default function MainSideBar() {
           </List>
         </Collapse>
 
+
+        {/* inventory section */}
         <ListItemButton
           onClick={handleInventoryClick}
           selected={isSelected("/load") || isSelected("/activeStock")}
@@ -194,6 +204,8 @@ export default function MainSideBar() {
           </List>
         </Collapse>
 
+
+        {/* Machine section */}
         <ListItemButton selected={isSelected("/Machine")}>
           <ListItemIcon
             sx={{
@@ -210,6 +222,9 @@ export default function MainSideBar() {
             primary="Machine"
           />
         </ListItemButton>
+
+
+        {/* Finace section */}
         <ListItemButton
           onClick={handleFinanceClick}
           selected={isSelected("/income") || isSelected("/exp")}
@@ -257,26 +272,28 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
+
+
+       {/* report section */}
         <ListItemButton
           onClick={handleReportClick}
-          selected={isSelected("/income") || isSelected("/exp")}
+          selected={isSelected("/stockSummary") || isSelected("/expSummary")}
         >
           <ListItemIcon
             sx={{
               color:
-                isSelected("/income") || isSelected("/exp")
+                isSelected("/stockSummary") || isSelected("/expSummary")
                   ? primaryColor
                   : secondaryColor,
             }}
           >
-            <AccountBalanceOutlinedIcon />
+            <AssessmentIcon/>
           </ListItemIcon>
-
           <ListItemText
             sx={{ marginLeft: "-18px" }}
             primaryTypographyProps={{
               color:
-                isSelected("/stockSummary") || isSelected("/exp")
+                isSelected("/stockSummary") || isSelected("/expSummary")
                   ? primaryColor
                   : secondaryColor,
             }}
@@ -288,7 +305,7 @@ export default function MainSideBar() {
             <ListItemButton component={Link} to={"/stockSummary"}>
               <ListItemIcon></ListItemIcon>
               <ListItemText
-                primary="stock summary"
+                primary="Stock Summary"
                 primaryTypographyProps={{
                   color: isSelected("/stockSummary")
                     ? primaryColor
@@ -296,26 +313,28 @@ export default function MainSideBar() {
                 }}
               />
             </ListItemButton>
-            <ListItemButton component={Link} to={"/exp"}>
+            <ListItemButton component={Link} to={"/expSummary"}>
               <ListItemIcon></ListItemIcon>
               <ListItemText
-                primary="Expenses"
+                primary="Expenses Summary"
                 primaryTypographyProps={{
-                  color: isSelected("/exp") ? primaryColor : secondaryColor,
+                  color: isSelected("/expSummary") ? primaryColor : secondaryColor,
                 }}
               />
             </ListItemButton>
           </List>
         </Collapse>
 
+
+        {/* setting section */}
         <ListItemButton
           onClick={handleSettinglick}
-          selected={isSelected("/employee") || isSelected("/employee/daily")}
+          selected={isSelected("/setting/treeType") || isSelected("/setting/timberNature") || isSelected("/setting/incomeType") || isSelected("/setting/expenseType")}
         >
           <ListItemIcon
             sx={{
               color:
-                isSelected("/employee") || isSelected("/employee/daily")
+              isSelected("/setting/treeType") || isSelected("/setting/timberNature") || isSelected("/setting/incomeType") || isSelected("/setting/expenseType")
                   ? primaryColor
                   : secondaryColor,
             }}
@@ -326,7 +345,7 @@ export default function MainSideBar() {
             sx={{ marginLeft: "-18px" }}
             primaryTypographyProps={{
               color:
-                isSelected("/employee") || isSelected("/employee/daily")
+              isSelected("/setting/treeType") || isSelected("/setting/timberNature") || isSelected("/setting/incomeType") || isSelected("/setting/expenseType")
                   ? primaryColor
                   : secondaryColor,
             }}
@@ -381,6 +400,7 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
+        
       </List>
     </Box>
   );
