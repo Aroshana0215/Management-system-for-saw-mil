@@ -90,42 +90,51 @@ const columns = [
   {
     field: "actions",
     headerName: "Actions",
-    renderCell: ({ row }) => (
-      <Box sx={{ display: "flex", gap: 1, marginTop: "4px" }}> 
-        {/* Payment Button with Tooltip */}
-        <Tooltip title="Make Payment">
-          <IconButton
-            component={Link}
-            to={`/employee/payment/${row.id}`}
-            color="success"
-            size="medium"
-            sx={{
-              "&:hover": { backgroundColor: "#C8E6C9" }, // Slightly darker on hover
-            }}
-          >
-            <PaymentIcon />
-          </IconButton>
-        </Tooltip>
-
-        {/* View Button with Tooltip */}
-        <Tooltip title="View Details">
-          <IconButton
-            component={Link}
-            to={`/employee/view/${row.id}`}
-            color="info"
-            size="medium"
-            sx={{
-              borderRadius: "50%",
-              backgroundColor: "#E3F2FD", // Light blue
-              "&:hover": { backgroundColor: "#BBDEFB" }, // Slightly darker on hover
-            }}
-          >
-            <VisibilityIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    ),
-  }
+    renderCell: ({ row }) => {
+      const isInactive = row.status !== "A";
+  
+      return (
+        <Box sx={{ display: "flex", gap: 1, marginTop: "4px" }}>
+          {/* Payment Button with Tooltip */}
+          <Tooltip title="Make Payment">
+            <span>
+              <IconButton
+                component={Link}
+                to={`/employee/payment/${row.id}`}
+                color="success"
+                size="medium"
+                disabled={isInactive}
+                sx={{
+                  "&:hover": { backgroundColor: "#C8E6C9" },
+                }}
+              >
+                <PaymentIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+  
+          {/* View Button with Tooltip */}
+          <Tooltip title="View Details">
+            <span>
+              <IconButton
+                component={Link}
+                to={`/employee/view/${row.id}`}
+                color="info"
+                size="medium"
+                sx={{
+                  borderRadius: "50%",
+                  backgroundColor: "#E3F2FD",
+                  "&:hover": { backgroundColor: "#BBDEFB" },
+                }}
+              >
+                <VisibilityIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Box>
+      );
+    }
+  }  
   
 ];
 
