@@ -17,16 +17,22 @@ import {
   Paper,
 } from "@mui/material";
 import { newDailyDetail } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
-import { getAllActiveEmployeeDetails, getemployeeDetailsById } from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import {
+  getAllActiveEmployeeDetails,
+  getemployeeDetailsById,
+} from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 
 const CreateDailyDetails = () => {
   const [employees, setEmployees] = useState([]);
   const [details, setDetails] = useState([]);
-  const [commonDate, setCommonDate] = useState(new Date().toISOString().split("T")[0]);
+  const [commonDate, setCommonDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [allPresent, setAllPresent] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -73,13 +79,11 @@ const CreateDailyDetails = () => {
 
       if (field === "isPresent") {
         if (value) {
-          // Enable fields and set default values when "Present" is checked
           updatedDetails[index].inTime = "08:00";
           updatedDetails[index].outTime = "17:00";
           updatedDetails[index].advancePerDay = "0";
           updatedDetails[index].otHours = calculateOTHours("08:00", "17:00");
         } else {
-          // Disable fields and clear values when unchecked
           updatedDetails[index].inTime = "";
           updatedDetails[index].outTime = "";
           updatedDetails[index].advancePerDay = "";
@@ -88,7 +92,10 @@ const CreateDailyDetails = () => {
       }
 
       if (field === "inTime" || field === "outTime") {
-        updatedDetails[index].otHours = calculateOTHours(updatedDetails[index].inTime, updatedDetails[index].outTime);
+        updatedDetails[index].otHours = calculateOTHours(
+          updatedDetails[index].inTime,
+          updatedDetails[index].outTime
+        );
       }
 
       return updatedDetails;
@@ -99,6 +106,21 @@ const CreateDailyDetails = () => {
     const newDate = event.target.value;
     setCommonDate(newDate);
     setDetails(details.map((detail) => ({ ...detail, selectedDateTime: newDate })));
+  };
+
+  const handleAllPresentToggle = (event) => {
+    const isChecked = event.target.checked;
+    setAllPresent(isChecked);
+    setDetails((prevDetails) =>
+      prevDetails.map((detail) => ({
+        ...detail,
+        isPresent: isChecked,
+        inTime: isChecked ? "08:00" : "",
+        outTime: isChecked ? "17:00" : "",
+        advancePerDay: isChecked ? "0" : "",
+        otHours: isChecked ? calculateOTHours("08:00", "17:00") : "",
+      }))
+    );
   };
 
   const validateFields = () => {
@@ -151,7 +173,7 @@ const CreateDailyDetails = () => {
 
         await newDailyDetail(formData);
       }
-      toast.success(`Attendance recorded for ${new Date(details.selectedDateTime)}`);
+      toast.success(`Attendance recorded for ${new Date(details[0].selectedDateTime).toISOString().split("T")[0]}`);
       setTimeout(() => {
         setLoading(false);
         window.location.href = "/employee/daily";
@@ -192,7 +214,13 @@ const CreateDailyDetails = () => {
                       <TableCell>Out Time</TableCell>
                       <TableCell>OT Hours</TableCell>
                       <TableCell>Advance</TableCell>
-                      <TableCell>Present</TableCell>
+                      <TableCell>
+                        <FormControlLabel
+                          control={<Switch checked={allPresent} onChange={handleAllPresentToggle} />}
+                          label="Attendance"
+                          sx={{ pb: "10px" }}
+                        />
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -200,17 +228,47 @@ const CreateDailyDetails = () => {
                       <TableRow key={employee.id}>
                         <TableCell>{employee.firstName}</TableCell>
                         <TableCell>
-                          <TextField size="small" fullWidth type="time" value={details[index]?.inTime} onChange={handleChange(index, "inTime")} disabled={!details[index]?.isPresent} />
+                          <TextField
+                            size="small"
+                            fullWidth
+                            type="time"
+                            value={details[index]?.inTime}
+                            onChange={handleChange(index, "inTime")}
+                            disabled={!details[index]?.isPresent}
+                          />
                         </TableCell>
                         <TableCell>
-                          <TextField size="small" fullWidth type="time" value={details[index]?.outTime} onChange={handleChange(index, "outTime")} disabled={!details[index]?.isPresent} />
+                          <TextField
+                            size="small"
+                            fullWidth
+                            type="time"
+                            value={details[index]?.outTime}
+                            onChange={handleChange(index, "outTime")}
+                            disabled={!details[index]?.isPresent}
+                          />
                         </TableCell>
                         <TableCell>{details[index]?.otHours}</TableCell>
                         <TableCell>
-                          <TextField size="small" fullWidth type="number" value={details[index]?.advancePerDay} onChange={handleChange(index, "advancePerDay")} disabled={!details[index]?.isPresent} />
+                          <TextField
+                            size="small"
+                            fullWidth
+                            type="number"
+                            value={details[index]?.advancePerDay}
+                            onChange={handleChange(index, "advancePerDay")}
+                            disabled={!details[index]?.isPresent}
+                          />
                         </TableCell>
                         <TableCell>
-                          <FormControlLabel control={<Switch checked={details[index]?.isPresent} onChange={handleChange(index, "isPresent")} />} label="Present" />
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={details[index]?.isPresent}
+                                onChange={handleChange(index, "isPresent")}
+                              />
+                            }
+                            label="Present"
+                            sx={{ pb: "10px" }}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -219,7 +277,9 @@ const CreateDailyDetails = () => {
               </TableContainer>
             </Grid>
             <Grid item xs={12} textAlign="center">
-              <Button type="submit" variant="contained" color="primary" disabled={loading}>{loading ? <CircularProgress size={24} /> : "Submit"}</Button>
+              <Button type="submit" variant="contained" color="primary" disabled={loading}>
+                {loading ? <CircularProgress size={24} /> : "Submit"}
+              </Button>
             </Grid>
           </Grid>
         </Paper>
