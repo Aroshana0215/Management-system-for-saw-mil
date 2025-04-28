@@ -174,7 +174,7 @@ const CreateDailyDetails = () => {
 
         await newDailyDetail(formData);
       }
-      toast.success(`Attendance recorded for ${new Date(details[0].selectedDateTime).toISOString().split("T")[0]}`);
+      toast.success(`Attendance  ${new Date(details[0].selectedDateTime).toISOString().split("T")[0]}`);
       setTimeout(() => {
         setLoading(false);
         window.location.href = "/employee/daily";

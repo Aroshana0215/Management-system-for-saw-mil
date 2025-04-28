@@ -83,7 +83,7 @@ export const getEmployeeWorkedDetail = async (formData) => {
 export const getAllemployeeDailyDetails = async () => {
   try {
     // Query Firestore collection with orderBy descending
-    const q = query(collection(db, "employeeDailyDetails"), orderBy("createdDate", "asc"));
+    const q = query(collection(db, "employeeDailyDetails"), orderBy("createdDate", "desc"));
     const querySnapshot = await getDocs(q);
     
     const employeeDailyDetailsList = querySnapshot.docs.map((doc) => ({
