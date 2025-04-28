@@ -4,7 +4,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage"; 
 
-// Your web app's Firebase configuration
+//DTS live configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCrJEMG2srxm665yfJUJolYSiYX5Pj95vU",
   authDomain: "dts-client.firebaseapp.com",
@@ -15,6 +15,7 @@ const firebaseConfig = {
   measurementId: "G-BBWE0Q93CP",
 };
 
+//Dev configuration
 // const firebaseConfig = {
 //   apiKey: "AIzaSyCOXiwyEFkDRzZRYeqaHaJsw4Sg2mR4Bs0",
 //   authDomain: "dts-dev-287e5.firebaseapp.com",

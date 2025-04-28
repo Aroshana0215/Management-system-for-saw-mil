@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { getAllemployeeDailyDetails } from '../../../services/EmployeeManagementService/EmployeeDailyDetailService';
-import { Stack, Typography, InputAdornment, Chip , IconButton, Box, Tooltip} from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { getAllemployeeDailyDetails } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
+import { getAllActiveEmployeeDetails } from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import { Stack, Typography, InputAdornment, Chip, IconButton, Box, Tooltip, Select, MenuItem } from "@mui/material";
 import { Grid, Button, TextField } from "@mui/material";
 import { Link } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
@@ -16,16 +17,22 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import PaidIcon from "@mui/icons-material/Paid";
 import CancelIcon from "@mui/icons-material/Cancel";
 
-
 const DailyDetailList = () => {
   const [details, setDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filteredDetails, setFilteredDetails] = useState([]);
-  const [generalQuery, setGeneralQuery] = useState("");
+  const [employeeList, setEmployeeList] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState("");
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
-  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const offset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - offset);
+    return localDate.toISOString().split("T")[0];
+  };
 
   const columns = [
     {
@@ -69,7 +76,7 @@ const DailyDetailList = () => {
             justifyContent: "center",
             gap: 1,
             width: "100%",
-            padding: "15px 10px", // Adjust padding for better spacing
+            padding: "15px 10px",
           }}
         >
           {row.isPaid ? (
@@ -89,29 +96,26 @@ const DailyDetailList = () => {
           )}
         </Box>
       ),
-    },    
+    },
     {
       field: "actions",
       headerName: "Actions",
       renderCell: ({ row }) => (
-        <Box >
-          {/* View Button with Tooltip */}
-          <Tooltip title="View Details">
-            <IconButton
-              component={Link}
-              to={`/employee/daily/${row.id}`}
-              color="info"
-              size="medium"
-              sx={{
-                borderRadius: "50%",
-                backgroundColor: "#E3F2FD", // Light blue
-                "&:hover": { backgroundColor: "#BBDEFB" }, // Slightly darker on hover
-              }}
-            >
-              <VisibilityIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
+        <Tooltip title="View Details">
+          <IconButton
+            component={Link}
+            to={`/employee/daily/${row.id}`}
+            color="info"
+            size="medium"
+            sx={{
+              borderRadius: "50%",
+              backgroundColor: "#E3F2FD",
+              "&:hover": { backgroundColor: "#BBDEFB" },
+            }}
+          >
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
       ),
     },
   ];
@@ -121,8 +125,14 @@ const DailyDetailList = () => {
       try {
         const data = await getAllemployeeDailyDetails();
         if (Array.isArray(data)) {
-          setDetails(data);
-          setFilteredDetails(data);
+          const sortedData = data
+            .sort((a, b) => a.dateTime.seconds - b.dateTime.seconds)
+            .map((detail, index) => ({
+              ...detail,
+              id: detail.id || index,
+            }));
+          setDetails(sortedData);
+          setFilteredDetails(sortedData);
           setLoading(false);
         } else {
           throw new Error("Invalid data format received from API");
@@ -136,16 +146,30 @@ const DailyDetailList = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const data = await getAllActiveEmployeeDetails();
+        console.log("🚀 ~ fetchEmployees ~ data:", data)
+        
+        if (Array.isArray(data)) {
+          setEmployeeList(data);
+        } else {
+          throw new Error("Invalid employee data format");
+        }
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
   const handleSearch = () => {
     let filteredData = details;
 
-    if (generalQuery) {
-      const lowercasedGeneralQuery = generalQuery.toLowerCase();
-      filteredData = filteredData.filter((detail) =>
-        Object.values(detail).some((value) =>
-          String(value).toLowerCase().includes(lowercasedGeneralQuery)
-        )
-      );
+    if (selectedEmployee) {
+      filteredData = filteredData.filter((detail) => detail.eid_name === selectedEmployee);
     }
 
     if (fromDate && toDate) {
@@ -161,35 +185,17 @@ const DailyDetailList = () => {
     setFilteredDetails(filteredData);
   };
 
-  const formatDate = (date) => {
-    if (!date) return "";
-    const offset = date.getTimezoneOffset() * 60000;
-    const localDate = new Date(date.getTime() - offset);
-    return localDate.toISOString().split("T")[0];
-  };
-
   useEffect(() => {
     handleSearch();
-  }, [generalQuery, fromDate, toDate]);
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
+  }, [selectedEmployee, fromDate, toDate]);
 
   const clearDateFilters = () => {
     setFromDate(null);
     setToDate(null);
   };
 
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (error) {
-    return <ErrorAlert error={error} />;
-  }
+  if (loading) return <Loading />;
+  if (error) return <ErrorAlert error={error} />;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -199,10 +205,7 @@ const DailyDetailList = () => {
             <Typography variant="h6" fontWeight="bold" color="primary">
               Daily Employee Details
             </Typography>
-
-
             <IconButton
-              onClick={() => setCalendarOpen(true)}
               sx={{
                 width: "45px",
                 height: "45px",
@@ -214,7 +217,6 @@ const DailyDetailList = () => {
             >
               <CalendarMonthIcon fontSize="medium" color="primary" />
             </IconButton>
-
             <Button
               variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
@@ -256,21 +258,24 @@ const DailyDetailList = () => {
                 Clear
               </Button>
             </Stack>
-            <TextField
+
+            {/* 👇 Employee Dropdown Replacing Search Field */}
+            <Select
               size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              placeholder="Search All Fields"
-              variant="outlined"
-              value={generalQuery}
-              onChange={(e) => setGeneralQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
+              displayEmpty
+              value={selectedEmployee}
+              onChange={(e) => setSelectedEmployee(e.target.value)}
+              sx={{ minWidth: 200 }}
+            >
+              <MenuItem value="">
+                <em>All Employees</em>
+              </MenuItem>
+              {employeeList.map((emp) => (
+                <MenuItem key={emp.id} value={emp.firstName}>
+                  {emp.firstName}
+                </MenuItem>
+              ))}
+            </Select>
           </Stack>
         </Grid>
 
@@ -278,18 +283,33 @@ const DailyDetailList = () => {
           <DataGrid
             sx={{
               bgcolor: "background.default",
+              "& .MuiDataGrid-row": {
+                transition: "all 0.3s",
+              },
+              "& .different-date": {
+                marginTop: "20px",
+              },
             }}
             rows={filteredDetails}
             columns={columns}
             initialState={{
               pagination: {
-                paginationModel: {
-                  pageSize: 8,
-                },
+                paginationModel: { pageSize: 8 },
               },
             }}
             pageSizeOptions={[8]}
             disableRowSelectionOnClick
+            getRowClassName={(params) => {
+              const index = filteredDetails.findIndex((row) => row.id === params.id);
+              if (index > 0) {
+                const currentDate = formatDate(new Date(filteredDetails[index].dateTime.seconds * 1000));
+                const previousDate = formatDate(new Date(filteredDetails[index - 1].dateTime.seconds * 1000));
+                if (currentDate !== previousDate) {
+                  return "different-date";
+                }
+              }
+              return "";
+            }}
           />
         </Grid>
       </Grid>
