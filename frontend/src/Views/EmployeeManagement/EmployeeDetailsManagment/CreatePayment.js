@@ -37,6 +37,7 @@ import {
   getemployeeDetailsById,
   updateemployeeDetails,
 } from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import { newExpense } from "../../../services/AccountManagementService/ExpenseManagmentService";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -193,11 +194,27 @@ const CreatePayment = () => {
       }
       if (paysheetId) {
         const stringResulty = await updateDailyDetailsAsPaid(formData);
+        if(stringResulty){
+          const formData = {
+            date: formattedDate,
+            type: "Salaray",
+            des: "Employee Salaray",
+            amount: actualPayment,
+            status: "A",
+            createdBy: user.displayName,
+            createdDate: formattedDate,
+          };
+
+      const ExpensesId = await newExpense(formData);
+      console.log("New Expenses ID:", ExpensesId);
+      if(ExpensesId){
         toast.success(`${stringResulty}`);
         setTimeout(() => {
           setLoading(false);
           window.location.href = `/employee/payment/${eid}`;
         }, 1000);
+        }
+      }
       }
     } catch (error) {
       setLoading(false);

@@ -80,23 +80,42 @@ export const getEmployeeWorkedDetail = async (formData) => {
   }
 };
 
+
+
 export const getAllemployeeDailyDetails = async () => {
   try {
-    // Query Firestore collection with orderBy descending
-    const q = query(collection(db, "employeeDailyDetails"), orderBy("createdDate", "desc"));
-    const querySnapshot = await getDocs(q);
-    
-    const employeeDailyDetailsList = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const q = query(
+      collection(db, "employeeDailyDetails"),
+      orderBy("dateTime", "asc")
+    );
 
-    return employeeDailyDetailsList;
+    const querySnapshot = await getDocs(q);
+
+    const employeeDailyDetailsList = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      
+      return {
+        id: doc.id,
+        ...data,
+      };
+    });
+
+    // Extra manual sort safeguard
+    const sortedList = employeeDailyDetailsList.sort((a, b) => {
+      const aTime = a.dateTime?.seconds ?? 0;
+      const bTime = b.dateTime?.seconds ?? 0;
+      return aTime - bTime; // ascending
+    });
+
+    console.log("🚀 ~ Sorted employeeDailyDetailsList:", sortedList);
+    return sortedList;
   } catch (error) {
-    console.error("Error fetching employeeDailyDetails List: ", error.message);
+    console.error("Error fetching employeeDailyDetails List:", error.message);
     throw error;
   }
 };
+;
+
 
 
 // Update employeeDailyDetails
