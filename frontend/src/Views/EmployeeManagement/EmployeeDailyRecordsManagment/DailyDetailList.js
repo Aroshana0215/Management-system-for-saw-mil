@@ -1,21 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { getAllemployeeDailyDetails } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
-import { getAllActiveEmployeeDetails } from "../../../services/EmployeeManagementService/EmployeeDetailService";
-import { Stack, Typography, InputAdornment, Chip, IconButton, Box, Tooltip, Select, MenuItem } from "@mui/material";
-import { Grid, Button, TextField } from "@mui/material";
+import {
+  Stack,
+  Typography,
+  Chip,
+  IconButton,
+  Box,
+  Tooltip,
+  Select,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar,
+  Grid,
+  Button,
+  TextField,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
+import { getAllemployeeDailyDetails, updateemployeeDailyDetails } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
+import { getAllActiveEmployeeDetails } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import SearchIcon from "@mui/icons-material/Search";
-import { DatePicker } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import PaidIcon from "@mui/icons-material/Paid";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { DatePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 const DailyDetailList = () => {
   const [details, setDetails] = useState([]);
@@ -27,11 +42,52 @@ const DailyDetailList = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
 
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [inTime, setInTime] = useState("");
+  const [outTime, setOutTime] = useState("");
+  const [otHours, setOtHours] = useState("");
+  const [advancePerDay, setAdvancePerDay] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
   const formatDate = (date) => {
     if (!date) return "";
     const offset = date.getTimezoneOffset() * 60000;
     const localDate = new Date(date.getTime() - offset);
     return localDate.toISOString().split("T")[0];
+  };
+
+  const calculateOTHours = (inTime, outTime) => {
+    if (!inTime || !outTime) return "0.00";
+    const inDateTime = new Date(`1970-01-01T${inTime}`);
+    const outDateTime = new Date(`1970-01-01T${outTime}`);
+    if (outDateTime <= inDateTime) return "0.00";
+    const totalMinutes = (outDateTime - inDateTime) / (1000 * 60);
+    const otMinutes = Math.max(totalMinutes - 540, 0);
+    const otHours = Math.floor(otMinutes / 60);
+    const otMinutesPart = otMinutes % 60;
+    return `${otHours}.${otMinutesPart.toString().padStart(2, "0")}`;
+  };
+
+  const handleUpdateSave = async () => {
+    try {
+      const updateData = {
+        inTime,
+        outTime,
+        otHours: calculateOTHours(inTime, outTime),
+        advancePerDay,
+      };
+      await updateemployeeDailyDetails(selectedRow.id, updateData);
+      setOpenDialog(false);
+      const updatedDetails = details.map((item) =>
+        item.id === selectedRow.id ? { ...item, ...updateData } : item
+      );
+      setDetails(updatedDetails);
+      setFilteredDetails(updatedDetails);
+      setSnackbarOpen(true);
+    } catch (err) {
+      console.error("Failed to update employeeDailyDetails:", err);
+    }
   };
 
   const columns = [
@@ -101,20 +157,31 @@ const DailyDetailList = () => {
       field: "actions",
       headerName: "Actions",
       renderCell: ({ row }) => (
-        <Tooltip title="View Details">
-          <IconButton
-            component={Link}
-            to={`/employee/daily/${row.id}`}
-            color="info"
-            size="medium"
-            sx={{
-              borderRadius: "50%",
-              backgroundColor: "#E3F2FD",
-              "&:hover": { backgroundColor: "#BBDEFB" },
-            }}
-          >
-            <VisibilityIcon />
-          </IconButton>
+        <Tooltip title={row.isPaid ? "" : "Update"}>
+          <span>
+            <IconButton
+              onClick={() => {
+                if (!row.isPaid) {
+                  setSelectedRow(row);
+                  setInTime(row.inTime);
+                  setOutTime(row.outTime);
+                  setOtHours(row.otHours);
+                  setAdvancePerDay(row.advancePerDay);
+                  setOpenDialog(true);
+                }
+              }}
+              color="info"
+              size="medium"
+              disabled={row.isPaid}
+              sx={{
+                borderRadius: "50%",
+                backgroundColor: "#E3F2FD",
+                "&:hover": { backgroundColor: "#BBDEFB" },
+              }}
+            >
+              <VisibilityIcon />
+            </IconButton>
+          </span>
         </Tooltip>
       ),
     },
@@ -142,7 +209,6 @@ const DailyDetailList = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -150,38 +216,28 @@ const DailyDetailList = () => {
     const fetchEmployees = async () => {
       try {
         const data = await getAllActiveEmployeeDetails();
-        console.log("🚀 ~ fetchEmployees ~ data:", data)
-        
-        if (Array.isArray(data)) {
-          setEmployeeList(data);
-        } else {
-          throw new Error("Invalid employee data format");
-        }
+        if (Array.isArray(data)) setEmployeeList(data);
+        else throw new Error("Invalid employee data format");
       } catch (error) {
         console.error("Error fetching employees:", error);
       }
     };
-
     fetchEmployees();
   }, []);
 
   const handleSearch = () => {
     let filteredData = details;
-
     if (selectedEmployee) {
       filteredData = filteredData.filter((detail) => detail.eid_name === selectedEmployee);
     }
-
     if (fromDate && toDate) {
       const fromDateFormatted = formatDate(fromDate);
       const toDateFormatted = formatDate(toDate);
-
       filteredData = filteredData.filter((detail) => {
         const detailDate = formatDate(new Date(detail.dateTime.seconds * 1000));
         return detailDate >= fromDateFormatted && detailDate <= toDateFormatted;
       });
     }
-
     setFilteredDetails(filteredData);
   };
 
@@ -200,6 +256,7 @@ const DailyDetailList = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Grid container spacing={2} p={2}>
+        {/* Top Toolbar and Filters */}
         <Grid item xs={12}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6" fontWeight="bold" color="primary">
@@ -259,7 +316,6 @@ const DailyDetailList = () => {
               </Button>
             </Stack>
 
-            {/* 👇 Employee Dropdown Replacing Search Field */}
             <Select
               size="small"
               displayEmpty
@@ -313,6 +369,63 @@ const DailyDetailList = () => {
           />
         </Grid>
       </Grid>
+
+      {/* Update Dialog */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Update Daily Record</DialogTitle>
+        <DialogContent dividers>
+          {selectedRow && (
+            <Box display="flex" flexDirection="column" gap={2} mt={1}>
+              <Typography><strong>Date:</strong> {formatDate(new Date(selectedRow.dateTime.seconds * 1000))}</Typography>
+              <Typography><strong>Employee:</strong> {selectedRow.eid_name}</Typography>
+              <TextField
+                label="In Time"
+                value={inTime}
+                onChange={(e) => {
+                  setInTime(e.target.value);
+                  setOtHours(calculateOTHours(e.target.value, outTime));
+                }}
+                fullWidth
+              />
+              <TextField
+                label="Out Time"
+                value={outTime}
+                onChange={(e) => {
+                  setOutTime(e.target.value);
+                  setOtHours(calculateOTHours(inTime, e.target.value));
+                }}
+                fullWidth
+              />
+              <TextField
+                label="OT Hours"
+                value={otHours}
+                disabled
+                fullWidth
+              />
+              <TextField
+                label="Advance"
+                value={advancePerDay}
+                onChange={(e) => setAdvancePerDay(e.target.value)}
+                fullWidth
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={handleUpdateSave}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message="Record updated successfully"
+      />
     </LocalizationProvider>
   );
 };
