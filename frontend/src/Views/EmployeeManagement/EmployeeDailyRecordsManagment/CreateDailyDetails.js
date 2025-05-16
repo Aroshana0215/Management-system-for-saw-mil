@@ -59,17 +59,39 @@ const CreateDailyDetails = () => {
     fetchEmployees();
   }, [commonDate]);
 
+
   const calculateOTHours = (inTime, outTime) => {
     if (!inTime || !outTime) return "0.00";
+  
     const inDateTime = new Date(`1970-01-01T${inTime}`);
     const outDateTime = new Date(`1970-01-01T${outTime}`);
+  
     if (outDateTime <= inDateTime) return "0.00";
+  
     const totalMinutes = (outDateTime - inDateTime) / (1000 * 60);
+  
+    const noon = new Date("1970-01-01T12:00:00");
+    const afterNoonStart = new Date("1970-01-01T12:01:00");
+    const afternoonEnd = new Date("1970-01-01T16:59:00");
+  
+    // Rule: Out between 12:01 PM and 4:59 PM AND In before 12:00 PM
+    if (outDateTime >= afterNoonStart && outDateTime <= afternoonEnd && inDateTime < noon) {
+      const otMinutes = totalMinutes - 240; // subtract 4 hours (240 min) as half-day
+      if (otMinutes <= 0) return "0.00";
+  
+      const otHours = Math.floor(otMinutes / 60);
+      const otMinutesPart = Math.round(otMinutes % 60);
+      return `${otHours}.${otMinutesPart.toString().padStart(2, "0")}`;
+    }
+  
+    // Default: calculate OT as time worked beyond 9 hours (540 minutes)
     const otMinutes = Math.max(totalMinutes - 540, 0);
     const otHours = Math.floor(otMinutes / 60);
-    const otMinutesPart = otMinutes % 60;
+    const otMinutesPart = Math.round(otMinutes % 60);
     return `${otHours}.${otMinutesPart.toString().padStart(2, "0")}`;
   };
+  
+
 
   const handleChange = (index, field) => (event) => {
     const value = field === "isPresent" ? event.target.checked : event.target.value;
