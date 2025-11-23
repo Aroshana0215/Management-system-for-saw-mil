@@ -15,7 +15,7 @@ const firebaseConfig = {
   measurementId: "G-BBWE0Q93CP",
 };
 
-//Dev configuration
+// Dev configuration
 // const firebaseConfig = {
 //   apiKey: "AIzaSyCOXiwyEFkDRzZRYeqaHaJsw4Sg2mR4Bs0",
 //   authDomain: "dts-dev-287e5.firebaseapp.com",

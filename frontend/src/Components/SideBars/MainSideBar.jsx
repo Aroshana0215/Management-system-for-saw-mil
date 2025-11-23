@@ -15,6 +15,8 @@ import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionMan
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import CalculateIcon from "@mui/icons-material/Calculate";
+
 
 export default function MainSideBar() {
   const location = useLocation();
@@ -400,6 +402,29 @@ export default function MainSideBar() {
             </ListItemButton>
           </List>
         </Collapse>
+
+
+        {/* cubic calculate section */}
+        <ListItemButton
+          component={Link}
+          to={"/cubicCalc"}
+          selected={isSelected("/cubicCalc")}
+        >
+          <ListItemIcon
+            sx={{
+              color: isSelected("/cubicCalc") ? primaryColor : secondaryColor,
+            }}
+          >
+            <CalculateIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Cubic Calculator"
+            sx={{ marginLeft: "-18px" }}
+            primaryTypographyProps={{
+              color: isSelected("/cubicCalc") ? primaryColor : secondaryColor,
+            }}
+          />
+        </ListItemButton>
         
       </List>
     </Box>

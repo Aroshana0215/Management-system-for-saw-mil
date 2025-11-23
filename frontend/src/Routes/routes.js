@@ -61,6 +61,9 @@ import UpdateRemainWood from "../Views/BillAndOrderManagement/UpdateRemainWood";
 import ImageUploader from "../Views/Common/ImageUploader";
 import SwitchCategory from "../Views/InventoryManagement/StockManagement/SwitchCategory";
 
+import ImportCubicValuesJSON from "../Views/import/ImportCubicValues.jsx";
+import CubicCalculate from "../Views/CubicCalculate/CubicCalculate.js";
+
 const privateRouter = createBrowserRouter([
   {
     path: "/",
@@ -265,6 +268,14 @@ const privateRouter = createBrowserRouter([
       {
         path: "/image-upload",
         element: <ImageUploader />,
+      },
+      {
+        path: "/import",
+        element: <ImportCubicValuesJSON />,
+      },
+      {
+        path: "/cubicCalc",
+        element: <CubicCalculate />,
       },
       {
         path: "*",
