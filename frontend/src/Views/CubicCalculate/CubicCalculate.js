@@ -8,13 +8,22 @@ import {
   Button,
   Typography,
   Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import CalculateIcon from "@mui/icons-material/Calculate";
 
 import { getcubicValueByLengthCur } from "../../services/CubicManagementService/CubicValue";
+
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer";
 
 // Helper to derive rate from circumference
 // circumference (below 23) = 1↑
@@ -33,53 +42,65 @@ const getRate = (circumference) => {
 };
 
 const CubicCalculate = () => {
-  const [rows, setRows] = useState([
-    { circumference: "", length: "", cubic: "", rate: "" },
-  ]);
+  const [circumference, setCircumference] = useState("");
+  const [length, setLength] = useState("");
+  const [cubic, setCubic] = useState("");
+  const [rate, setRate] = useState("");
+  const [rows, setRows] = useState([]);
+  const [editIndex, setEditIndex] = useState(null);
 
-  const handleRowChange = async (index, field, value) => {
-    const updatedRows = [...rows];
-    updatedRows[index][field] = value;
-
-    // Update Rate when circumference changes
+  const handleRowChange = async (field, value) => {
     if (field === "circumference") {
-      updatedRows[index].rate = getRate(value);
+      setCircumference(value);
+      setRate(getRate(value));
+    }
+    if (field === "length") {
+      setLength(value);
     }
 
-    const circumference = Number(updatedRows[index].circumference);
-    const length = Number(updatedRows[index].length);
-
-    // Fetch cubic when LENGTH is selected and circumference exists
-    if (field === "length" && length && circumference) {
+    // Fetch cubic value when length is changed and circumference exists
+    if (field === "length" && value && circumference) {
       try {
-        const result = await getcubicValueByLengthCur(length, circumference);
-
-        if (result) {
-          const feet = result.feet ?? 0;
-          const inches = result.inches ?? 0;
-          updatedRows[index].cubic = `${feet}.${inches}`;
-        } else {
-          updatedRows[index].cubic = "0.0";
-        }
+        const result = await getcubicValueByLengthCur(value, circumference);
+        setCubic(result ? `${result.feet}.${result.inches}` : "0.0");
       } catch (error) {
-        updatedRows[index].cubic = "N/A";
         console.error("Error fetching cubic:", error?.message || error);
+        setCubic("N/A");
       }
     }
-
-    setRows(updatedRows);
   };
 
-  const addRow = () => {
-    setRows([
-      ...rows,
-      { circumference: "", length: "", cubic: "", rate: "" },
-    ]);
+  const handleAddRow = () => {
+    if (!circumference || !length) {
+      alert("Please fill in both Circumference and Length.");
+      return;
+    }
+    const newRow = {
+      circumference,
+      length,
+      cubic,
+      rate,
+    };
+    setRows([...rows, newRow]);
+
+    // Clear the input fields after adding row
+    setCircumference("");
+    setLength("");
+    setCubic("");
+    setRate("");
   };
 
-  const removeRow = (index) => {
-    if (rows.length === 1) return;
+  const handleDeleteRow = (index) => {
     setRows(rows.filter((_, i) => i !== index));
+  };
+
+  const handleEditRow = (index) => {
+    const rowToEdit = rows[index];
+    setCircumference(rowToEdit.circumference);
+    setLength(rowToEdit.length);
+    setCubic(rowToEdit.cubic);
+    setRate(rowToEdit.rate);
+    setEditIndex(index);
   };
 
   const handleCalculateAll = () => {
@@ -87,97 +108,153 @@ const CubicCalculate = () => {
     alert("Calculated! Check console.");
   };
 
+  const MyDocument = () => (
+    <Document>
+      <Page style={styles.page}>
+        <Text style={styles.title}>Cubic Calculation Table</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCell}>Circumference</Text>
+            <Text style={styles.tableCell}>Length</Text>
+            <Text style={styles.tableCell}>Cubic Value</Text>
+            <Text style={styles.tableCell}>Rate</Text>
+          </View>
+          {rows.map((row, index) => (
+            <View key={index} style={styles.tableRow}>
+              <Text style={styles.tableCell}>{row.circumference}</Text>
+              <Text style={styles.tableCell}>{row.length}</Text>
+              <Text style={styles.tableCell}>{row.cubic}</Text>
+              <Text style={styles.tableCell}>{row.rate}</Text>
+            </View>
+          ))}
+        </View>
+      </Page>
+    </Document>
+  );
+
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: "column",
+      padding: 20,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginBottom: 10,
+    },
+    table: {
+      display: "table",
+      width: "100%",
+      borderStyle: "solid",
+      borderWidth: 1,
+      borderColor: "#000",
+      marginBottom: 10,
+    },
+    tableRow: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: "#000",
+    },
+    tableCell: {
+      width: "25%",
+      padding: 5,
+      textAlign: "center",
+      borderRightWidth: 1,
+      borderRightColor: "#000",
+    },
+  });
+
   return (
     <Paper sx={{ p: 3, borderRadius: 2, mt: 2 }}>
       <Typography variant="h6" gutterBottom>
         Cubic Calculator
       </Typography>
 
-      {rows.map((row, index) => (
-        <Grid
-          container
-          spacing={2}
-          alignItems="center"
-          key={index}
-          sx={{
-            my: 1,
-            p: 2,
-            borderRadius: 2,
-            backgroundColor: "#fafafa",
-            border: "1px solid #eee",
-          }}
-        >
-          {/* Circumference Input (FIRST FIELD) */}
-          <Grid item xs={3}>
-            <TextField
-              type="number"
-              fullWidth
-              label="Circumference"
-              value={row.circumference}
-              onChange={(e) =>
-                handleRowChange(index, "circumference", e.target.value)
-              }
-            />
-          </Grid>
-
-          {/* Length Dropdown (SECOND FIELD) */}
-          <Grid item xs={3}>
-            <TextField
-              select
-              fullWidth
-              label="Length (1-40)"
-              value={row.length}
-              onChange={(e) =>
-                handleRowChange(index, "length", e.target.value)
-              }
-            >
-              {[...Array(40)].map((_, i) => (
-                <MenuItem key={i + 1} value={i + 1}>
-                  {i + 1}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-
-          {/* Cubic Value */}
-          <Grid item xs={3}>
-            <TextField
-              fullWidth
-              label="Cubic Value (ft.in)"
-              value={row.cubic}
-              InputProps={{ readOnly: true }}
-            />
-          </Grid>
-
-          {/* Rate (derived from circumference) */}
-          <Grid item xs={2}>
-            <TextField
-              fullWidth
-              label="Rate"
-              value={row.rate || ""}
-              InputProps={{ readOnly: true }}
-            />
-          </Grid>
-
-          {/* Delete Row */}
-          <Grid item xs={1}>
-            <IconButton
-              color="error"
-              onClick={() => removeRow(index)}
-              disabled={rows.length === 1}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Grid>
+      {/* Input Row for Adding Data */}
+      <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
+        <Grid item xs={3}>
+          <TextField
+            type="number"
+            fullWidth
+            label="Circumference"
+            value={circumference}
+            onChange={(e) => handleRowChange("circumference", e.target.value)}
+          />
         </Grid>
-      ))}
 
-      {/* Add Row */}
-      <Box textAlign="left" sx={{ mt: 2 }}>
-        <IconButton color="primary" onClick={addRow}>
-          <AddCircleIcon fontSize="large" />
-        </IconButton>
-      </Box>
+        <Grid item xs={3}>
+          <TextField
+            select
+            fullWidth
+            label="Length (1-40)"
+            value={length}
+            onChange={(e) => handleRowChange("length", e.target.value)}
+          >
+            {[...Array(40)].map((_, i) => (
+              <MenuItem key={i + 1} value={i + 1}>
+                {i + 1}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+
+        <Grid item xs={3}>
+          <TextField
+            fullWidth
+            label="Cubic Value (ft.in)"
+            value={cubic}
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+
+        <Grid item xs={2}>
+          <TextField
+            fullWidth
+            label="Rate"
+            value={rate}
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+
+        <Grid item xs={1}>
+          <IconButton color="primary" onClick={handleAddRow}>
+            <AddCircleIcon fontSize="large" />
+          </IconButton>
+        </Grid>
+      </Grid>
+
+      {/* Table with Rows */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Circumference</TableCell>
+              <TableCell>Length</TableCell>
+              <TableCell>Cubic Value</TableCell>
+              <TableCell>Rate</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map((row, index) => (
+              <TableRow key={index}>
+                <TableCell>{row.circumference}</TableCell>
+                <TableCell>{row.length}</TableCell>
+                <TableCell>{row.cubic}</TableCell>
+                <TableCell>{row.rate}</TableCell>
+                <TableCell>
+                  <IconButton onClick={() => handleEditRow(index)}>
+                    <EditIcon color="primary" />
+                  </IconButton>
+                  <IconButton onClick={() => handleDeleteRow(index)}>
+                    <DeleteIcon color="error" />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* Calculate Button */}
       <Box textAlign="right" sx={{ mt: 3 }}>
@@ -188,6 +265,19 @@ const CubicCalculate = () => {
         >
           Calculate
         </Button>
+        <PDFDownloadLink document={<MyDocument />} fileName="cubic_calculations.pdf">
+          {({ loading }) =>
+            loading ? (
+              <Button variant="contained" sx={{ ml: 2 }}>
+                Loading PDF...
+              </Button>
+            ) : (
+              <Button variant="contained" sx={{ ml: 2 }}>
+                Export to PDF
+              </Button>
+            )
+          }
+        </PDFDownloadLink>
       </Box>
     </Paper>
   );

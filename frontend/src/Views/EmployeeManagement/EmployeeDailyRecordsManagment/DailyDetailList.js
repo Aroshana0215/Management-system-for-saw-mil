@@ -20,8 +20,8 @@ import {
 import { Link } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 import {
-  getAllemployeeDailyDetails,
   updateemployeeDailyDetails,
+  getEmployeeDetails,
 } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
 import { getAllActiveEmployeeDetails } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import Loading from "../../../Components/Progress/Loading";
@@ -52,6 +52,45 @@ const DailyDetailList = () => {
   const [otHours, setOtHours] = useState("");
   const [advancePerDay, setAdvancePerDay] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastVisible, setLastVisible] = useState(null);
+
+  const recordsPerPage = 10;
+
+  const handleNextPage = async () => {
+    try {
+      const data = await getEmployeeDetails({
+        startAfterDoc: lastVisible,
+        pageSize: recordsPerPage
+      });
+      setDetails(data.items);
+      setFilteredDetails(data.items);
+      setLastVisible(data.lastVisible);
+      setCurrentPage(currentPage + 1);
+    } catch (error) {
+      console.error("Error fetching next page:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePreviousPage = async () => {
+    try {
+      const data = await getEmployeeDetails({
+        startBeforeDoc: lastVisible,
+        pageSize: recordsPerPage
+      });
+      setDetails(data.items);
+      setFilteredDetails(data.items);
+      setLastVisible(data.lastVisible);
+      setCurrentPage(currentPage - 1);
+    } catch (error) {
+      console.error("Error fetching previous page:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (date) => {
     if (!date) return "";
@@ -267,30 +306,6 @@ const DailyDetailList = () => {
     },
   ];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getAllemployeeDailyDetails();
-        if (Array.isArray(data)) {
-          const sortedData = data
-            .sort((a, b) => a.dateTime.seconds - b.dateTime.seconds)
-            .map((detail, index) => ({
-              ...detail,
-              id: detail.id || index,
-            }));
-          setDetails(sortedData);
-          setFilteredDetails(sortedData);
-          setLoading(false);
-        } else {
-          throw new Error("Invalid data format received from API");
-        }
-      } catch (error) {
-        setError(error.message);
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -305,24 +320,25 @@ const DailyDetailList = () => {
     fetchEmployees();
   }, []);
 
-  const handleSearch = () => {
-    let filteredData = details;
+  const handleSearch = async () => {
+    const queryParams = {
+      employeeName: selectedEmployee,
+      fromDate: formatDate(fromDate),
+      toDate: formatDate(toDate),
+      startAfterDoc: lastVisible,
+      pageSize: recordsPerPage,
+    };
 
-    if (selectedEmployee) {
-      filteredData = filteredData.filter((detail) => detail.eid_name === selectedEmployee);
+    try {
+      const data = await getEmployeeDetails(queryParams);
+      setDetails(data.items);
+      setFilteredDetails(data.items);
+      setLastVisible(data.lastVisible);
+    } catch (error) {
+      console.error("Error performing search:", error);
+    } finally{
+      setLoading(false);
     }
-
-    if (fromDate && toDate) {
-      const fromDateFormatted = formatDate(fromDate);
-      const toDateFormatted = formatDate(toDate);
-
-      filteredData = filteredData.filter((detail) => {
-        const detailDate = formatDate(new Date(detail.dateTime.seconds * 1000));
-        return detailDate >= fromDateFormatted && detailDate <= toDateFormatted;
-      });
-    }
-
-    setFilteredDetails(filteredData);
   };
 
   useEffect(() => {
@@ -434,10 +450,7 @@ const DailyDetailList = () => {
             }}
             rows={filteredDetails}
             columns={columns}
-            initialState={{
-              pagination: { paginationModel: { pageSize: 8 } },
-            }}
-            pageSizeOptions={[8]}
+            hideFooterPagination={true}
             disableRowSelectionOnClick
             getRowClassName={(params) => {
               const index = filteredDetails.findIndex((row) => row.id === params.id);
@@ -449,6 +462,25 @@ const DailyDetailList = () => {
               return "";
             }}
           />
+        </Grid>
+        <Grid item xs={12}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", padding: "10px 0" }}>
+            <Button
+              variant="outlined"
+              onClick={handlePreviousPage}
+              disabled={currentPage <= 1}
+            >
+              Previous
+            </Button>
+            <Typography variant="body1">Page {currentPage}</Typography>
+            <Button
+              variant="outlined"
+              onClick={handleNextPage}
+              disabled={!lastVisible}
+            >
+              Next
+            </Button>
+          </Box>
         </Grid>
       </Grid>
 
