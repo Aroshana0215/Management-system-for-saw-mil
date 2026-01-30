@@ -12,7 +12,8 @@ import {
   Timestamp, 
   limit,
   startAfter,
-  endBefore
+  endBefore,
+  limitToLast
 } from "firebase/firestore";
 
 const db = getFirestore();
@@ -83,12 +84,12 @@ export const getEmployeeWorkedDetail = async (formData) => {
   }
 };
 
-export const getEmployeeDetails = async ({ startAfterDoc = null, endBeforeDoc = null, pageSize = 10, employeeName = '', fromDate = '', toDate = '' }) => {
+export const getEmployeeDetails = async ({ startAfterDoc = null, endBeforeDoc = null, pageSize = 10, employeeName = '', fromDate = '', toDate = '',isPrevious=false }) => {
   try {
     let q = query(
       collection(db, "employeeDailyDetails"),
       orderBy("dateTime", "desc"),
-      limit(pageSize)
+      isPrevious ? limitToLast(pageSize) : limit(pageSize)
     );
 
     // Add search filters to Firestore query
