@@ -24,7 +24,6 @@ import {
   getEmployeeDetails,
 } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
 import { getAllActiveEmployeeDetails } from "../../../services/EmployeeManagementService/EmployeeDetailService";
-import Loading from "../../../Components/Progress/Loading";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -55,18 +54,25 @@ const DailyDetailList = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [lastVisible, setLastVisible] = useState(null);
+  const [firstVisible, setFirstVisible] = useState(null);
 
   const recordsPerPage = 10;
+  const isLastPage = () => Array.isArray(details) && (details.length < recordsPerPage);
 
   const handleNextPage = async () => {
     try {
+      setLoading(true);
       const data = await getEmployeeDetails({
         startAfterDoc: lastVisible,
-        pageSize: recordsPerPage
+        pageSize: recordsPerPage,
+        employeeName: selectedEmployee,
+        fromDate: formatDate(fromDate),
+        toDate: formatDate(toDate),
       });
       setDetails(data.items);
       setFilteredDetails(data.items);
       setLastVisible(data.lastVisible);
+      setFirstVisible(data.firstVisible);
       setCurrentPage(currentPage + 1);
     } catch (error) {
       console.error("Error fetching next page:", error);
@@ -77,13 +83,18 @@ const DailyDetailList = () => {
 
   const handlePreviousPage = async () => {
     try {
+      setLoading(true);
       const data = await getEmployeeDetails({
-        startBeforeDoc: lastVisible,
-        pageSize: recordsPerPage
+        endBeforeDoc: firstVisible,
+        pageSize: recordsPerPage,
+        employeeName: selectedEmployee,
+        fromDate: formatDate(fromDate),
+        toDate: formatDate(toDate),
       });
       setDetails(data.items);
       setFilteredDetails(data.items);
       setLastVisible(data.lastVisible);
+      setFirstVisible(data.firstVisible);
       setCurrentPage(currentPage - 1);
     } catch (error) {
       console.error("Error fetching previous page:", error);
@@ -325,15 +336,16 @@ const DailyDetailList = () => {
       employeeName: selectedEmployee,
       fromDate: formatDate(fromDate),
       toDate: formatDate(toDate),
-      startAfterDoc: lastVisible,
       pageSize: recordsPerPage,
     };
 
     try {
+      setLoading(true);
       const data = await getEmployeeDetails(queryParams);
       setDetails(data.items);
       setFilteredDetails(data.items);
       setLastVisible(data.lastVisible);
+      setFirstVisible(data.firstVisible);
     } catch (error) {
       console.error("Error performing search:", error);
     } finally{
@@ -342,16 +354,22 @@ const DailyDetailList = () => {
   };
 
   useEffect(() => {
+    if (fromDate && toDate) {
+      handleSearch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromDate, toDate]);
+  useEffect(() => {
     handleSearch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedEmployee, fromDate, toDate]);
+  }, [selectedEmployee]);
 
   const clearDateFilters = () => {
     setFromDate(null);
     setToDate(null);
+    handleSearch()
   };
 
-  if (loading) return <Loading />;
   if (error) return <ErrorAlert error={error} />;
 
   return (
@@ -448,6 +466,7 @@ const DailyDetailList = () => {
                 marginTop: "20px",
               },
             }}
+            loading={loading}
             rows={filteredDetails}
             columns={columns}
             hideFooterPagination={true}
@@ -468,7 +487,7 @@ const DailyDetailList = () => {
             <Button
               variant="outlined"
               onClick={handlePreviousPage}
-              disabled={currentPage <= 1}
+              disabled={loading || currentPage <= 1}
             >
               Previous
             </Button>
@@ -476,7 +495,7 @@ const DailyDetailList = () => {
             <Button
               variant="outlined"
               onClick={handleNextPage}
-              disabled={!lastVisible}
+              disabled={!lastVisible || loading || isLastPage()}
             >
               Next
             </Button>

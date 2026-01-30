@@ -12,7 +12,7 @@ import {
   Timestamp, 
   limit,
   startAfter,
-  startAt
+  endBefore
 } from "firebase/firestore";
 
 const db = getFirestore();
@@ -83,7 +83,7 @@ export const getEmployeeWorkedDetail = async (formData) => {
   }
 };
 
-export const getEmployeeDetails = async ({ startAfterDoc = null, startBeforeDoc = null, pageSize = 10, employeeName = '', fromDate = '', toDate = '' }) => {
+export const getEmployeeDetails = async ({ startAfterDoc = null, endBeforeDoc = null, pageSize = 10, employeeName = '', fromDate = '', toDate = '' }) => {
   try {
     let q = query(
       collection(db, "employeeDailyDetails"),
@@ -106,8 +106,8 @@ export const getEmployeeDetails = async ({ startAfterDoc = null, startBeforeDoc 
       q = query(q, startAfter(startAfterDoc)); // For next page
     }
 
-    if (startBeforeDoc) {
-      q = query(q, startAt(startBeforeDoc)); // For previous page
+    if (endBeforeDoc) {
+      q = query(q, endBefore(endBeforeDoc)); // For previous page
     }
 
     const querySnapshot = await getDocs(q);
@@ -116,6 +116,7 @@ export const getEmployeeDetails = async ({ startAfterDoc = null, startBeforeDoc 
     return {
       items,
       lastVisible: querySnapshot.docs[querySnapshot.docs.length - 1],
+      firstVisible: querySnapshot.docs[0],
     };
   } catch (error) {
     console.error("Error fetching employee details:", error.message);
