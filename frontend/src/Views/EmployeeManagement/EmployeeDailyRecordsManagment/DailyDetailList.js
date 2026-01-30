@@ -90,6 +90,7 @@ const DailyDetailList = () => {
         employeeName: selectedEmployee,
         fromDate: formatDate(fromDate),
         toDate: formatDate(toDate),
+        isPrevious: true,
       });
       setDetails(data.items);
       setFilteredDetails(data.items);
@@ -350,6 +351,7 @@ const DailyDetailList = () => {
       console.error("Error performing search:", error);
     } finally{
       setLoading(false);
+      setCurrentPage(1);
     }
   };
 
