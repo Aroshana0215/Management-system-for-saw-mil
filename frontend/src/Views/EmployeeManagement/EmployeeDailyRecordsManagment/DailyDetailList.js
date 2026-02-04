@@ -23,7 +23,7 @@ import {
   updateemployeeDailyDetails,
   getEmployeeDetails,
 } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
-import { getAllActiveEmployeeDetails } from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import { getAllemployeeDetails } from "../../../services/EmployeeManagementService/EmployeeDetailService";
 import ErrorAlert from "../../../Components/Alert/ErrorAlert";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -322,7 +322,7 @@ const DailyDetailList = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const data = await getAllActiveEmployeeDetails();
+        const data = await getAllemployeeDetails();
         if (Array.isArray(data)) setEmployeeList(data);
         else throw new Error("Invalid employee data format");
       } catch (error) {
@@ -379,7 +379,7 @@ const DailyDetailList = () => {
       <Grid container spacing={2} p={2}>
         <Grid item xs={12}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6" fontWeight="bold" sx={{ color: "#9C6B3D" }}>
+            <Typography variant="h6" fontWeight="bold" color="primary">
               Daily Employee Details
             </Typography>
 
@@ -393,7 +393,7 @@ const DailyDetailList = () => {
                 padding: "5px 15px",
               }}
             >
-              <CalendarMonthIcon fontSize="medium" sx={{ color: "#9C6B3D" }} />
+              <CalendarMonthIcon fontSize="medium" color="primary" />
             </IconButton>
 
             <Button

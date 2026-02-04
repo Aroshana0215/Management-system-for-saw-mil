@@ -78,6 +78,7 @@ const UpdateEmpUpdate = () => {
     if (!employee?.lastName?.trim()) temp.lastName = "Last name is required";
     if (!employee?.phoneNo?.trim()) temp.phoneNo = "Phone number is required";
     if (!employee?.nic?.trim()) temp.nic = "NIC is required";
+    if (!employee?.holidayRate?.trim()) temp.holidayRate = "Holiday Rate is required";
 
     // Salary validation - validate only the visible one
     if (salaryType === "DAY") {
@@ -121,6 +122,7 @@ const UpdateEmpUpdate = () => {
       phoneNo: employee.phoneNo ?? "",
       address: employee.address ?? "",
       joinDate: employee.joinDate ?? "",
+      holidayRate: employee.holidayRate ?? "",
       otValuePerHour: employee.otValuePerHour ?? "",
       employeeImage: employee.employeeImage ?? "",
       status: employee.status ?? "A",
@@ -321,6 +323,18 @@ const UpdateEmpUpdate = () => {
                 name="otValuePerHour"
                 label="OT Value Per Hour"
                 value={employee.otValuePerHour ?? ""}
+                onChange={handleChange}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+
+             {/* Holiday Rate*/}
+            <Grid item xs={12} md={6}>
+              <TextField
+                name="holidayRate"
+                label="Holiday Rate"
+                value={employee.holidayRate ?? ""}
                 onChange={handleChange}
                 fullWidth
                 size="small"
