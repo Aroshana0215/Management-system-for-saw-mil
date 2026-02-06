@@ -18,6 +18,7 @@ import {
   TextField,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   updateemployeeDailyDetails,
@@ -51,10 +52,18 @@ const DailyDetailList = () => {
   const [otHours, setOtHours] = useState("");
   const [advancePerDay, setAdvancePerDay] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [rowAttendance, setRowAttendance] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [lastVisible, setLastVisible] = useState(null);
   const [firstVisible, setFirstVisible] = useState(null);
+
+  let currentDate = new Date();
+  let year = currentDate.getFullYear();
+  let month = ("0" + (currentDate.getMonth() + 1)).slice(-2); // Months are zero-based
+  let day = ("0" + currentDate.getDate()).slice(-2);
+  let formattedDate = `${year}-${month}-${day}`;
+    const { user } = useSelector((state) => state.auth);
 
   const recordsPerPage = 10;
   const isLastPage = () => Array.isArray(details) && (details.length < recordsPerPage);
@@ -175,7 +184,10 @@ const DailyDetailList = () => {
       const updateData = {
         inTime,
         outTime,
+        isPresent: rowAttendance,
         otHours: calculateOTHours(inTime, outTime),
+        modifiedBy: user.displayName,
+        modifiedDate: formattedDate,
         advancePerDay,
       };
       await updateemployeeDailyDetails(selectedRow.id, updateData);
@@ -298,6 +310,7 @@ const DailyDetailList = () => {
                   setOutTime(row.outTime);
                   setOtHours(row.otHours);
                   setAdvancePerDay(row.advancePerDay);
+                  setRowAttendance(row.isPresent);
                   setOpenDialog(true);
                 }
               }}
@@ -316,6 +329,7 @@ const DailyDetailList = () => {
         </Tooltip>
       ),
     },
+       { field: "createdDate", headerName: "Created By", width: 120 },
   ];
 
 
@@ -552,6 +566,18 @@ const DailyDetailList = () => {
                 onChange={(e) => setAdvancePerDay(e.target.value)}
                 fullWidth
               />
+
+            <TextField
+              label="Attendance"
+              value={rowAttendance ? "Present" : "Absent"}
+              onChange={(e) => setRowAttendance(e.target.value === "Present")}
+              select
+              fullWidth
+            >
+              <MenuItem value="Present">Present</MenuItem>
+              <MenuItem value="Absent">Absent</MenuItem>
+            </TextField>
+
             </Box>
           )}
         </DialogContent>
