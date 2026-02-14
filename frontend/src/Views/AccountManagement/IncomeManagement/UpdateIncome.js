@@ -11,17 +11,14 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { newIncome } from "../../../services/AccountManagementService/IncomeManagmentService";
-import {
-  getActiveAccountSummaryDetails,
-  newAccountSummary,
-  updateAccountSummary,
-} from "../../../services/AccountManagementService/AccountSummaryManagmentService";
+import { useParams, useNavigate } from "react-router-dom";
+import { getincomeById, updateincome } from "../../../services/AccountManagementService/IncomeManagmentService";
 import { getAllActiveIncomeType } from "../../../services/SettingManagementService/IncomeTypeService";
 
-const AddIncome = () => {
+const UpdateIncome = () => {
   const { user } = useSelector((state) => state.auth);
-  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ prevent double submit
+  const { incomeId } = useParams(); // Get income ID from URL params
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     date: "",
@@ -32,14 +29,21 @@ const AddIncome = () => {
 
   const [incomeTypes, setIncomeTypes] = useState([]);
 
-  let currentDate = new Date();
-  let year = currentDate.getFullYear();
-  let month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
-  let day = ("0" + currentDate.getDate()).slice(-2);
-  let formattedDate = `${year}-${month}-${day}`;
-
-  // Fetch income types on component mount
   useEffect(() => {
+    const fetchIncomeData = async () => {
+      try {
+        const incomeData = await getincomeById(incomeId);
+        setFormData({
+          date: incomeData.date,
+          type: incomeData.type,
+          des: incomeData.des,
+          amount: incomeData.amount,
+        }); // Populate form with existing data for the fields we want to update
+      } catch (error) {
+        console.error("Error fetching income data:", error.message);
+      }
+    };
+
     const fetchIncomeTypes = async () => {
       try {
         const response = await getAllActiveIncomeType();
@@ -49,8 +53,9 @@ const AddIncome = () => {
       }
     };
 
+    fetchIncomeData();
     fetchIncomeTypes();
-  }, []);
+  }, [incomeId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,50 +67,18 @@ const AddIncome = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    if (isSubmitting) return; // Prevent double-submit
-    setIsSubmitting(true); // Set submitting state to true
-
     try {
-      let formattedFormData = {
-        ...formData,
+      const updatedData = {
+        ...formData, // Only include fields that are updated
         status: "A",
-        createdBy: user.displayName,
-        createdDate: formattedDate,
+        modifiedBy: user.displayName,
       };
 
-      const incomeId = await newIncome(formattedFormData);
-      console.log("New income ID:", incomeId);
-      if (incomeId != null) {
-        const data = await getActiveAccountSummaryDetails();
+      await updateincome(incomeId, updatedData); // Update the income with the new data
 
-        if (data != null) {
-          const accountSummaryData = {
-            status: "D",
-          };
-
-          await updateAccountSummary(data.id, accountSummaryData);
-
-          const newAccountSummaryData = {
-            totalAmount: Number(data.totalAmount) + Number(formData.amount),
-            changedAmount: formData.amount,
-            previousAmount: data.totalAmount,
-            expId_fk: "",
-            incId_fk: incomeId,
-            status: "A",
-            createdBy: user.displayName,
-            createdDate: formattedDate,
-          };
-          const accountSummaryId = await newAccountSummary(newAccountSummaryData);
-          console.log("AccountSummaryId:", accountSummaryId);
-        }
-      }
-
-      window.location.href = "/income";
+      navigate("/income"); // Redirect back to income list
     } catch (error) {
-      console.error("Error creating income:", error.message);
-    } finally {
-      setIsSubmitting(false); // ✅ Always re-enable the button after async task
+      console.error("Error updating income:", error.message);
     }
   };
 
@@ -114,7 +87,7 @@ const AddIncome = () => {
       <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={2} p={2}>
         <Grid item xs={12}>
           <Typography variant="h4" color="primary" align="center">
-            Add Income
+            Update Income
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -128,7 +101,8 @@ const AddIncome = () => {
               borderRadius: 2,
             }}
           >
-            {Object.entries(formData).map(([key, value]) => (
+            {/* Loop over only the fields we want to update */}
+            {["date", "type", "des", "amount"].map((key) => (
               <Grid item key={key} xs={12} padding={1}>
                 <FormControl fullWidth>
                   <Typography>
@@ -140,11 +114,9 @@ const AddIncome = () => {
                       <InputLabel>Type</InputLabel>
                       <Select
                         name={key}
-                        value={value}
+                        value={formData[key]}
                         onChange={handleChange}
-                        required
                         variant="outlined"
-                        disabled={isSubmitting} // ✅ disable while submitting
                         fullWidth
                       >
                         {incomeTypes.map((type) => (
@@ -157,11 +129,9 @@ const AddIncome = () => {
                   ) : (
                     <TextField
                       name={key}
-                      value={value}
+                      value={formData[key]}
                       onChange={handleChange}
                       variant="outlined"
-                      disabled={isSubmitting} // ✅ disable while submitting
-                      required
                       fullWidth
                       type={key === "date" ? "date" : "text"}
                       InputLabelProps={{
@@ -173,6 +143,7 @@ const AddIncome = () => {
                 </FormControl>
               </Grid>
             ))}
+
             <Grid
               item
               xs={12}
@@ -184,8 +155,8 @@ const AddIncome = () => {
                 alignItems: "flex-end",
               }}
             >
-              <Button type="submit" variant="contained" sx={{ color: "#fdfdfd" }} disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create"}
+              <Button type="submit" variant="contained" color="primary">
+                Update
               </Button>
             </Grid>
           </Grid>
@@ -195,4 +166,4 @@ const AddIncome = () => {
   );
 };
 
-export default AddIncome;
+export default UpdateIncome;

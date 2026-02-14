@@ -39,7 +39,6 @@ const IncomeList = () => {
       renderCell: ({ row }) => `${row.amount}.00`,
     },
     { field: "BilId", headerName: "Bill ID", width: 150 },
-    { field: "status", headerName: "Status", width: 120 },
     { field: "des", headerName: "Description", width: 180 },
     { field: "createdBy", headerName: "Created By", width: 120 },
     { field: "modifiedBy", headerName: "Modified By", width: 130 },
@@ -48,7 +47,7 @@ const IncomeList = () => {
       headerName: "Actions",
       width: 120,
       renderCell: ({ row }) => (
-        <Link to={`/income/view/${row.incID}`}>
+        <Link to={`/income/view/${row.id}`}>
           <Button variant="contained" size="small">View</Button>
         </Link>
       ),

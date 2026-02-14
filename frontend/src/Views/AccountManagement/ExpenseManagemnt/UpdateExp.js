@@ -1,40 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { Container, Grid, Typography, TextField, Button, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { newExpense } from "../../../services/AccountManagementService/ExpenseManagmentService";
 import {
-  getActiveAccountSummaryDetails,
-  newAccountSummary,
-  updateAccountSummary,
-} from "../../../services/AccountManagementService/AccountSummaryManagmentService";
+  Container,
+  Grid,
+  Typography,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router-dom";
+import { getexpenseById, updateexpense } from "../../../services/AccountManagementService/ExpenseManagmentService";
 import { getAllActiveExpenseType } from "../../../services/SettingManagementService/ExpenseTypeService"; // Importing the service
 
-
-const AddExp = () => {
+const UpdateExp = () => {
   const { user } = useSelector((state) => state.auth);
-
-  let currentDate = new Date();
-  let year = currentDate.getFullYear();
-  let month = ('0' + (currentDate.getMonth() + 1)).slice(-2); // Months are zero-based
-  let day = ('0' + currentDate.getDate()).slice(-2);
-  let formattedDate = `${year}-${month}-${day}`;
+  const { expId } = useParams(); // Get the expense ID from the URL params
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     date: "",
     type: "",
     des: "",
     amount: "",
-    status: "A",
-    createdBy: user.displayName,
-    createdDate: formattedDate,
   });
 
   const [expenseTypes, setExpenseTypes] = useState([]); // State to store the fetched expense types
   const [isSubmitting, setIsSubmitting] = useState(false); // ✅ prevent double submit
 
-  // Fetch expense types on component mount
+  // Fetch the expense data and the expense types on component mount
   useEffect(() => {
+    const fetchExpenseData = async () => {
+      try {
+        const response = await getexpenseById(expId);
+        setFormData({
+          date: response.date,
+          type: response.type,
+          des: response.des,
+          amount: response.amount,
+        });
+      } catch (error) {
+        console.error("Error fetching expense data:", error.message);
+      }
+    };
+
     const fetchExpenseTypes = async () => {
       try {
         const response = await getAllActiveExpenseType();
@@ -43,8 +54,10 @@ const AddExp = () => {
         console.error("Error fetching expense types:", error);
       }
     };
+
+    fetchExpenseData();
     fetchExpenseTypes();
-  }, []);
+  }, [expId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,43 +70,29 @@ const AddExp = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-        // ✅ block double click
+    // ✅ block double click
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      const ExpensesId = await newExpense(formData);
-      console.log("New Expenses ID:", ExpensesId);
+      // Only include the fields that are being updated: date, type, des, amount
+      const updatedData = {
+        date: formData.date,
+        type: formData.type,
+        des: formData.des,
+        amount: formData.amount,
+        status: "A", // Assuming status is active when updating
+        modifiedBy: user.displayName,
+      };
 
-      if (ExpensesId != null) {
-        const data = await getActiveAccountSummaryDetails();
+      await updateexpense(expId, updatedData); // Update the expense
 
-        if (data != null) {
-          const accountSummaryData = {
-            status: "D",
-          };
+      // Optionally, you can add logic for updating account summary or other related data
 
-          await updateAccountSummary(data.id, accountSummaryData);
-          const newAccountSummaryData = {
-            totalAmount: Number(data.totalAmount) - Number(formData.amount),
-            changedAmount: formData.amount,
-            previousAmount: data.totalAmount,
-            expId_fk: "",
-            incId_fk: ExpensesId,
-            status: "A",
-            createdBy: "",
-            createdDate: "",
-            modifiedBy: "",
-            modifiedDate: "",
-          };
-          await newAccountSummary(newAccountSummaryData);
-        }
-      }
-
-      window.location.href = "/exp";
+      navigate("/exp"); // Redirect back to the expense list
     } catch (error) {
-      console.error("Error creating Expenses:", error.message);
-    }finally {
+      console.error("Error updating expense:", error.message);
+    } finally {
       setIsSubmitting(false); // ✅ always re-enable
     }
   };
@@ -102,8 +101,8 @@ const AddExp = () => {
     <Container>
       <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={2} p={2}>
         <Grid item xs={12}>
-          <Typography variant="h4" color="primary" align="center">
-            Add Income
+          <Typography variant="h4" sx={{ color: "#9C6B3D" }} align="center">
+            Update Expense
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -133,6 +132,7 @@ const AddExp = () => {
                 sx={{ mt: 2 }}
               />
             </Grid>
+
             <Grid item xs={12} padding={1}>
               <FormControl fullWidth sx={{ mt: 2 }}>
                 <InputLabel>Type</InputLabel>
@@ -152,6 +152,7 @@ const AddExp = () => {
                 </Select>
               </FormControl>
             </Grid>
+
             <Grid item xs={12} padding={1}>
               <TextField
                 label="Description"
@@ -164,6 +165,7 @@ const AddExp = () => {
                 sx={{ mt: 2 }}
               />
             </Grid>
+
             <Grid item xs={12} padding={1}>
               <TextField
                 label="Amount"
@@ -176,6 +178,7 @@ const AddExp = () => {
                 sx={{ mt: 2 }}
               />
             </Grid>
+
             <Grid
               item
               xs={12}
@@ -188,16 +191,14 @@ const AddExp = () => {
               }}
             >
               <Button type="submit" variant="contained" sx={{ color: "#ffffff" }} disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create"}
+                {isSubmitting ? "Updating..." : "Update"}
               </Button>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item xs={12}>
         </Grid>
       </Grid>
     </Container>
   );
 };
 
-export default AddExp;
+export default UpdateExp;

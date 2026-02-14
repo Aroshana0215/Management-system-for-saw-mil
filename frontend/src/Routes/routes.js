@@ -44,6 +44,8 @@ import CreatePayment from "../Views/EmployeeManagement/EmployeeDetailsManagment/
 import IncomeList from "../Views/AccountManagement/IncomeManagement/IncomeList";
 import AddIncome from "../Views/AccountManagement/IncomeManagement/AddIncome";
 import ExpList from "../Views/AccountManagement/ExpenseManagemnt/ExpList";
+import UpdateIncome from "../Views/AccountManagement/IncomeManagement/UpdateIncome.js";
+import UpdateExp from "../Views/AccountManagement/ExpenseManagemnt/UpdateExp.js";
 import AddExp from "../Views/AccountManagement/ExpenseManagemnt/AddExp";
 import TreeTypeList from "../Views/SettingManagment/TreeTypeManagment/TreeTypeList";
 import CreateTreeType from "../Views/SettingManagment/TreeTypeManagment/CreateTreeType";
@@ -217,6 +219,14 @@ const privateRouter = createBrowserRouter([
       {
         path: "/exp",
         element: <ExpList />,
+      },
+      {
+        path: "/exp/view/:expId",
+        element: <UpdateExp />,
+      },
+      {
+        path: "/income/view/:incomeId",
+        element: <UpdateIncome />,
       },
       {
         path: "/exp/add",

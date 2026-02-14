@@ -20,6 +20,7 @@ import {
   getAllActiveEmployeeDetails,
   getemployeeDetailsById,
 } from "../../../services/EmployeeManagementService/EmployeeDetailService";
+import { newExpense } from "../../../services/AccountManagementService/ExpenseManagmentService";
 import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -239,7 +240,21 @@ const CreateDailyDetails = () => {
           createdDate: new Date().toISOString(),
         };
 
-        await newDailyDetail(formData);
+        let deailyId = await newDailyDetail(formData);
+
+         if (deailyId && Number(detail.advancePerDay) > 0) {
+          const expData = {
+            date: new Date(detail.selectedDateTime).toISOString() .split("T")[0],
+            type: "Salary Advance",
+            des: `${employee.firstName} Salary Advance`,
+            amount: detail.advancePerDay,
+            status: "A",
+            createdBy: user.displayName,
+            createdDate: commonDate,
+          };
+
+          await newExpense(expData);
+        }
       }
 
       toast.success(
