@@ -66,6 +66,7 @@ import SwitchCategory from "../Views/InventoryManagement/StockManagement/SwitchC
 
 import ImportCubicValuesJSON from "../Views/import/ImportCubicValues.jsx";
 import CubicCalculate from "../Views/CubicCalculate/CubicCalculate.js";
+import FinanceDashboard from "../Views/ReportAndSummary/FinanceDashboard.js";
 
 const privateRouter = createBrowserRouter([
   {
@@ -291,6 +292,10 @@ const privateRouter = createBrowserRouter([
       {
         path: "/cubicCalc",
         element: <CubicCalculate />,
+      },
+      {
+        path: "/FinanceDashboard",
+        element: <FinanceDashboard />,
       },
       {
         path: "*",
