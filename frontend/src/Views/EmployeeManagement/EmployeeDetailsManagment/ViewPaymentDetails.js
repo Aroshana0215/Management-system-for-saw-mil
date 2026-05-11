@@ -25,13 +25,97 @@ import TableRow from "@mui/material/TableRow";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 
+import {
+  PDFDownloadLink,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+} from "@react-pdf/renderer";
+
+const pdfStyles = StyleSheet.create({
+  page: {
+    padding: 30,
+    fontSize: 10,
+    fontFamily: "Helvetica",
+  },
+  title: {
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 20,
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 14,
+    marginBottom: 10,
+    fontWeight: "bold",
+    color: "#007aff",
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 20,
+  },
+  item: {
+    width: "33%",
+    marginBottom: 10,
+    paddingRight: 8,
+  },
+  label: {
+    fontSize: 8,
+    color: "#666",
+  },
+  value: {
+    fontSize: 10,
+    marginTop: 2,
+  },
+  table: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  tableRow: {
+    flexDirection: "row",
+  },
+  tableHeader: {
+    backgroundColor: "#f2f2f2",
+  },
+  tableCell: {
+    width: "12.5%",
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    padding: 4,
+    fontSize: 7,
+    textAlign: "center",
+  },
+  noDataCell: {
+    width: "100%",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    padding: 6,
+    fontSize: 8,
+    textAlign: "center",
+  },
+});
+
 const ViewPaymentDetails = () => {
   const { paymentId } = useParams();
   const navigate = useNavigate();
+
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [workDetail, setWorkDetail] = useState([]);
   const [showWorkDetails, setShowWorkDetails] = useState(true);
+
+  const formatFileDate = (timestamp) => {
+  if (!timestamp || !timestamp.seconds) return "N-A";
+
+  return new Date(timestamp.seconds * 1000)
+    .toISOString()
+    .split("T")[0];
+};
 
   useEffect(() => {
     const fetchPaymentDetails = async () => {
@@ -66,6 +150,7 @@ const ViewPaymentDetails = () => {
 
   const formatDate = (timestamp) => {
     if (!timestamp || !timestamp.seconds) return "N/A";
+
     return new Date(timestamp.seconds * 1000).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -73,7 +158,6 @@ const ViewPaymentDetails = () => {
     });
   };
 
-  // ✅ Half Day / Full Day (rule: < 9 hours = half day)
   const getWorkType = (work) => {
     if (!work?.isPresent) return "-";
     if (!work?.inTime || !work?.outTime) return "-";
@@ -85,16 +169,17 @@ const ViewPaymentDetails = () => {
     if (outMins <= inMins) return "-";
 
     const workedHours = (outMins - inMins) / 60;
+
     return workedHours < 9 ? "Half Day" : "Full Day";
   };
 
-  // ✅ Compute totals from workDetail (for correct Total Half Days display)
   const computedTotals = useMemo(() => {
     let totalHalfDays = 0;
     let totalFullDays = 0;
 
-    (workDetail || []).forEach((w) => {
-      const type = getWorkType(w);
+    (workDetail || []).forEach((work) => {
+      const type = getWorkType(work);
+
       if (type === "Half Day") totalHalfDays += 1;
       if (type === "Full Day") totalFullDays += 1;
     });
@@ -105,13 +190,121 @@ const ViewPaymentDetails = () => {
     };
   }, [workDetail]);
 
-  // ✅ Use DB value if exists, otherwise computed
   const safeHalfDays =
     paymentDetails?.totalHalfDay !== null &&
     paymentDetails?.totalHalfDay !== undefined &&
     String(paymentDetails?.totalHalfDay).trim() !== ""
       ? paymentDetails.totalHalfDay
       : computedTotals.totalHalfDays;
+
+  const MyDocument = () => {
+    const summaryData = [
+      { label: "Employee Name", value: paymentDetails.employeeName },
+      { label: "Employee ID", value: paymentDetails.eid },
+      { label: "From Date", value: formatDate(paymentDetails.fromDate) },
+      { label: "To Date", value: formatDate(paymentDetails.toDate) },
+      { label: "Total Days", value: paymentDetails.totalDay },
+      { label: "Total Half Days", value: safeHalfDays },
+      { label: "Total OT Hours", value: paymentDetails.totalOt },
+      { label: "Total Advance", value: paymentDetails.totalAdvance },
+      { label: "Reduce Amount", value: paymentDetails.reduceAmount },
+      {
+        label: "Total Worked Holidays",
+        value: paymentDetails.workingHolidayAmount,
+      },
+      {
+        label: "Worked Holidays Payment",
+        value: paymentDetails.holidayTotal,
+      },
+      { label: "Total Payment", value: paymentDetails.totalPayment },
+      { label: "Actual Payment", value: paymentDetails.actualPayment },
+      { label: "Payment Status", value: paymentDetails.paymentStatus },
+    ];
+
+    return (
+      <Document>
+        <Page size="A4" style={pdfStyles.page}>
+          <Text style={pdfStyles.title}>Payment Details</Text>
+
+          <Text style={pdfStyles.sectionTitle}>Payment Summary</Text>
+
+          <View style={pdfStyles.grid}>
+            {summaryData.map((item, index) => (
+              <View key={index} style={pdfStyles.item}>
+                <Text style={pdfStyles.label}>{item.label}</Text>
+                <Text style={pdfStyles.value}>
+                  {item.value || item.value === 0 ? String(item.value) : "-"}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <Text style={pdfStyles.sectionTitle}>Employee Work Details</Text>
+
+          <View style={pdfStyles.table}>
+            <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
+              <Text style={pdfStyles.tableCell}>Employee</Text>
+              <Text style={pdfStyles.tableCell}>Date</Text>
+              <Text style={pdfStyles.tableCell}>Present</Text>
+              <Text style={pdfStyles.tableCell}>Type</Text>
+              <Text style={pdfStyles.tableCell}>In Time</Text>
+              <Text style={pdfStyles.tableCell}>Out Time</Text>
+              <Text style={pdfStyles.tableCell}>OT Hours</Text>
+              <Text style={pdfStyles.tableCell}>Advance</Text>
+            </View>
+
+            {workDetail && workDetail.length > 0 ? (
+              workDetail.map((work, index) => (
+                <View key={index} style={pdfStyles.tableRow}>
+                  <Text style={pdfStyles.tableCell}>
+                    {work.eid_name || "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {formatDate(work.dateTime)}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.isPresent ? "Present" : "Absent"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.isPresent ? getWorkType(work) : "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.inTime || "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.outTime || "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.otHours || work.otHours === 0
+                      ? String(work.otHours)
+                      : "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.advancePerDay || work.advancePerDay === 0
+                      ? String(work.advancePerDay)
+                      : "-"}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <View style={pdfStyles.tableRow}>
+                <Text style={pdfStyles.noDataCell}>
+                  No work details found.
+                </Text>
+              </View>
+            )}
+          </View>
+        </Page>
+      </Document>
+    );
+  };
 
   if (loading) {
     return (
@@ -144,33 +337,57 @@ const ViewPaymentDetails = () => {
             <Typography variant="h5" fontWeight={600} gutterBottom>
               Payment Summary
             </Typography>
+
             <Divider sx={{ mb: 2 }} />
+
             <Box
               display="grid"
-              gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }}
+              gridTemplateColumns={{
+                xs: "1fr",
+                sm: "1fr 1fr",
+                md: "1fr 1fr 1fr",
+              }}
               gap={2}
             >
               {[
                 { label: "Employee Name", value: paymentDetails.employeeName },
                 { label: "Employee ID", value: paymentDetails.eid },
-                { label: "From Date", value: formatDate(paymentDetails.fromDate) },
-                { label: "To Date", value: formatDate(paymentDetails.toDate) },
+                {
+                  label: "From Date",
+                  value: formatDate(paymentDetails.fromDate),
+                },
+                {
+                  label: "To Date",
+                  value: formatDate(paymentDetails.toDate),
+                },
                 { label: "Total Days", value: paymentDetails.totalDay },
-                // ✅ FIXED: show correct Half Days
                 { label: "Total Half Days", value: safeHalfDays },
                 { label: "Total OT Hours", value: paymentDetails.totalOt },
                 { label: "Total Advance", value: paymentDetails.totalAdvance },
                 { label: "Reduce Amount", value: paymentDetails.reduceAmount },
-                { label: "Total WorkedHolidays", value: paymentDetails.workingHolidayAmount },
-                { label: "WorkedHolidays payment", value: paymentDetails.holidayTotal },
+                {
+                  label: "Total WorkedHolidays",
+                  value: paymentDetails.workingHolidayAmount,
+                },
+                {
+                  label: "WorkedHolidays payment",
+                  value: paymentDetails.holidayTotal,
+                },
                 { label: "Total Payment", value: paymentDetails.totalPayment },
-                { label: "Actual Payment", value: paymentDetails.actualPayment },
-                { label: "Payment Status", value: paymentDetails.paymentStatus },
-              ].map((item, i) => (
-                <Box key={i}>
+                {
+                  label: "Actual Payment",
+                  value: paymentDetails.actualPayment,
+                },
+                {
+                  label: "Payment Status",
+                  value: paymentDetails.paymentStatus,
+                },
+              ].map((item, index) => (
+                <Box key={index}>
                   <Typography variant="caption" color="text.secondary">
                     {item.label}
                   </Typography>
+
                   <Typography fontWeight={500} variant="body1">
                     {item.value || item.value === 0 ? item.value : "-"}
                   </Typography>
@@ -193,8 +410,13 @@ const ViewPaymentDetails = () => {
               <Typography variant="h6" sx={{ color: "#9C6B3D" }}>
                 Employee Work Details
               </Typography>
+
               <IconButton>
-                {showWorkDetails ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                {showWorkDetails ? (
+                  <KeyboardArrowUpIcon />
+                ) : (
+                  <KeyboardArrowDownIcon />
+                )}
               </IconButton>
             </Stack>
 
@@ -212,6 +434,7 @@ const ViewPaymentDetails = () => {
                     <TableCell align="center">Advance Per Day</TableCell>
                   </TableRow>
                 </TableHead>
+
                 <TableBody>
                   {workDetail && workDetail.length > 0 ? (
                     workDetail.map((work, index) => {
@@ -220,8 +443,14 @@ const ViewPaymentDetails = () => {
 
                       return (
                         <TableRow key={index}>
-                          <TableCell align="center">{work.eid_name}</TableCell>
-                          <TableCell align="center">{formatDate(work.dateTime)}</TableCell>
+                          <TableCell align="center">
+                            {work.eid_name}
+                          </TableCell>
+
+                          <TableCell align="center">
+                            {formatDate(work.dateTime)}
+                          </TableCell>
+
                           <TableCell align="center">
                             <Chip
                               label={work.isPresent ? "Present" : "Absent"}
@@ -241,7 +470,9 @@ const ViewPaymentDetails = () => {
                                   fontWeight: "bold",
                                   borderColor: isFull ? "#66BB6A" : "#FFB74D",
                                   color: isFull ? "#1B5E20" : "#E65100",
-                                  backgroundColor: isFull ? "#C8E6C9" : "#FFE0B2",
+                                  backgroundColor: isFull
+                                    ? "#C8E6C9"
+                                    : "#FFE0B2",
                                 }}
                               />
                             ) : (
@@ -250,9 +481,14 @@ const ViewPaymentDetails = () => {
                           </TableCell>
 
                           <TableCell align="center">{work.inTime}</TableCell>
+
                           <TableCell align="center">{work.outTime}</TableCell>
+
                           <TableCell align="center">{work.otHours}</TableCell>
-                          <TableCell align="center">{work.advancePerDay}</TableCell>
+
+                          <TableCell align="center">
+                            {work.advancePerDay}
+                          </TableCell>
                         </TableRow>
                       );
                     })
@@ -271,6 +507,28 @@ const ViewPaymentDetails = () => {
 
         {/* Actions */}
         <Grid item xs={12} display="flex" justifyContent="flex-end">
+          <PDFDownloadLink
+            document={<MyDocument />}
+            fileName={`${paymentDetails.employeeName
+              ?.replace(/\s+/g, "_")
+              ?.replace(/[^\w-]/g, "")}_${formatFileDate(
+              paymentDetails.fromDate
+            )}-${formatFileDate(paymentDetails.toDate)}.pdf`}
+            style={{ textDecoration: "none" }}
+          >
+            {({ loading }) =>
+              loading ? (
+                <Button variant="contained" sx={{ ml: 2 }}>
+                  Loading PDF...
+                </Button>
+              ) : (
+                <Button variant="contained" sx={{ ml: 2 }}>
+                  Export to PDF
+                </Button>
+              )
+            }
+          </PDFDownloadLink>
+
           <Button
             variant="contained"
             sx={{ color: "#9C6B3D", borderRadius: 2 }}

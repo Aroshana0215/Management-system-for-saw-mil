@@ -27,6 +27,14 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import {
+  PDFDownloadLink,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+} from "@react-pdf/renderer";
+import {
   getEmployeeWorkedDetailNotpaid,
   updateDailyDetailsAsPaid,
 } from "../../../services/EmployeeManagementService/EmployeeDailyDetailService";
@@ -44,6 +52,72 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+const pdfStyles = StyleSheet.create({
+  page: {
+    padding: 30,
+    fontSize: 10,
+    fontFamily: "Helvetica",
+  },
+  title: {
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 20,
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 14,
+    marginBottom: 10,
+    fontWeight: "bold",
+    color: "#007aff",
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 20,
+  },
+  item: {
+    width: "33%",
+    marginBottom: 10,
+    paddingRight: 8,
+  },
+  label: {
+    fontSize: 8,
+    color: "#666",
+  },
+  value: {
+    fontSize: 10,
+    marginTop: 2,
+  },
+  table: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  tableRow: {
+    flexDirection: "row",
+  },
+  tableHeader: {
+    backgroundColor: "#f2f2f2",
+  },
+  tableCell: {
+    width: "12.5%",
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    padding: 4,
+    fontSize: 7,
+    textAlign: "center",
+  },
+  noDataCell: {
+    width: "100%",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    padding: 6,
+    fontSize: 8,
+    textAlign: "center",
+  },
+});
+
 const CreatePayment = () => {
   const { eid } = useParams();
   const { user } = useSelector((state) => state.auth);
@@ -58,8 +132,21 @@ const CreatePayment = () => {
     salaryPerDay: "",
     salaryPerMonth: "",
     currentLendAmount: "",
-    isMonthPayEmp: false, // ✅ make sure this exists in your employee doc
+    isMonthPayEmp: false,
   });
+
+  const getSafeFileName = () => {
+  const employeeName =
+    empData?.firstName || empData?.name || empData?.empID;
+
+  const safeEmployeeName = String(employeeName)
+    .replace(/\s+/g, "_")
+    .replace(/[^\w-]/g, "");
+
+  return `tempPay-${safeEmployeeName}_${formatFileDate(
+    fromDate
+  )}-${formatFileDate(toDate)}.pdf`;
+};
 
   const [workDetail, setWorkDetail] = useState([]);
   const [totalPayment, setTotalPayment] = useState("");
@@ -82,10 +169,8 @@ const CreatePayment = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ✅ NEW: validation error for Payment Status
   const [paymentStatusError, setPaymentStatusError] = useState("");
 
-  // ✅ NEW: Working Holiday fields (only for month-pay employees with no day salary)
   const [workingHolidayAmount, setWorkingHolidayAmount] = useState("0");
   const [holidayTotal, setHolidayTotal] = useState("0.00");
 
@@ -93,13 +178,13 @@ const CreatePayment = () => {
   const formattedDate = currentDate.toISOString().slice(0, 10);
 
   const hasDaySalary = (emp) => {
-    const v = emp?.salaryPerDay;
-    return v !== null && v !== undefined && String(v).trim() !== "";
+    const value = emp?.salaryPerDay;
+    return value !== null && value !== undefined && String(value).trim() !== "";
   };
 
   const hasMonthSalary = (emp) => {
-    const v = emp?.salaryPerMonth;
-    return v !== null && v !== undefined && String(v).trim() !== "";
+    const value = emp?.salaryPerMonth;
+    return value !== null && value !== undefined && String(value).trim() !== "";
   };
 
   const getSalaryMode = (emp) => {
@@ -108,25 +193,27 @@ const CreatePayment = () => {
     return "NONE";
   };
 
-  // ✅ determine half-day vs full-day using your same rule: < 9 hours = half day
   const getWorkType = (work) => {
     if (!work?.isPresent) return "-";
     if (!work?.inTime || !work?.outTime) return "-";
 
     const inMins = work.inTime.split(":").reduce((h, m) => h * 60 + +m);
     const outMins = work.outTime.split(":").reduce((h, m) => h * 60 + +m);
+
     if (!Number.isFinite(inMins) || !Number.isFinite(outMins)) return "-";
     if (outMins <= inMins) return "-";
 
     const workedHours = (outMins - inMins) / 60;
+
     return workedHours < 9 ? "Half Day" : "Full Day";
   };
 
-  // ✅ condition you asked:
-  // if salaryPerDay is null/empty AND isMonthPayEmp is true => show holiday fields
-  const showHolidayFields = !hasDaySalary(empData) && empData?.salaryPerDay == null 
-  || empData?.salaryPerDay <= 0 || empData?.salaryPerDay == undefined || String(empData?.salaryPerDay).trim() === "";
-  console.log("empData?.salaryPerDay" + empData?.salaryPerDay);
+  const showHolidayFields =
+    !hasDaySalary(empData) ||
+    empData?.salaryPerDay == null ||
+    empData?.salaryPerDay <= 0 ||
+    empData?.salaryPerDay == undefined ||
+    String(empData?.salaryPerDay).trim() === "";
 
   useEffect(() => {
     const fetchEmpData = async () => {
@@ -138,10 +225,10 @@ const CreatePayment = () => {
         console.error("Error fetching employee data:", error.message);
       }
     };
+
     fetchEmpData();
   }, [eid]);
 
-  // ✅ calculate holidayTotal whenever user changes amount / rate
   useEffect(() => {
     if (!showHolidayFields) {
       setWorkingHolidayAmount("0");
@@ -165,11 +252,14 @@ const CreatePayment = () => {
 
       setTotalPayment(payment.toFixed(2));
 
-      // ✅ UPDATED (your requested formula): add holidayTotal
-      const total = payment -  (parseFloat(reduceAmount || 0) + parseFloat(totalAdvance || 0) ) + parseFloat(holidayTotal || 0);
+      const total =
+        payment -
+        (parseFloat(reduceAmount || 0) + parseFloat(totalAdvance || 0)) +
+        parseFloat(holidayTotal || 0);
 
       setActualPayment(total.toFixed(2));
     };
+
     calculateActualPayment();
   }, [
     reduceAmount,
@@ -181,8 +271,69 @@ const CreatePayment = () => {
     holidayTotal,
   ]);
 
+  const calculateTotals = (data) => {
+    const salaryMode = getSalaryMode(empData);
+
+    let totOt = 0.0;
+    let totDays = 0.0;
+    let totHalfDays = 0.0;
+    let totAdvance = 0.0;
+
+    data.forEach((item) => {
+      if (item.isPresent) {
+        let [hours, minutes] = (item.otHours || "0").split(".").map(Number);
+        const ot = (hours || 0) + (minutes || 0) / 60;
+        totOt += ot;
+
+        const inMins = item.inTime.split(":").reduce((h, m) => h * 60 + +m);
+        const outMins = item.outTime.split(":").reduce((h, m) => h * 60 + +m);
+
+        const workedHours = (outMins - inMins) / 60;
+
+        if (workedHours < 9) {
+          totHalfDays++;
+        } else {
+          totDays++;
+        }
+      }
+
+      totAdvance += parseFloat(item.advancePerDay || 0);
+    });
+
+    setTotalAdvance(totAdvance.toFixed(2));
+    setTotalHalfDay(totHalfDays.toFixed(2));
+    setTotalDay(totDays.toFixed(2));
+
+    setTotalOt(totOt.toFixed(2));
+    setOtPerHour(empData.otValuePerHour);
+    setTotalOtAmount(
+      (totOt * parseFloat(empData.otValuePerHour || 0)).toFixed(2)
+    );
+
+    if (salaryMode === "MONTH") {
+      const monthly = parseFloat(empData.salaryPerMonth || 0);
+
+      setSalaryPerDay("");
+      setSalaryPerHalfDay("");
+      setTotalHalfDaySal("0.00");
+      setTotalFullDaySal(monthly.toFixed(2));
+      return;
+    }
+
+    const daySalary = parseFloat(empData.salaryPerDay || 0);
+    setSalaryPerDay(daySalary.toFixed(2));
+
+    const fullDayPay = daySalary * totDays;
+    const halfDayPay = (daySalary / 2) * totHalfDays;
+
+    setTotalFullDaySal(fullDayPay.toFixed(2));
+    setTotalHalfDaySal(halfDayPay.toFixed(2));
+    setSalaryPerHalfDay((daySalary / 2).toFixed(2));
+  };
+
   const handleDateChange = async (date) => {
     setToDate(date);
+
     if (date) {
       const formatedFromDate = new Date(fromDate);
       formatedFromDate.setHours(0, 0, 0, 0);
@@ -196,85 +347,44 @@ const CreatePayment = () => {
           toDate: formatedToDate,
           eid,
         });
-        setWorkDetail(data);
-        calculateTotals(data);
+
+        setWorkDetail(data || []);
+        calculateTotals(data || []);
       } catch (error) {
         console.error("Error getting work details:", error.message);
       }
     }
   };
 
-  const calculateTotals = (data) => {
-    const salaryMode = getSalaryMode(empData);
-
-    let totOt = 0.0,
-      totDays = 0.0,
-      totHalfDays = 0.0,
-      totAdvance = 0.0;
-
-    data.forEach((item) => {
-      if (item.isPresent) {
-        let [h, m] = (item.otHours || "0").split(".").map(Number);
-        const ot = (h || 0) + (m || 0) / 60;
-        totOt += ot;
-
-        const inMins = item.inTime.split(":").reduce((h, m) => h * 60 + +m);
-        const outMins = item.outTime.split(":").reduce((h, m) => h * 60 + +m);
-
-        const workedHours = (outMins - inMins) / 60;
-
-        if (workedHours < 9) totHalfDays++;
-        else totDays++;
-      }
-      totAdvance += parseFloat(item.advancePerDay || 0);
-    });
-
-    setTotalAdvance(totAdvance.toFixed(2));
-    setTotalHalfDay(totHalfDays.toFixed(2));
-    setTotalDay(totDays.toFixed(2));
-
-    setTotalOt(totOt.toFixed(2));
-    setOtPerHour(empData.otValuePerHour);
-    setTotalOtAmount((totOt * parseFloat(empData.otValuePerHour || 0)).toFixed(2));
-
-    // ✅ MONTH SALARY MODE: no full/half day calculations
-    if (salaryMode === "MONTH") {
-      const monthly = parseFloat(empData.salaryPerMonth || 0);
-
-      setSalaryPerDay("");
-      setSalaryPerHalfDay("");
-      setTotalHalfDaySal("0.00");
-      setTotalFullDaySal(monthly.toFixed(2));
-      return;
-    }
-
-    // ✅ DAY SALARY MODE
-    const daySalary = parseFloat(empData.salaryPerDay || 0);
-    setSalaryPerDay(daySalary.toFixed(2));
-
-    const fullDayPay = daySalary * totDays;
-    const halfDayPay = (daySalary / 2) * totHalfDays;
-
-    setTotalFullDaySal(fullDayPay.toFixed(2));
-    setTotalHalfDaySal(halfDayPay.toFixed(2));
-    setSalaryPerHalfDay((daySalary / 2).toFixed(2));
-  };
-
   const clearDateFilters = () => {
     setFromDate(null);
     setToDate(null);
+    setWorkDetail([]);
+
+    setTotalPayment("");
+    setTotalFullDaySal("");
+    setSalaryPerHalfDay("");
+    setOtPerHour("");
+    setTotalHalfDaySal("");
+    setTotalAdvance("");
+    setSalaryPerDay("");
+    setTotalDay("");
+    setTotalHalfDay("");
+    setTotalOt("");
+    setTotalOtAmount("");
+    setReduceAmount("0");
+    setActualPayment("");
   };
 
   const validateBeforeSubmit = () => {
-    // ✅ paymentStatus mandatory
     if (!paymentStatus || String(paymentStatus).trim() === "") {
       setPaymentStatusError("Payment Status is required");
       toast.error("Please select Payment Status");
       return false;
     }
+
     setPaymentStatusError("");
 
-    // ✅ optional: validate holiday amount (non-negative)
     if (showHolidayFields && parseFloat(workingHolidayAmount || 0) < 0) {
       toast.error("Working Holiday Amount cannot be negative");
       return false;
@@ -306,6 +416,7 @@ const CreatePayment = () => {
       totalPayment,
       totalAdvance,
       totalDay,
+      totalHalfDay,
       totalOt,
       fromDate,
       toDate,
@@ -314,11 +425,8 @@ const CreatePayment = () => {
       eid: empData.empID,
       employeeName: empData.firstName,
       holidayRate: empData.holidayRate,
-
-      // ✅ NEW: include holiday info (optional but recommended)
       workingHolidayAmount: showHolidayFields ? workingHolidayAmount : "0",
       holidayTotal: showHolidayFields ? holidayTotal : "0.00",
-
       paymentStatus,
       reduceAmount,
       actualPayment,
@@ -334,6 +442,7 @@ const CreatePayment = () => {
         const updatedEmployeeData = {
           currentLendAmount: parseFloat(previous) - parseFloat(reduceAmount),
         };
+
         await updateemployeeDetails(eid, updatedEmployeeData);
       }
 
@@ -356,6 +465,7 @@ const CreatePayment = () => {
 
           if (ExpensesId) {
             toast.success(`${stringResulty}`);
+
             setTimeout(() => {
               setLoading(false);
               window.location.href = `/employee/payment/${eid}`;
@@ -375,16 +485,164 @@ const CreatePayment = () => {
       try {
         if (eid) {
           const latestToDate = await getLatestToDateByEmployee(eid);
-          let newFromDate = latestToDate ? new Date(latestToDate.seconds * 1000) : new Date();
-          if (latestToDate) newFromDate.setDate(newFromDate.getDate() + 1);
+
+          let newFromDate = latestToDate
+            ? new Date(latestToDate.seconds * 1000)
+            : new Date();
+
+          if (latestToDate) {
+            newFromDate.setDate(newFromDate.getDate() + 1);
+          }
+
           setFromDate(newFromDate);
         }
       } catch (error) {
         console.error("Error fetching latest toDate:", error.message);
       }
     };
+
     fetchLatestToDate();
   }, [eid]);
+
+  const formatDate = (dateValue) => {
+    if (!dateValue) return "N/A";
+
+    if (dateValue?.seconds) {
+      return new Date(dateValue.seconds * 1000).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+
+    return new Date(dateValue).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatFileDate = (dateValue) => {
+    if (!dateValue) return "N-A";
+
+    const parsedDate = dateValue?.seconds
+      ? new Date(dateValue.seconds * 1000)
+      : new Date(dateValue);
+
+    return parsedDate.toISOString().split("T")[0];
+  };
+
+  const canExportPdf = !!toDate && workDetail && workDetail.length > 0;
+
+  const MyDocument = () => {
+    const summaryData = [
+      { label: "Employee Name", value: empData?.firstName || empData?.name },
+      { label: "Employee ID", value: empData?.empID },
+      { label: "From Date", value: formatDate(fromDate) },
+      { label: "To Date", value: formatDate(toDate) },
+      { label: "Salary Mode", value: salaryMode },
+      { label: "Total Working Days", value: totalDay },
+      { label: "Total Half Days", value: totalHalfDay },
+      { label: "Salary Per Day", value: salaryPerDay },
+      { label: "Salary Per Half Day", value: salaryPerHalfDay },
+      { label: "Full Day Salary", value: totalFullDaySal },
+      { label: "Half Day Salary", value: totalHalfDaySal },
+      { label: "Total OT Hours", value: totalOt },
+      { label: "Rate Per OT Hour", value: otPerHour },
+      { label: "OT Amount", value: totalOtAmount },
+      { label: "Total Advance", value: totalAdvance },
+      { label: "Reduce Amount", value: reduceAmount },
+      // { label: "Working Holiday Amount", value: workingHolidayAmount },
+      // { label: "Holiday Total", value: holidayTotal },
+      { label: "Total Payment", value: totalPayment },
+      { label: "Actual Payment", value: actualPayment },
+      { label: "Payment Status", value: paymentStatus || "-" },
+    ];
+
+    return (
+      <Document>
+        <Page size="A4" style={pdfStyles.page}>
+          <Text style={pdfStyles.title}>Pay Sheet Details</Text>
+
+          <Text style={pdfStyles.sectionTitle}>Payment Summary</Text>
+
+          <View style={pdfStyles.grid}>
+            {summaryData.map((item, index) => (
+              <View key={index} style={pdfStyles.item}>
+                <Text style={pdfStyles.label}>{item.label}</Text>
+                <Text style={pdfStyles.value}>
+                  {item.value || item.value === 0 ? String(item.value) : "-"}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <Text style={pdfStyles.sectionTitle}>Employee Work Details</Text>
+
+          <View style={pdfStyles.table}>
+            <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
+              <Text style={pdfStyles.tableCell}>Employee</Text>
+              <Text style={pdfStyles.tableCell}>Date</Text>
+              <Text style={pdfStyles.tableCell}>Present</Text>
+              <Text style={pdfStyles.tableCell}>Type</Text>
+              <Text style={pdfStyles.tableCell}>In Time</Text>
+              <Text style={pdfStyles.tableCell}>Out Time</Text>
+              <Text style={pdfStyles.tableCell}>OT Hours</Text>
+              <Text style={pdfStyles.tableCell}>Advance</Text>
+            </View>
+
+            {workDetail && workDetail.length > 0 ? (
+              workDetail.map((work, index) => (
+                <View key={index} style={pdfStyles.tableRow}>
+                  <Text style={pdfStyles.tableCell}>
+                    {work.eid_name || "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {formatDate(work.dateTime)}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.isPresent ? "Present" : "Absent"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.isPresent ? getWorkType(work) : "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.inTime || "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.outTime || "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.otHours || work.otHours === 0
+                      ? String(work.otHours)
+                      : "-"}
+                  </Text>
+
+                  <Text style={pdfStyles.tableCell}>
+                    {work.advancePerDay || work.advancePerDay === 0
+                      ? String(work.advancePerDay)
+                      : "-"}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <View style={pdfStyles.tableRow}>
+                <Text style={pdfStyles.noDataCell}>
+                  No work details found.
+                </Text>
+              </View>
+            )}
+          </View>
+        </Page>
+      </Document>
+    );
+  };
 
   const salaryMode = getSalaryMode(empData);
 
@@ -400,25 +658,68 @@ const CreatePayment = () => {
         {/* Date Filters */}
         <Grid item xs={12}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  label="From Date"
-                  value={fromDate}
-                  onChange={(date) => setFromDate(date)}
-                  renderInput={(params) => <TextField {...params} size="small" />}
-                />
-                <DatePicker
-                  label="To Date"
-                  value={toDate}
-                  onChange={handleDateChange}
-                  renderInput={(params) => <TextField {...params} size="small" />}
-                  shouldDisableDate={(date) => fromDate && date < fromDate}
-                />
-              </LocalizationProvider>
-              <Button variant="outlined" onClick={clearDateFilters}>
-                Clear
-              </Button>
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+              flexWrap="wrap"
+              rowGap={2}
+            >
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                flexWrap="wrap"
+                rowGap={2}
+              >
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    label="From Date"
+                    value={fromDate}
+                    onChange={(date) => {
+                      setFromDate(date);
+                      setToDate(null);
+                      setWorkDetail([]);
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} size="small" />
+                    )}
+                  />
+
+                  <DatePicker
+                    label="To Date"
+                    value={toDate}
+                    onChange={handleDateChange}
+                    renderInput={(params) => (
+                      <TextField {...params} size="small" />
+                    )}
+                    shouldDisableDate={(date) => fromDate && date < fromDate}
+                  />
+                </LocalizationProvider>
+
+                <Button variant="outlined" onClick={clearDateFilters}>
+                  Clear
+                </Button>
+              </Stack>
+
+              {canExportPdf ? (
+                <PDFDownloadLink
+                  document={<MyDocument />}
+                  fileName={getSafeFileName()}
+                  style={{ textDecoration: "none" }}
+                >
+                  {({ loading }) => (
+                    <Button variant="contained" disabled={loading}>
+                      {loading ? "Loading PDF..." : "Export to PDF"}
+                    </Button>
+                  )}
+                </PDFDownloadLink>
+              ) : (
+                <Button variant="contained" disabled>
+                  Export to PDF
+                </Button>
+              )}
             </Stack>
           </Paper>
         </Grid>
@@ -436,8 +737,13 @@ const CreatePayment = () => {
               <Typography variant="h6" color="primary">
                 Employee Work Details
               </Typography>
+
               <IconButton>
-                {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                {isExpanded ? (
+                  <KeyboardArrowUpIcon />
+                ) : (
+                  <KeyboardArrowDownIcon />
+                )}
               </IconButton>
             </Stack>
 
@@ -455,50 +761,70 @@ const CreatePayment = () => {
                     <TableCell align="center">Advance Per Day</TableCell>
                   </TableRow>
                 </TableHead>
+
                 <TableBody>
-                  {workDetail.map((work, index) => {
-                    const type = getWorkType(work);
-                    const isFull = type === "Full Day";
+                  {workDetail && workDetail.length > 0 ? (
+                    workDetail.map((work, index) => {
+                      const type = getWorkType(work);
+                      const isFull = type === "Full Day";
 
-                    return (
-                      <TableRow key={index}>
-                        <TableCell align="center">{work.eid_name}</TableCell>
-                        <TableCell align="center">
-                          {new Date(work.dateTime.seconds * 1000).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={work.isPresent ? "Present" : "Absent"}
-                            color={work.isPresent ? "success" : "error"}
-                            variant="outlined"
-                          />
-                        </TableCell>
+                      return (
+                        <TableRow key={index}>
+                          <TableCell align="center">
+                            {work.eid_name}
+                          </TableCell>
 
-                        <TableCell align="center">
-                          {work.isPresent ? (
+                          <TableCell align="center">
+                            {formatDate(work.dateTime)}
+                          </TableCell>
+
+                          <TableCell align="center">
                             <Chip
-                              label={type}
-                              size="small"
+                              label={work.isPresent ? "Present" : "Absent"}
+                              color={work.isPresent ? "success" : "error"}
                               variant="outlined"
-                              sx={{
-                                fontWeight: "bold",
-                                borderColor: isFull ? "#66BB6A" : "#FFB74D",
-                                color: isFull ? "#1B5E20" : "#E65100",
-                                backgroundColor: isFull ? "#C8E6C9" : "#FFE0B2",
-                              }}
                             />
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
+                          </TableCell>
 
-                        <TableCell align="center">{work.inTime}</TableCell>
-                        <TableCell align="center">{work.outTime}</TableCell>
-                        <TableCell align="center">{work.otHours}</TableCell>
-                        <TableCell align="center">{work.advancePerDay}</TableCell>
-                      </TableRow>
-                    );
-                  })}
+                          <TableCell align="center">
+                            {work.isPresent ? (
+                              <Chip
+                                label={type}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  fontWeight: "bold",
+                                  borderColor: isFull ? "#66BB6A" : "#FFB74D",
+                                  color: isFull ? "#1B5E20" : "#E65100",
+                                  backgroundColor: isFull
+                                    ? "#C8E6C9"
+                                    : "#FFE0B2",
+                                }}
+                              />
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+
+                          <TableCell align="center">{work.inTime}</TableCell>
+
+                          <TableCell align="center">{work.outTime}</TableCell>
+
+                          <TableCell align="center">{work.otHours}</TableCell>
+
+                          <TableCell align="center">
+                            {work.advancePerDay}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center">
+                        No work details found.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </Collapse>
@@ -515,12 +841,15 @@ const CreatePayment = () => {
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="subtitle1"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     📅 Attendance & Salary Info
                   </Typography>
                 </Grid>
 
-                {/* DAY MODE fields */}
                 {salaryMode === "DAY" && (
                   <>
                     <Grid item xs={12} sm={4}>
@@ -532,6 +861,7 @@ const CreatePayment = () => {
                         fullWidth
                       />
                     </Grid>
+
                     <Grid item xs={12} sm={4}>
                       <TextField
                         label="Salary Per Day"
@@ -541,6 +871,7 @@ const CreatePayment = () => {
                         fullWidth
                       />
                     </Grid>
+
                     <Grid item xs={12} sm={4}>
                       <TextField
                         label="Full Day Salary"
@@ -560,6 +891,7 @@ const CreatePayment = () => {
                         fullWidth
                       />
                     </Grid>
+
                     <Grid item xs={12} sm={4}>
                       <TextField
                         label="Salary Per Half Day"
@@ -569,6 +901,7 @@ const CreatePayment = () => {
                         fullWidth
                       />
                     </Grid>
+
                     <Grid item xs={12} sm={4}>
                       <TextField
                         label="Half Day Salary"
@@ -581,7 +914,6 @@ const CreatePayment = () => {
                   </>
                 )}
 
-                {/* MONTH MODE fields */}
                 {salaryMode === "MONTH" && (
                   <>
                     <Grid item xs={12} sm={6}>
@@ -593,6 +925,7 @@ const CreatePayment = () => {
                         fullWidth
                       />
                     </Grid>
+
                     <Grid item xs={12} sm={6}>
                       <TextField
                         label="Monthly Salary (Full)"
@@ -605,11 +938,14 @@ const CreatePayment = () => {
                   </>
                 )}
 
-                {/* ✅ Working Holidays (only when salaryPerDay is empty AND isMonthPayEmp true) */}
                 {showHolidayFields && (
                   <>
                     <Grid item xs={12}>
-                      <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                      <Typography
+                        variant="subtitle1"
+                        color="text.secondary"
+                        gutterBottom
+                      >
                         🏖️ Working Holidays
                       </Typography>
                     </Grid>
@@ -619,7 +955,9 @@ const CreatePayment = () => {
                         label="Working Holiday Amount"
                         type="number"
                         value={workingHolidayAmount}
-                        onChange={(e) => setWorkingHolidayAmount(e.target.value)}
+                        onChange={(e) =>
+                          setWorkingHolidayAmount(e.target.value)
+                        }
                         fullWidth
                         helperText="Default is 0"
                       />
@@ -627,7 +965,9 @@ const CreatePayment = () => {
 
                     <Grid item xs={12} sm={6}>
                       <TextField
-                        label={`Holiday Total (Rate: ${empData?.holidayRate || 0})`}
+                        label={`Holiday Total (Rate: ${
+                          empData?.holidayRate || 0
+                        })`}
                         type="number"
                         value={holidayTotal}
                         InputProps={{ readOnly: true }}
@@ -637,9 +977,12 @@ const CreatePayment = () => {
                   </>
                 )}
 
-                {/* OT Summary */}
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="subtitle1"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     ⏱️ Overtime Calculation
                   </Typography>
                 </Grid>
@@ -653,6 +996,7 @@ const CreatePayment = () => {
                     fullWidth
                   />
                 </Grid>
+
                 <Grid item xs={12} sm={4}>
                   <TextField
                     label="Rate per OT Hour"
@@ -662,6 +1006,7 @@ const CreatePayment = () => {
                     fullWidth
                   />
                 </Grid>
+
                 <Grid item xs={12} sm={4}>
                   <TextField
                     label="OT Amount"
@@ -672,9 +1017,12 @@ const CreatePayment = () => {
                   />
                 </Grid>
 
-                {/* Advance & Deductions */}
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="subtitle1"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     💸 Advance & Deductions
                   </Typography>
                 </Grid>
@@ -688,6 +1036,7 @@ const CreatePayment = () => {
                     fullWidth
                   />
                 </Grid>
+
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Reduce Amount"
@@ -699,9 +1048,12 @@ const CreatePayment = () => {
                   />
                 </Grid>
 
-                {/* Final */}
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="subtitle1"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     ✅ Final Payment
                   </Typography>
                 </Grid>
@@ -730,15 +1082,18 @@ const CreatePayment = () => {
                   />
                 </Grid>
 
-                {/* ✅ Payment Status (MANDATORY) */}
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth error={!!paymentStatusError}>
                     <InputLabel>Payment Status</InputLabel>
+
                     <Select
                       value={paymentStatus}
                       onChange={(e) => {
                         setPaymentStatus(e.target.value);
-                        if (e.target.value) setPaymentStatusError("");
+
+                        if (e.target.value) {
+                          setPaymentStatusError("");
+                        }
                       }}
                       label="Payment Status"
                     >
@@ -746,7 +1101,10 @@ const CreatePayment = () => {
                       <MenuItem value="Completed">Completed</MenuItem>
                       <MenuItem value="Cancelled">Cancelled</MenuItem>
                     </Select>
-                    {paymentStatusError && <FormHelperText>{paymentStatusError}</FormHelperText>}
+
+                    {paymentStatusError && (
+                      <FormHelperText>{paymentStatusError}</FormHelperText>
+                    )}
                   </FormControl>
                 </Grid>
 
